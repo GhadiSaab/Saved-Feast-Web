@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('type');
             $table->text('message');
             $table->boolean('read')->default(false);
-            $table->nullablemorphs('notifiable'); // For different notification types (meals, orders, etc.)
+            $table->nullablemorphs('notifiable'); 
             $table->timestamps();
         });
     }

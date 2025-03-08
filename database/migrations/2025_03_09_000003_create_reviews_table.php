@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->morphs('reviewable'); // This allows reviews for both meals and restaurants
-            $table->integer('rating'); // Typically 1-5 stars
+            $table->morphs('reviewable'); 
+            $table->integer('rating'); 
             $table->text('comment')->nullable();
             $table->timestamps();
         });
