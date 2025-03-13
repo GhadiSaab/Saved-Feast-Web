@@ -14,7 +14,10 @@ class Restaurant extends Model
         'description',
         'phone',
         'address',
+        'email',
+        'website',
         'image',
+        'user_id'
     ];
 
     public function user()
@@ -26,7 +29,4 @@ class Restaurant extends Model
     {
         return $this->hasMany(Meal::class);
     }
-    
-
-
 }

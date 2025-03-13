@@ -10,13 +10,16 @@ class Meal extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
+        'title',
         'description',
         'price',
+        'quantity',
+        'available_from',
+        'available_until',
+        'status',
         'image',
         'restaurant_id',
-        'category_id',
-        'is_available',
+        'category_id'
     ];
 
     public function restaurant()
@@ -24,7 +27,10 @@ class Meal extends Model
         return $this->belongsTo(Restaurant::class);
     }
 
-
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 
     public function orderItems()
     {

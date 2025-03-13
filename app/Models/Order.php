@@ -9,27 +9,40 @@ class Order extends Model
 {
     use HasFactory;
 
+    /**
+     * Order status constants
+     */
+    const STATUS_PENDING = 'pending';
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_CANCELLED = 'cancelled';
+
     protected $fillable = [
         'user_id',
-        'restaurant_id',
-        'total_price',
+        'total_amount',
         'status',
-        'delivery_address',
-        'payment_method',
     ];
 
+    /**
+     * Get the user that owns the order
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function restaurant()
-    {
-        return $this->belongsTo(Restaurant::class);
-    }
-
+    /**
+     * Get the order items for the order
+     */
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+    
+    /**
+     * Get the payment record associated with the order
+     */
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
     }
 }
