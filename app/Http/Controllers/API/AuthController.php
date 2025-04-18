@@ -73,7 +73,19 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
             'user' => $user,
         ]);
-    } 
+    }
 
-    
+    public function logout(Request $request): \Illuminate\Http\JsonResponse
+    {
+        // Get the authenticated user
+        $user = $request->user();
+
+        // Revoke the token that was used to authenticate the current request...
+        $user->currentAccessToken()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User logged out successfully',
+        ]);
+    }
 }

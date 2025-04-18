@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 /**
  * Authentication helper functions
  */
@@ -55,7 +57,8 @@ export const auth = {
     async login(credentials) {
         try {
             const response = await axios.post('/api/login', credentials);
-            this.setToken(response.data.token);
+            this.setToken(response.data.access_token); // Corrected key
+            window.dispatchEvent(new Event('authChange')); // Dispatch event
             return response.data;
         } catch (error) {
             throw error;
@@ -67,8 +70,10 @@ export const auth = {
      */
     async register(userData) {
         try {
-            const response = await axios.post('/api/register', userData);
-            this.setToken(response.data.token);
+            // Use relative path and correct token key
+            const response = await axios.post('/api/register', userData); 
+            this.setToken(response.data.access_token); // Corrected key
+            window.dispatchEvent(new Event('authChange')); // Dispatch event
             return response.data;
         } catch (error) {
             throw error;

@@ -25,3 +25,6 @@ Route::post('/register', 'App\Http\Controllers\API\AuthController@register')->na
 Route::post('/login', 'App\Http\Controllers\API\AuthController@login')->name('api.login');
 
 Route::get('/meals', 'App\Http\Controllers\API\MealController@index')->name('api.meals.index');
+
+// Logout route (protected)
+Route::middleware('auth:sanctum')->post('/logout', 'App\Http\Controllers\API\AuthController@logout')->name('api.logout');

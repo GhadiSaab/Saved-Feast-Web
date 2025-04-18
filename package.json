@@ -3,16 +3,26 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build && tsc"
     },
     "devDependencies": {
-        "axios": "^1.6.4",
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "@vitejs/plugin-react": "^4.3.1",
+        "axios": "^1.8.4",
         "laravel-vite-plugin": "^1.2.0",
         "sass": "^1.85.1",
         "sass-migrator": "^2.3.1",
+        "typescript": "^5.5.3",
         "vite": "^6.2.2"
     },
     "dependencies": {
-        "bootstrap": "^5.3.3"
+        "@headlessui/react": "^2.1.2",
+        "@stripe/react-stripe-js": "^2.7.3",
+        "@stripe/stripe-js": "^4.1.0",
+        "bootstrap": "^5.3.3",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-router-dom": "^6.25.1"
     }
 }
