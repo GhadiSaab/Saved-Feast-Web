@@ -36,6 +36,13 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    protected $with = ['roles']; // Add this line to always load roles
+
     public function restaurants()
     {
         return $this->hasMany(Restaurant::class);

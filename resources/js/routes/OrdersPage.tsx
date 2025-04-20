@@ -1,24 +1,56 @@
 // resources/js/routes/OrdersPage.tsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import auth from '../auth'; // Assuming auth helper is needed to fetch user-specific orders
+import auth from '../auth'; // Import the auth helper
 
-// Define a type for Order data (adjust based on actual API response)
+// Define types based on the actual API response from OrderController
+interface Meal {
+    id: number;
+    name: string;
+    // Add other meal properties if needed
+}
+
 interface OrderItem {
     id: number;
-    meal_name: string; // Example field
+    meal_id: number;
     quantity: number;
-    price: number;
+    price: number; // Price per item at the time of order
+    meal: Meal; // Nested meal object
 }
 
-interface Order {
+// Export the Order interface
+export interface Order {
     id: number;
-    order_date: string; // Or Date object
-    status: string;
+    user_id: number;
     total_amount: number;
-    items: OrderItem[]; // Assuming items are nested
-    // Add other relevant fields like restaurant name, etc.
+    status: string; // e.g., 'pending', 'completed', 'cancelled'
+    created_at: string; // ISO date string
+    updated_at: string; // ISO date string
+    order_items: OrderItem[]; // Renamed from 'items' and matches backend
 }
+
+// Export the ApiResponse interface
+export interface ApiResponse {
+    status: boolean;
+    message: string;
+    data: Order[];
+}
+
+// Helper function to determine badge color based on status
+const getStatusColor = (status: string): string => {
+    switch (status.toLowerCase()) {
+        case 'completed':
+        case 'delivered': // Assuming 'delivered' is a possible completed status
+            return 'success';
+        case 'pending':
+        case 'processing':
+            return 'warning';
+        case 'cancelled':
+            return 'danger';
+        default:
+            return 'secondary'; // Default color for unknown statuses
+    }
+};
 
 const OrdersPage: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -37,19 +69,21 @@ const OrdersPage: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                // TODO: Define and implement the actual API endpoint for fetching user orders
-                // Example: const response = await axios.get<{ data: Order[] }>('/api/orders');
-                // setOrders(response.data.data || response.data);
+                // Fetch orders from the API
+                const response = await axios.get<ApiResponse>('/api/orders', {
+                    headers: {
+                        Authorization: `Bearer ${auth.getToken()}` // Add authorization token
+                    }
+                });
 
-                // Placeholder data for now:
-                await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-                setOrders([
-                    { id: 1, order_date: '2025-04-17', status: 'Delivered', total_amount: 15.50, items: [{ id: 101, meal_name: 'Sample Meal 1', quantity: 1, price: 10.00 }, { id: 102, meal_name: 'Sample Meal 2', quantity: 1, price: 5.50 }] },
-                    { id: 2, order_date: '2025-04-18', status: 'Processing', total_amount: 8.00, items: [{ id: 103, meal_name: 'Another Meal', quantity: 1, price: 8.00 }] },
-                ]);
+                if (response.data.status && response.data.data) {
+                    setOrders(response.data.data);
+                } else {
+                    setError(response.data.message || 'Failed to fetch orders.');
+                }
 
             } catch (err: any) {
-                setError('Failed to fetch orders. Please try again later.');
+                setError('An error occurred while fetching orders. Please try again later.');
                 console.error("Error fetching orders:", err);
             } finally {
                 setLoading(false);
@@ -75,21 +109,26 @@ const OrdersPage: React.FC = () => {
                     orders.map(order => (
                         <div className="card mb-3" key={order.id}>
                             <div className="card-header d-flex justify-content-between">
-                                <span>Order #{order.id} - {new Date(order.order_date).toLocaleDateString()}</span>
-                                <span className={`badge bg-${order.status === 'Delivered' ? 'success' : 'warning'}`}>{order.status}</span>
+                                {/* Use created_at for the date */}
+                                <span>Order #{order.id} - {new Date(order.created_at).toLocaleDateString()}</span>
+                                {/* Adjust badge based on actual status values */}
+                                <span className={`badge bg-${getStatusColor(order.status)} text-capitalize`}>{order.status}</span>
                             </div>
                             <div className="card-body">
                                 <ul className="list-group list-group-flush">
-                                    {order.items.map(item => (
+                                    {/* Use order_items and item.meal.name */}
+                                    {order.order_items.map(item => (
                                         <li key={item.id} className="list-group-item d-flex justify-content-between">
-                                            <span>{item.quantity} x {item.meal_name}</span>
+                                            <span>{item.quantity} x {item.meal.name}</span>
+                                            {/* Calculate item total based on stored price */}
                                             <span>${(item.quantity * item.price).toFixed(2)}</span>
                                         </li>
                                     ))}
                                 </ul>
                             </div>
                             <div className="card-footer">
-                                <strong>Total: ${order.total_amount.toFixed(2)}</strong>
+                                {/* Ensure total_amount is treated as a number before formatting */}
+                                <strong>Total: ${!isNaN(parseFloat(String(order.total_amount))) ? parseFloat(String(order.total_amount)).toFixed(2) : 'N/A'}</strong>
                             </div>
                         </div>
                     ))

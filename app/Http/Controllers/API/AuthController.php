@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password; // Import Password rule
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -14,12 +15,13 @@ class AuthController extends Controller
     {
         
         $request->validate([
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-            'phone' => 'nullable|string',
-            'address' => 'nullable|string',
+            'first_name' => 'required|string|max:255', // Added max length
+            'last_name' => 'required|string|max:255', // Added max length
+            'email' => 'required|string|email|max:255|unique:users,email', // Added max length and string type
+            // Use the Password rule for better complexity enforcement
+            'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
+            'phone' => 'nullable|string|max:25', // Added max length
+            'address' => 'nullable|string|max:255', // Added max length
         ]);
 
         
@@ -35,12 +37,15 @@ class AuthController extends Controller
         
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Eager load roles relationship
+        $user->load('roles');
+
         return response()->json([
             'success' => true,
             'message' => 'User registered successfully',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user,
+            'user' => $user, // Return user data with roles
         ]);
     }
 
@@ -66,12 +71,15 @@ class AuthController extends Controller
         
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Eager load roles relationship
+        $user->load('roles');
+
         return response()->json([
             'success' => true,
             'message' => 'User logged in successfully',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user,
+            'user' => $user, // Return user data with roles
         ]);
     }
 

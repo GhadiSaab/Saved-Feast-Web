@@ -1,5 +1,5 @@
 import React, { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
 import auth from '../auth'; // Import the auth helper
 
 const SignupPage: React.FC = () => {
@@ -7,7 +7,9 @@ const SignupPage: React.FC = () => {
     const [lastName, setLastName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [showPassword, setShowPassword] = useState<boolean>(false); // State for password visibility
     const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
+    const [showPasswordConfirmation, setShowPasswordConfirmation] = useState<boolean>(false); // State for confirmation visibility
     const [phone, setPhone] = useState<string>('');
     const [address, setAddress] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
@@ -61,10 +63,12 @@ const SignupPage: React.FC = () => {
 
     return (
         <div className="row justify-content-center">
-            <div className="col-md-6">
-                <div className="card">
-                    <div className="card-header">Sign Up</div>
-                    <div className="card-body">
+            <div className="col-md-6 col-lg-5"> {/* Slightly narrower on larger screens */}
+                <div className="card shadow-sm"> {/* Added shadow */}
+                    <div className="card-header text-center fs-4"> {/* Centered header */}
+                        Sign Up for SavedFeast
+                    </div>
+                    <div className="card-body p-4"> {/* Increased padding */}
                         {error && !Object.keys(validationErrors).length && (
                             <div className="alert alert-danger" role="alert">
                                 {error}
@@ -125,17 +129,29 @@ const SignupPage: React.FC = () => {
                                 )}
                             </div>
 
-                            <div className="mb-3">
+                            <div className="mb-3 position-relative"> {/* Added position-relative */}
                                 <label htmlFor="password" className="form-label">Password</label>
                                 <input
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'} // Toggle input type
                                     className={`form-control ${validationErrors.password ? 'is-invalid' : ''}`}
                                     id="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     disabled={loading}
+                                    aria-describedby="passwordHelp"
                                 />
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-secondary btn-sm position-absolute end-0 top-50 translate-middle-y me-2 mt-1" // Position the button (adjusted margin)
+                                    style={{ zIndex: 5 }} // Ensure button is clickable over input
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? 'Hide' : 'Show'}
+                                </button>
+                                <div id="passwordHelp" className="form-text">
+                                    Minimum 8 characters, including uppercase, lowercase, numbers, and symbols. {/* Updated hint */}
+                                </div>
                                 {validationErrors.password && (
                                     <div className="invalid-feedback">
                                         {validationErrors.password.join(', ')}
@@ -143,10 +159,10 @@ const SignupPage: React.FC = () => {
                                 )}
                             </div>
 
-                            <div className="mb-3">
+                            <div className="mb-3 position-relative"> {/* Added position-relative */}
                                 <label htmlFor="password_confirmation" className="form-label">Confirm Password</label>
                                 <input
-                                    type="password"
+                                    type={showPasswordConfirmation ? 'text' : 'password'} // Toggle input type
                                     className={`form-control ${validationErrors.password_confirmation ? 'is-invalid' : ''}`}
                                     id="password_confirmation"
                                     value={passwordConfirmation}
@@ -154,6 +170,14 @@ const SignupPage: React.FC = () => {
                                     required
                                     disabled={loading}
                                 />
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-secondary btn-sm position-absolute end-0 top-50 translate-middle-y me-2" // Position the button
+                                    style={{ zIndex: 5 }} // Ensure button is clickable over input
+                                    onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
+                                >
+                                    {showPasswordConfirmation ? 'Hide' : 'Show'}
+                                </button>
                                 {validationErrors.password_confirmation && (
                                     <div className="invalid-feedback">
                                         {validationErrors.password_confirmation.join(', ')}
@@ -201,9 +225,22 @@ const SignupPage: React.FC = () => {
                                 </div>
                             )}
 
-                            <button type="submit" className="btn btn-primary" disabled={loading}>
-                                {loading ? 'Signing up...' : 'Sign Up'}
+                            <button type="submit" className="btn btn-primary w-100" disabled={loading}> {/* Use primary color, make full width */}
+                                {loading ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Signing up...
+                                    </>
+                                ) : (
+                                    'Sign Up'
+                                )}
                             </button>
+                            <div className="text-center mt-4"> {/* Centered link */}
+                                <Link to="/login" className="d-block auth-link">Already have an account? Login</Link>
+                            </div>
+                            <p className="text-center text-muted small mt-4"> {/* Terms/Privacy text */}
+                                By signing up, you agree to our <a href="#" onClick={(e) => e.preventDefault()}>Terms of Service</a> and <a href="#" onClick={(e) => e.preventDefault()}>Privacy Policy</a>.
+                            </p>
                         </form>
                     </div>
                 </div>

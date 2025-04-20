@@ -9,7 +9,7 @@ interface Meal {
     name: string;
     description: string;
     price: number;
-    image_url?: string;
+    image_url?: string; // Reverted back to image_url
     restaurant?: { // Assuming restaurant is nested
         name: string;
     };
@@ -45,8 +45,8 @@ const FeedPage: React.FC = () => {
     }, []); // Empty dependency array means this runs once on mount
 
     return (
-        <div>
-            <h1 className="mb-4">Today's Feasts</h1>
+        <div className="feed-page-container bg-white p-4 p-md-5 rounded shadow-sm"> {/* Wrapper div */}
+            <h1 className="mb-5 page-title">Today's Feasts</h1> {/* Added page-title class */}
             {loading && (
                 <div className="d-flex justify-content-center">
                     <div className="spinner-border" role="status">
@@ -56,7 +56,7 @@ const FeedPage: React.FC = () => {
             )}
             {error && <div className="alert alert-danger">{error}</div>}
             {!loading && !error && (
-                <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4"> {/* Added xl breakpoint */}
                     {meals.length > 0 ? (
                         meals.map(meal => (
                             <div className="col" key={meal.id}>

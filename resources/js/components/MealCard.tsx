@@ -1,5 +1,8 @@
 // resources/js/components/MealCard.tsx
 import React from 'react';
+import { useCart } from '../context/CartContext'; // Import the useCart hook
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import auth from '../auth'; // Import the auth helper
 
 // Re-define or import the Meal type (ensure consistency with FeedPage.tsx)
 interface Meal {
@@ -7,7 +10,7 @@ interface Meal {
     name: string;
     description: string;
     price: number;
-    image_url?: string;
+    image_url?: string; // Reverted back to image_url
     restaurant?: {
         name: string;
     };
@@ -16,21 +19,36 @@ interface Meal {
 
 interface MealCardProps {
     meal: Meal;
-    // Add an onAddToCart function prop later for cart functionality
-    // onAddToCart: (meal: Meal) => void;
+    // Removed onAddToCart prop - using context instead
 }
 
-const MealCard: React.FC<MealCardProps> = ({ meal /*, onAddToCart */ }) => {
+const MealCard: React.FC<MealCardProps> = ({ meal }) => { // Removed onAddToCart from props
+    const { addToCart } = useCart(); // Get addToCart function from context
+    const navigate = useNavigate(); // Get navigate function
+
     const handleAddToCart = () => {
-        console.log(`Adding ${meal.name} to cart (ID: ${meal.id})`);
-        // Call onAddToCart(meal) when implemented
+        if (auth.isAuthenticated()) {
+            // Ensure price is a valid number before adding
+            const price = typeof meal.price === 'number' ? meal.price : parseFloat(String(meal.price));
+            if (!isNaN(price)) {
+                addToCart({ id: meal.id, name: meal.name, price: price });
+                console.log(`Added ${meal.name} to cart (ID: ${meal.id})`);
+                // Optionally: Add user feedback (e.g., toast notification)
+            } else {
+                console.error(`Invalid price for meal: ${meal.name}`);
+                // Optionally: Show an error to the user
+            }
+        } else {
+            // Redirect to login page if not authenticated
+            navigate('/login');
+        }
     };
 
     return (
         <div className="card h-100 shadow-sm"> {/* Use h-100 for equal height cards in a row */}
-            {meal.image_url ? (
+            {meal.image_url ? ( // Reverted back to image_url
                 <img
-                    src={meal.image_url}
+                    src={meal.image_url} // Reverted back to image_url
                     className="card-img-top"
                     alt={meal.name}
                     style={{ height: '200px', objectFit: 'cover' }} // Consistent image height
@@ -50,9 +68,13 @@ const MealCard: React.FC<MealCardProps> = ({ meal /*, onAddToCart */ }) => {
                         <small>{meal.restaurant.name}</small>
                     </p>
                 )}
-                <p className="card-text flex-grow-1"> {/* Allow description to grow */}
+                <p className="card-text flex-grow-1 mb-2"> {/* Allow description to grow, add small bottom margin */}
                     {meal.description.substring(0, 80)}{meal.description.length > 80 ? '...' : ''}
                 </p>
+                 {/* Pickup Time Placeholder - Requires backend data */}
+                 <p className="card-text mb-2">
+                    <small className="text-muted">Pickup: (Time window unavailable)</small>
+                 </p>
                 <div className="mt-auto d-flex justify-content-between align-items-center"> {/* Push price and button to bottom */}
                     <p className="card-text mb-0"> {/* Remove bottom margin */}
                         <strong>

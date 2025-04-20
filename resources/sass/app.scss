@@ -1,8 +1,99 @@
 // Variables
 @use './variables' as *;
 
-// Bootstrap
-@use 'bootstrap/scss/bootstrap' as *;
+// Bootstrap - Import and override primary color
+@use 'bootstrap/scss/bootstrap' as * with (
+  $primary: #fd7e14 // Set primary color to orange
+);
 
 // Fonts
 @import url('https://fonts.bunny.net/css?family=Nunito');
+
+// Global Styles
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f8f9fa; // Light gray background for the body
+}
+
+// Navbar Customization
+.navbar.bg-light { // Target the default light navbar specifically or remove .bg-light if you change it globally
+    background-color: #ffffff !important; // Make navbar white
+    border-bottom: 1px solid #dee2e6; // Add subtle bottom border
+    padding-top: 0.8rem; // Adjust vertical padding
+    padding-bottom: 0.8rem;
+
+    .navbar-brand {
+        font-weight: bold;
+        // color: $primary; // Use theme color if defined
+    }
+
+    .nav-link {
+        transition: color 0.2s ease-in-out;
+        &:hover {
+            color: $primary !important; // Use theme primary color on hover
+        }
+    }
+
+     // Style the cart button specifically if needed
+    .btn-outline-primary {
+        // Customize cart button styles
+    }
+    // Removed extra closing brace here
+}
+
+// Page Title Styles
+.page-title {
+    font-weight: 600; // Make title slightly bolder
+    color: #343a40; // Darker color for emphasis
+    // text-align: center; // Optional: Center the title
+    // border-bottom: 1px solid #dee2e6; // Optional: Add an underline
+    // padding-bottom: 0.5rem; // Optional: Add padding below underline
+}
+
+// Auth Page Link Styles
+.auth-link {
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: $secondary; // Use secondary color for less emphasis
+
+    &:hover {
+        color: $primary; // Use primary color on hover
+        text-decoration: underline;
+    }
+}
+
+// Add subtle border to auth cards specifically
+.row.justify-content-center .card.shadow-sm {
+    border: 1px solid #dee2e6; // Add a light border
+}
+
+// Custom Styles for MealCard
+.card {
+    border-radius: 0.5rem; // Add rounded corners to cards
+    border: none; // Remove default card border if using shadow primarily
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; // Smooth transition for hover
+
+    &:hover {
+        transform: translateY(-5px); // Lift effect
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; // Enhanced shadow on hover
+    }
+
+    .card-img-top {
+        border-top-left-radius: 0.5rem; // Match card's rounded corner
+        border-top-right-radius: 0.5rem; // Match card's rounded corner
+        border-bottom: 1px solid #eee; // Subtle separator
+    }
+
+    .card-body {
+        .btn-primary {
+            padding: 0.3rem 0.6rem; // Slightly adjust button padding
+            font-size: 0.85rem; // Adjust font size if needed
+            transition: background-color 0.15s ease-in-out; // Smooth background transition
+
+            &:hover {
+                // Optional: Slightly darken or lighten on hover if desired
+                // background-color: darken($primary, 5%);
+            }
+        }
+    }
+}
