@@ -86,8 +86,12 @@ export const auth = {
     async logout() {
         try {
             await axios.post('/api/logout');
+        } catch (error) {
+            // Even if the server request fails, we should still clear local state
+            console.error('Logout error:', error);
         } finally {
             this.removeToken();
+            window.dispatchEvent(new Event('authChange')); // Dispatch event to update UI
         }
     }
 };

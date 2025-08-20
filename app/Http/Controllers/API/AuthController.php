@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth; // Import Auth facade
 use Illuminate\Validation\Rules\Password; // Import Password rule
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule; // Import Rule for unique email check
 
 class AuthController extends Controller
 {
@@ -33,6 +35,12 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
         ]);
+
+        // Assign default 'consumer' role to new users
+        $consumerRole = \App\Models\Role::where('name', 'consumer')->first();
+        if ($consumerRole) {
+            $user->roles()->attach($consumerRole->id);
+        }
 
         
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -94,6 +102,79 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User logged out successfully',
+        ]);
+    }
+
+    /**
+     * Update the authenticated user's profile information.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateProfile(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = $request->user();
+
+        // Check if user can update their own profile
+        $this->authorize('update', $user);
+
+        $validatedData = $request->validate([
+            // Use first_name/last_name if those are the actual DB columns
+            'name' => 'required|string|max:255',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($user->id), // Ignore current user's email
+            ],
+            // Add validation for other updatable fields like phone, address if needed
+            // 'phone' => 'nullable|string|max:25',
+            // 'address' => 'nullable|string|max:255',
+        ]);
+
+        // Update only the validated fields
+        $user->update($validatedData);
+
+        // Eager load roles to return updated user data consistently
+        $user->load('roles');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'user' => $user,
+        ]);
+    }
+
+     /**
+     * Change the authenticated user's password.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function changePassword(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = $request->user();
+
+        $validatedData = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
+        ]);
+
+        // Check if the current password matches
+        if (!Hash::check($validatedData['current_password'], $user->password)) {
+             throw ValidationException::withMessages([
+                'current_password' => ['The provided current password does not match our records.'],
+            ]);
+        }
+
+        // Update the password
+        $user->password = Hash::make($validatedData['new_password']);
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password changed successfully',
         ]);
     }
 }

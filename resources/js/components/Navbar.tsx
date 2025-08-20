@@ -109,9 +109,12 @@ const Navbar: React.FC = () => {
                                         <Link className="nav-link" to="/provider/dashboard">Restaurant Dashboard</Link>
                                     </li>
                                 )}
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/orders">My Orders</Link>
-                                </li>
+                                {/* Conditionally show My Orders link only for non-providers */}
+                                {!userHasRole('provider') && (
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/orders">My Orders</Link>
+                                    </li>
+                                )}
                                 <li className="nav-item">
                                     <Link className="nav-link" to="/profile">Profile</Link>
                                 </li>
@@ -130,14 +133,17 @@ const Navbar: React.FC = () => {
                                 </li>
                             </>
                         )}
-                        <li className="nav-item ms-lg-2"> {/* Add some margin for the cart */}
-                            <Link className="btn btn-outline-primary btn-sm position-relative" to="/checkout">
-                                Cart
-                                <span className="badge bg-primary rounded-pill position-absolute top-0 start-100 translate-middle">
-                                    {getItemCount()} {/* Display actual item count */}
-                                </span>
-                            </Link>
-                        </li>
+                        {/* Conditionally render Cart link only for authenticated non-providers */}
+                        {isAuthenticated && !userHasRole('provider') && (
+                            <li className="nav-item ms-lg-2"> {/* Add some margin for the cart */}
+                                <Link className="btn btn-outline-primary btn-sm position-relative" to="/checkout">
+                                    Cart
+                                    <span className="badge bg-primary rounded-pill position-absolute top-0 start-100 translate-middle">
+                                        {getItemCount()} {/* Display actual item count */}
+                                    </span>
+                                </Link>
+                            </li>
+                        )}
                     </ul>
                 </div>
             </div>

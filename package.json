@@ -3,13 +3,16 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build && tsc"
+        "build": "vite build && tsc",
+        "serve": "concurrently \"npm run dev\" \"php artisan serve\"",
+        "serve:full": "concurrently \"npm run dev\" \"php artisan serve --host=127.0.0.1 --port=8000\""
     },
     "devDependencies": {
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
         "@vitejs/plugin-react": "^4.3.1",
         "axios": "^1.8.4",
+        "concurrently": "^9.2.0",
         "laravel-vite-plugin": "^1.2.0",
         "sass": "^1.85.1",
         "sass-migrator": "^2.3.1",
@@ -21,7 +24,9 @@
         "@stripe/react-stripe-js": "^2.7.3",
         "@stripe/stripe-js": "^4.1.0",
         "bootstrap": "^5.3.3",
+        "chart.js": "^4.4.9",
         "react": "^18.3.1",
+        "react-chartjs-2": "^5.3.0",
         "react-dom": "^18.3.1",
         "react-router-dom": "^6.25.1"
     }

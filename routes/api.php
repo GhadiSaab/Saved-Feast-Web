@@ -7,7 +7,9 @@ use App\Http\Controllers\API\MealController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\RestaurantApplicationController; // Import RestaurantApplicationController
 use App\Http\Controllers\API\Provider\MealController as ProviderMealController; // Import Provider Meal Controller
+use App\Http\Controllers\API\Provider\ProfileController as ProviderProfileController; // Import Provider Profile Controller
 use App\Http\Controllers\API\CategoryController; // Import Category Controller
+use Illuminate\Support\Facades\Gate; // Import Gate facade
 
 /*
 |--------------------------------------------------------------------------
@@ -29,39 +31,68 @@ Route::post('/register', [AuthController::class, 'register'])->middleware('throt
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1')->name('api.login');
 
-Route::get('/meals', [MealController::class, 'index'])->name('api.meals.index');
+// Public routes with rate limiting
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/meals', [MealController::class, 'index'])->name('api.meals.index');
+    Route::get('/meals/filters', [MealController::class, 'filters'])->name('api.meals.filters');
+    Route::get('/categories', [CategoryController::class, 'index'])->name('api.categories.index');
+});
 
-// Categories Route (Public or Authenticated - accessible to providers for dropdown)
-Route::get('/categories', [CategoryController::class, 'index'])->name('api.categories.index');
+// Restaurant Application Route (Public) with rate limiting
+Route::post('/restaurant-applications', [RestaurantApplicationController::class, 'store'])
+    ->middleware('throttle:3,1') // 3 attempts per minute for applications
+    ->name('api.restaurant-applications.store');
 
-// Restaurant Application Route (Public)
-Route::post('/restaurant-applications', [RestaurantApplicationController::class, 'store'])->name('api.restaurant-applications.store');
+// Protected routes - require authentication with rate limiting
+Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function () {
+    // Order routes (protected by policies)
+    Route::apiResource('orders', OrderController::class)->names([
+        'index' => 'api.orders.index',
+        'store' => 'api.orders.store',
+        'show' => 'api.orders.show',
+        'update' => 'api.orders.update',
+        'destroy' => 'api.orders.destroy',
+    ]);
+    
+    // Additional order actions
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('api.orders.cancel');
+    Route::post('/orders/{order}/complete', [OrderController::class, 'complete'])->name('api.orders.complete');
 
-// Order routes (protected)
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/orders', [OrderController::class, 'index'])->name('api.orders.index');
-    Route::post('/orders', [OrderController::class, 'store'])->name('api.orders.store');
-    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('api.orders.show');
-    Route::put('/orders/{id}', [OrderController::class, 'update'])->name('api.orders.update'); // General update (e.g., status)
-    Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('api.orders.destroy');
-    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('api.orders.cancel');
-    Route::post('/orders/{id}/complete', [OrderController::class, 'complete'])->name('api.orders.complete');
+    // User Profile Update (protected by UserPolicy)
+    Route::post('/user/profile', [AuthController::class, 'updateProfile'])->name('api.user.updateProfile');
+
+    // Password Change (protected by UserPolicy)
+    Route::post('/user/change-password', [AuthController::class, 'changePassword'])->name('api.user.changePassword');
 
     // Logout route
     Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
 });
 
-// Restaurant Provider Routes (Protected by auth and role)
-Route::middleware(['auth:sanctum', 'role:provider'])->prefix('provider')->name('api.provider.')->group(function () {
-    // Placeholder route - we will add meal management routes here later
+// Restaurant Provider Routes (Protected by auth and policies) with rate limiting
+Route::middleware(['auth:sanctum', 'throttle:300,1'])->prefix('provider')->name('api.provider.')->group(function () {
+    // Dashboard data (protected by provider-access gate)
     Route::get('/dashboard-data', function () {
+        Gate::authorize('provider-access');
         return response()->json(['message' => 'Welcome to the Provider Dashboard!']);
     })->name('dashboard');
 
-    // Meal Management Routes for Providers
+    // Meal Management Routes for Providers (protected by MealPolicy)
     Route::apiResource('meals', ProviderMealController::class);
+
+    // Provider Profile Routes (protected by UserPolicy)
+    Route::get('/profile', [ProviderProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile/picture', [ProviderProfileController::class, 'updatePicture'])->name('profile.updatePicture');
 });
 
+// Admin routes (Protected by admin-access gate) with rate limiting
+Route::middleware(['auth:sanctum', 'throttle:600,1'])->prefix('admin')->name('api.admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        Gate::authorize('admin-access');
+        return response()->json(['message' => 'Welcome to the Admin Dashboard!']);
+    })->name('dashboard');
+    
+    // Add more admin routes here as needed
+});
 
 // Note: Using array syntax [Controller::class, 'method'] is the modern Laravel standard
 // Also corrected AuthController usage in logout route

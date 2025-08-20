@@ -16,7 +16,8 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
             $table->foreignId('meal_id')->constrained('meals')->onDelete('cascade');
             $table->integer('quantity');
-            $table->decimal('price', 8, 2); // price per item
+            $table->decimal('price', 8, 2); // price per item (discounted price paid)
+            $table->decimal('original_price', 8, 2)->nullable(); // Added original price at time of order
             $table->timestamps();
         });
     }

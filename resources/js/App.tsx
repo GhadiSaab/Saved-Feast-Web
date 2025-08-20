@@ -1,53 +1,107 @@
 import React from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
-import LoginPage from './routes/LoginPage'; // Import the actual component
-import SignupPage from './routes/SignupPage'; // Import the actual component
-import FeedPage from './routes/FeedPage';
+import { Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import LoadingSpinner from './components/LoadingSpinner';
 import Navbar from './components/Navbar';
+
+// Import pages
+import LoginPage from './routes/LoginPage';
+import SignupPage from './routes/SignupPage';
+import FeedPage from './routes/FeedPage';
 import CheckoutPage from './routes/CheckoutPage';
 import OrdersPage from './routes/OrdersPage';
 import ProfilePage from './routes/ProfilePage';
 import RestaurantApplicationPage from './routes/RestaurantApplicationPage';
-import RestaurantDashboardPage from './routes/RestaurantDashboardPage'; // Import Dashboard page
-import { CartProvider } from './context/CartContext'; // Import CartProvider
+import RestaurantDashboardPage from './routes/RestaurantDashboardPage';
 
-// Placeholder components for routes - removed as actual components are imported
-// const LoginPage = () => <div>Login Page Placeholder</div>; // Removed placeholder
-// const SignupPage = () => <div>Signup Page Placeholder</div>; // Removed placeholder
-// const FeedPage = () => <div>Meal Feed Page Placeholder</div>; // Removed placeholder
-// const CheckoutPage = () => <div>Checkout Page Placeholder</div>; // Removed placeholder
-// const OrdersPage = () => <div>Orders Page Placeholder</div>; // Removed placeholder
-// const ProfilePage = () => <div>Profile Page Placeholder</div>; // Removed placeholder
-const NotFoundPage = () => <div>404 Not Found</div>;
-
-// Placeholder Navbar removed - using imported component
+// 404 Page
+const NotFoundPage = () => (
+    <div className="container mt-5">
+        <div className="row justify-content-center">
+            <div className="col-md-6 text-center">
+                <h1 className="display-1">404</h1>
+                <h2>Page Not Found</h2>
+                <p className="text-muted">The page you're looking for doesn't exist.</p>
+                <a href="/" className="btn btn-primary">Go Home</a>
+            </div>
+        </div>
+    </div>
+);
 
 function App() {
-  // Note: Authentication state management and PrivateRoute logic
-  // might need to be re-added or integrated differently depending
-  // on how authentication was previously handled.
-  // This example focuses on adding the CartProvider.
+    return (
+        <AuthProvider>
+            <CartProvider>
+                <div className="app">
+                    <Navbar />
+                    <main className="container mt-4">
+                        <Routes>
+                            {/* Public routes */}
+                            <Route path="/" element={<FeedPage />} />
+                            <Route 
+                                path="/login" 
+                                element={
+                                    <ProtectedRoute requireAuth={false}>
+                                        <LoginPage />
+                                    </ProtectedRoute>
+                                } 
+                            />
+                            <Route 
+                                path="/signup" 
+                                element={
+                                    <ProtectedRoute requireAuth={false}>
+                                        <SignupPage />
+                                    </ProtectedRoute>
+                                } 
+                            />
+                            <Route path="/partner-with-us" element={<RestaurantApplicationPage />} />
 
-  return (
-    <CartProvider> {/* Wrap the application content with CartProvider */}
-      <div>
-        <Navbar /> {/* Assuming Navbar might need cart info later (e.g., item count) */}
-        <div className="container mt-4"> {/* Added margin-top like in previous version */}
-          <Routes>
-          <Route path="/" element={<FeedPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/partner-with-us" element={<RestaurantApplicationPage />} />
-          <Route path="/provider/dashboard" element={<RestaurantDashboardPage />} /> {/* Add route for provider dashboard */}
-          <Route path="*" element={<NotFoundPage />} /> {/* Catch-all route */}
-          </Routes>
-        </div>
-      </div>
-    </CartProvider>
-  );
+                            {/* Protected routes */}
+                            <Route 
+                                path="/checkout" 
+                                element={
+                                    <ProtectedRoute>
+                                        <CheckoutPage />
+                                    </ProtectedRoute>
+                                } 
+                            />
+                            <Route 
+                                path="/orders" 
+                                element={
+                                    <ProtectedRoute>
+                                        <OrdersPage />
+                                    </ProtectedRoute>
+                                } 
+                            />
+                            <Route 
+                                path="/profile" 
+                                element={
+                                    <ProtectedRoute>
+                                        <ProfilePage />
+                                    </ProtectedRoute>
+                                } 
+                            />
+
+                            {/* Provider routes */}
+                            <Route 
+                                path="/provider/dashboard" 
+                                element={
+                                    <ProtectedRoute requireRole="provider">
+                                        <RestaurantDashboardPage />
+                                    </ProtectedRoute>
+                                } 
+                            />
+
+                            {/* 404 route */}
+                            <Route path="*" element={<NotFoundPage />} />
+                        </Routes>
+                    </main>
+                </div>
+            </CartProvider>
+        </AuthProvider>
+    );
 }
 
 export default App;

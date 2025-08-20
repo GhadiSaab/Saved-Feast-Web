@@ -6,47 +6,231 @@ import MealCard from '../components/MealCard'; // Import the actual component
 // Define a type for the Meal data (adjust based on actual API response)
 interface Meal {
     id: number;
-    name: string;
+    title: string; // Changed from name
     description: string;
-    price: number;
-    image_url?: string; // Reverted back to image_url
+    current_price: number; // Changed from price
+    original_price?: number | null; // Added original_price
+    image?: string | null; // Changed from image_url to image, matching backend
+    available_from: string; // Add available_from (ISO string)
+    available_until: string; // Add available_until (ISO string)
     restaurant?: { // Assuming restaurant is nested
+        name: string;
+    };
+    category?: {
+        id: number;
         name: string;
     };
     // Add other relevant fields
 }
 
-// Placeholder MealCard component - removed
+interface PaginationInfo {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+    has_more_pages: boolean;
+}
 
+interface ApiResponse {
+    status: boolean;
+    message: string;
+    data: Meal[];
+    pagination: PaginationInfo;
+    filters_applied: any;
+}
+
+interface FilterOptions {
+    categories: Array<{ id: number; name: string }>;
+    price_range: { min: number; max: number };
+    sort_options: Array<{ value: string; label: string }>;
+    sort_orders: Array<{ value: string; label: string }>;
+}
 
 const FeedPage: React.FC = () => {
     const [meals, setMeals] = useState<Meal[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+    const [filters, setFilters] = useState<FilterOptions | null>(null);
+    
+    // Filter states
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [selectedCategory, setSelectedCategory] = useState<number | ''>('');
+    const [priceRange, setPriceRange] = useState<{ min: string; max: string }>({ min: '', max: '' });
+    const [sortBy, setSortBy] = useState<string>('created_at');
+    const [sortOrder, setSortOrder] = useState<string>('desc');
 
+    // Fetch filter options
     useEffect(() => {
-        const fetchMeals = async () => {
-            setLoading(true);
-            setError(null);
+        const fetchFilters = async () => {
             try {
-                // Fetch from the existing API endpoint
-                const response = await axios.get<{ data: Meal[] }>('/api/meals');
-                // Adjust based on how Laravel pagination/resource wraps the data
-                setMeals(response.data.data || response.data);
-            } catch (err: any) {
-                setError('Failed to fetch meals. Please try again later.');
-                console.error("Error fetching meals:", err);
-            } finally {
-                setLoading(false);
+                const response = await axios.get<{ data: FilterOptions }>('/api/meals/filters');
+                setFilters(response.data.data);
+            } catch (err) {
+                console.error("Error fetching filters:", err);
             }
         };
+        fetchFilters();
+    }, []);
 
-        fetchMeals();
-    }, []); // Empty dependency array means this runs once on mount
+    // Fetch meals with filters
+    const fetchMeals = async (page: number = 1) => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const params = new URLSearchParams({
+                page: page.toString(),
+                per_page: '12', // Show 12 meals per page
+                sort_by: sortBy,
+                sort_order: sortOrder,
+            });
+
+            if (searchTerm) params.append('search', searchTerm);
+            if (typeof selectedCategory === 'number') params.append('category_id', selectedCategory.toString());
+            if (priceRange.min && priceRange.min.trim() !== '') params.append('min_price', priceRange.min);
+            if (priceRange.max && priceRange.max.trim() !== '') params.append('max_price', priceRange.max);
+            params.append('available', 'true'); // Only show available meals by default
+
+            const response = await axios.get<ApiResponse>(`/api/meals?${params.toString()}`);
+            
+            if (response.data.status) {
+                setMeals(response.data.data);
+                setPagination(response.data.pagination);
+                setCurrentPage(page);
+            } else {
+                setError(response.data.message || 'Failed to fetch meals');
+            }
+        } catch (err: any) {
+            if (err.response && err.response.status === 422) {
+                // Validation error - show specific errors
+                const validationErrors = err.response.data.errors;
+                if (validationErrors) {
+                    const errorMessages = Object.values(validationErrors).flat().join(', ');
+                    setError(`Validation error: ${errorMessages}`);
+                } else {
+                    setError(err.response.data.message || 'Validation failed');
+                }
+            } else {
+                setError('Failed to fetch meals. Please try again later.');
+            }
+            console.error("Error fetching meals:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Initial fetch
+    useEffect(() => {
+        fetchMeals(1);
+    }, []); // Only run on mount
+
+    // Handle filter changes
+    const handleFilterChange = () => {
+        fetchMeals(1); // Reset to first page when filters change
+    };
+
+    // Handle search
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        handleFilterChange();
+    };
+
+    // Handle pagination
+    const handlePageChange = (page: number) => {
+        fetchMeals(page);
+    };
 
     return (
-        <div className="feed-page-container bg-white p-4 p-md-5 rounded shadow-sm"> {/* Wrapper div */}
-            <h1 className="mb-5 page-title">Today's Feasts</h1> {/* Added page-title class */}
+        <div className="feed-page-container bg-white p-4 p-md-5 rounded shadow-sm">
+            <h1 className="mb-5 page-title">Today's Feasts</h1>
+            
+            {/* Filters Section */}
+            <div className="mb-4">
+                <form onSubmit={handleSearch} className="row g-3">
+                    {/* Search */}
+                    <div className="col-md-4">
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search meals..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    
+                    {/* Category Filter */}
+                    <div className="col-md-2">
+                        <select
+                            className="form-select"
+                            value={selectedCategory}
+                            onChange={(e) => {
+                                setSelectedCategory(e.target.value ? Number(e.target.value) : '');
+                                handleFilterChange();
+                            }}
+                        >
+                            <option value="">All Categories</option>
+                            {filters?.categories.map(category => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    {/* Price Range */}
+                    <div className="col-md-2">
+                        <input
+                            type="number"
+                            className="form-control"
+                            placeholder="Min Price"
+                            value={priceRange.min}
+                            onChange={(e) => {
+                                setPriceRange(prev => ({ ...prev, min: e.target.value }));
+                                handleFilterChange();
+                            }}
+                        />
+                    </div>
+                    <div className="col-md-2">
+                        <input
+                            type="number"
+                            className="form-control"
+                            placeholder="Max Price"
+                            value={priceRange.max}
+                            onChange={(e) => {
+                                setPriceRange(prev => ({ ...prev, max: e.target.value }));
+                                handleFilterChange();
+                            }}
+                        />
+                    </div>
+                    
+                    {/* Sort */}
+                    <div className="col-md-2">
+                        <select
+                            className="form-select"
+                            value={`${sortBy}-${sortOrder}`}
+                            onChange={(e) => {
+                                const [field, order] = e.target.value.split('-');
+                                setSortBy(field);
+                                setSortOrder(order);
+                                handleFilterChange();
+                            }}
+                        >
+                            <option value="created_at-desc">Newest First</option>
+                            <option value="created_at-asc">Oldest First</option>
+                            <option value="current_price-asc">Price: Low to High</option>
+                            <option value="current_price-desc">Price: High to Low</option>
+                            <option value="title-asc">Name: A-Z</option>
+                            <option value="title-desc">Name: Z-A</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            {/* Loading State */}
             {loading && (
                 <div className="d-flex justify-content-center">
                     <div className="spinner-border" role="status">
@@ -54,21 +238,75 @@ const FeedPage: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            {/* Error State */}
             {error && <div className="alert alert-danger">{error}</div>}
+
+            {/* Meals Grid */}
             {!loading && !error && (
-                <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4"> {/* Added xl breakpoint */}
-                    {meals.length > 0 ? (
-                        meals.map(meal => (
-                            <div className="col" key={meal.id}>
-                                <MealCard meal={meal} /> {/* Use actual component */}
+                <>
+                    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                        {meals.length > 0 ? (
+                            meals.map(meal => (
+                                <div className="col" key={meal.id}>
+                                    <MealCard meal={meal} />
+                                </div>
+                            ))
+                        ) : (
+                            <div className="col-12">
+                                <p className="text-center text-muted">No meals available with the current filters. Try adjusting your search criteria.</p>
                             </div>
-                        ))
-                    ) : (
-                         <div className="col-12">
-                            <p className="text-center text-muted">No meals available right now. Check back soon!</p>
+                        )}
+                    </div>
+
+                    {/* Pagination */}
+                    {pagination && pagination.last_page > 1 && (
+                        <nav className="mt-4">
+                            <ul className="pagination justify-content-center">
+                                {/* Previous Page */}
+                                <li className={`page-item ${pagination.current_page === 1 ? 'disabled' : ''}`}>
+                                    <button
+                                        className="page-link"
+                                        onClick={() => handlePageChange(pagination.current_page - 1)}
+                                        disabled={pagination.current_page === 1}
+                                    >
+                                        Previous
+                                    </button>
+                                </li>
+
+                                {/* Page Numbers */}
+                                {Array.from({ length: pagination.last_page }, (_, i) => i + 1).map(page => (
+                                    <li key={page} className={`page-item ${page === pagination.current_page ? 'active' : ''}`}>
+                                        <button
+                                            className="page-link"
+                                            onClick={() => handlePageChange(page)}
+                                        >
+                                            {page}
+                                        </button>
+                                    </li>
+                                ))}
+
+                                {/* Next Page */}
+                                <li className={`page-item ${pagination.current_page === pagination.last_page ? 'disabled' : ''}`}>
+                                    <button
+                                        className="page-link"
+                                        onClick={() => handlePageChange(pagination.current_page + 1)}
+                                        disabled={pagination.current_page === pagination.last_page}
+                                    >
+                                        Next
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    )}
+
+                    {/* Results Info */}
+                    {pagination && (
+                        <div className="text-center text-muted mt-3">
+                            Showing {pagination.from} to {pagination.to} of {pagination.total} meals
                         </div>
                     )}
-                </div>
+                </>
             )}
         </div>
     );

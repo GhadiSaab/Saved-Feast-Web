@@ -1,19 +1,44 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API; // Corrected namespace
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\Meal; // Import Meal model
+use Illuminate\Support\Facades\Log; // Import Log facade
 
 class OrderController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+        $this->authorizeResource(Order::class, 'order');
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
 
-        // Fetch orders for the authenticated user
-        $orders = Order::where('user_id', $user->id)->with('orderItems.meal')->get();
+        // Check if user can view orders
+        $this->authorize('viewAny', Order::class);
+
+        // Fetch orders based on user role
+        if ($user->isProvider()) {
+            // Providers see orders for their restaurants
+            $restaurantIds = $user->restaurants()->pluck('id');
+            $orders = Order::whereIn('restaurant_id', $restaurantIds)
+                          ->with('orderItems.meal')
+                          ->get();
+        } else {
+            // Consumers see their own orders
+            $orders = Order::where('user_id', $user->id)
+                          ->with('orderItems.meal')
+                          ->get();
+        }
 
         return response()->json([
             'status' => true,
@@ -21,12 +46,16 @@ class OrderController extends Controller
             'data' => $orders
         ], 200);
     }
-    public function show($id, Request $request)
+
+    public function show(Order $order, Request $request)
     {
         $user = $request->user();
 
-        // Fetch a specific order for the authenticated user
-        $order = Order::where('user_id', $user->id)->with('orderItems.meal')->findOrFail($id);
+        // Check if user can view this specific order
+        $this->authorize('view', $order);
+
+        // Load relationships
+        $order->load('orderItems.meal');
 
         return response()->json([
             'status' => true,
@@ -34,33 +63,59 @@ class OrderController extends Controller
             'data' => $order
         ], 200);
     }
+
     public function store(Request $request)
     {
         $user = $request->user();
+
+        // Check if user can create orders
+        $this->authorize('create', Order::class);
 
         // Validate the request data
         $request->validate([
             'total_amount' => 'required|numeric',
             'order_items' => 'required|array',
             'order_items.*.meal_id' => 'required|exists:meals,id',
+            'order_items.*.meal_id' => 'required|exists:meals,id',
             'order_items.*.quantity' => 'required|integer|min:1',
+            // 'order_items.*.price' validation removed, as we'll fetch price from the Meal model
         ]);
 
         // Create the order
         $order = Order::create([
             'user_id' => $user->id,
-            'total_amount' => $request->total_amount,
-            'status' => Order::STATUS_PENDING,
+            'total_amount' => $request->total_amount, // Consider recalculating total amount based on fetched prices
+            'status' => 'pending', // Use string status directly or define constants in Order model
         ]);
 
-        // Attach order items to the order
-        foreach ($request->order_items as $item) {
-            $order->orderItems()->create([
-                'meal_id' => $item['meal_id'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
-            ]);
+        // Attach order items to the order, fetching prices from Meal model
+        foreach ($request->order_items as $itemData) {
+             $meal = Meal::find($itemData['meal_id']);
+
+             if ($meal) {
+                 // Ensure meal has sufficient quantity (optional check)
+                 // if ($meal->quantity < $itemData['quantity']) { ... handle error ... }
+
+                 $order->orderItems()->create([
+                     'meal_id' => $meal->id,
+                     'quantity' => $itemData['quantity'],
+                     'price' => $meal->price, // Use current price from Meal model
+                     'original_price' => $meal->original_price ?? $meal->price, // Use original_price, fallback to price if null
+                 ]);
+
+                 // Optionally decrease meal quantity
+                 // $meal->decrement('quantity', $itemData['quantity']);
+             } else {
+                 // Log error if meal not found, potentially rollback transaction
+                 Log::error("Meal with ID {$itemData['meal_id']} not found during order creation for order ID {$order->id}.");
+                 // Consider deleting the order and returning an error response
+                 // $order->delete();
+                 // return response()->json(['status' => false, 'message' => 'Invalid meal ID provided.'], 400);
+             }
         }
+
+        // Reload the order with items to return the complete data
+        $order->load('orderItems.meal');
 
         return response()->json([
             'status' => true,
@@ -68,9 +123,13 @@ class OrderController extends Controller
             'data' => $order
         ], 201);
     }
-    public function update(Request $request, $id)
+
+    public function update(Request $request, Order $order)
     {
         $user = $request->user();
+
+        // Check if user can update this order
+        $this->authorize('update', $order);
 
         // Validate the request data
         $request->validate([
@@ -78,7 +137,6 @@ class OrderController extends Controller
         ]);
 
         // Update the order status
-        $order = Order::where('user_id', $user->id)->findOrFail($id);
         $order->update(['status' => $request->status]);
 
         return response()->json([

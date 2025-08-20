@@ -10,11 +10,13 @@ interface Meal {
     // Add other meal properties if needed
 }
 
-interface OrderItem {
+// Export the OrderItem interface
+export interface OrderItem {
     id: number;
     meal_id: number;
     quantity: number;
-    price: number; // Price per item at the time of order
+    price: number; // Price per item at the time of order (discounted price paid)
+    original_price?: number | null; // Original price at time of order (make optional for backward compatibility)
     meal: Meal; // Nested meal object
 }
 

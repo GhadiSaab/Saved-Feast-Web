@@ -21,10 +21,13 @@ class Meal extends Model
     protected $fillable = [
         'title', // Reverted: Database likely uses 'title'
         'description',
-        'price',
+        'current_price', // Renamed from 'price'
+        'original_price', // Added original_price
         'quantity', // Add quantity here
         'category_id',
         'image', // Assuming 'image' is the correct DB column for the URL/path
+        'available_from', // Add available_from
+        'available_until', // Add available_until
         // 'restaurant_id' is assigned manually, not needed here
      ];
 
@@ -34,10 +37,11 @@ class Meal extends Model
      * @var array
      */
     protected $casts = [
-        'price' => 'float', // Cast price to float/double
+        'current_price' => 'float', // Cast current_price to float/double
+        'original_price' => 'float', // Cast original_price to float/double
         // Add other casts if needed, e.g., for dates or boolean status
-        // 'available_from' => 'datetime',
-        // 'available_until' => 'datetime',
+        'available_from' => 'datetime', // Cast available_from to datetime
+        'available_until' => 'datetime', // Cast available_until to datetime
     ];
 
      public function restaurant()

@@ -16,7 +16,8 @@ return new class extends Migration
             $table->foreignId('restaurant_id')->references('id')->on('restaurants')->onDelete('cascade');
             $table->string('title');
             $table->text('description')->nullable();
-            $table->decimal('price', 8, 2);
+            $table->decimal('current_price', 8, 2); // Renamed from 'price' - This is the discounted price
+            $table->decimal('original_price', 8, 2)->nullable(); // Added original price
             $table->integer('quantity')->unsigned();
             $table->timestamp('available_from')->nullable();
             $table->timestamp('available_until')->nullable();

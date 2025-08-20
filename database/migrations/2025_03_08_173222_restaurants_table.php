@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('website')->nullable();
             $table->string('image')->nullable();
+            $table->string('profile_picture_path')->nullable(); // Added for provider profile picture
             $table->timestamps();
         });
     }

@@ -53,28 +53,25 @@ class MealSeeder extends Seeder
         for ($i = 0; $i < 50; $i++) {
             $restaurantId = $faker->randomElement($restaurantIds);
             $status = $faker->randomElement($statusOptions);
-            
-            // Set availability times based on status
-            $availableFrom = null;
-            $availableUntil = null;
-            
-            if ($status == 'available') {
-                $availableFrom = Carbon::now()->subHours($faker->numberBetween(1, 5));
-                $availableUntil = Carbon::now()->addHours($faker->numberBetween(2, 12));
-            } elseif ($status == 'expired') {
-                $availableFrom = Carbon::now()->subDays($faker->numberBetween(1, 7));
-                $availableUntil = Carbon::now()->subHours($faker->numberBetween(1, 24));
-            } elseif ($status == 'sold_out') {
-                $availableFrom = Carbon::now()->subHours($faker->numberBetween(1, 24));
-                $availableUntil = Carbon::now()->addHours($faker->numberBetween(1, 12));
-            }
-            
+
+            // Generate valid availability times regardless of status to meet validation rules
+            // available_from should be >= now
+            $availableFrom = Carbon::now()->addMinutes($faker->numberBetween(0, 120)); // Start time between now and 2 hours from now
+            // available_until should be > available_from
+            $availableUntil = $availableFrom->copy()->addHours($faker->numberBetween(2, 8)); // End time 2-8 hours after start time
+
+            // Generate prices
+            $currentPrice = $faker->randomFloat(2, 5, 50);
+            // 70% chance of having an original price higher than the current price
+            $originalPrice = $faker->optional(0.7, null)->randomFloat(2, $currentPrice + 1, $currentPrice + 20);
+
             Meal::create([
                 'restaurant_id' => $restaurantId,
                 'category_id' => $faker->randomElement($categoryIds),
                 'title' => $faker->randomElement($mealNames),
                 'description' => $faker->paragraph(2),
-                'price' => $faker->randomFloat(2, 5, 50),
+                'current_price' => $currentPrice, // Use current_price
+                'original_price' => $originalPrice, // Add original_price (can be null)
                 'quantity' => $status == 'sold_out' ? 0 : $faker->numberBetween(1, 20),
                 'available_from' => $availableFrom,
                 'available_until' => $availableUntil,

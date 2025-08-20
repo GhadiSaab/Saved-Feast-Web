@@ -11,12 +11,15 @@ interface Category {
 
 interface Meal {
     id: number;
-    name: string; // Mapped from 'title' in backend for consistency if needed
+    title: string; // Changed from name to match backend
     description: string;
-    price: number; // Matches backend type
-    quantity: number; // Add quantity field
+    current_price: number; // Changed from price
+    original_price?: number | null; // Added original_price
+    quantity: number;
     category_id: number;
-    image_url?: string | null; // Optional
+    image?: string | null; // Changed from image_url, matches MealCard
+    available_from: string; // Add available_from (ISO string from backend)
+    available_until: string; // Add available_until (ISO string from backend)
     restaurant_id: number;
     created_at: string;
     updated_at: string;
@@ -26,12 +29,14 @@ interface Meal {
 // Interface for the form data - use strings for input fields
 interface MealFormData {
     id?: number | null; // Present when editing
-    name: string;
+    title: string; // Changed from name
     description: string;
-    price: string; // Use string for form input, convert on submit
-    quantity: string; // Add quantity field for form
+    current_price: string; // Changed from price
+    original_price: string; // Added original_price (use string for input)
+    quantity: string;
     category_id: string; // Use string for form select, convert on submit
-    image_url?: string;
+    available_from: string; // Add available_from (string for datetime-local input)
+    available_until: string; // Add available_until (string for datetime-local input)
 }
 
 
@@ -50,15 +55,18 @@ const RestaurantDashboardPage: React.FC = () => {
     const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
     const [formMode, setFormMode] = useState<'add' | 'edit'>('add'); // 'add' or 'edit'
     const [formData, setFormData] = useState<MealFormData>({
-        name: '',
+        title: '', // Changed from name
         description: '',
-        price: '',
-        quantity: '', // Initialize quantity
+        current_price: '', // Changed from price
+        original_price: '', // Initialize original_price
+        quantity: '',
         category_id: '',
-        image_url: '',
+        available_from: '', // Initialize available_from
+        available_until: '', // Initialize available_until
     });
     const [formSubmitting, setFormSubmitting] = useState<boolean>(false); // Loading state for form submission
     const [formError, setFormError] = useState<string | null>(null); // Errors specific to the form submission
+    const [imageFile, setImageFile] = useState<File | null>(null); // State for the image file
 
     // --- Placeholder functions for CRUD operations ---
     const fetchMealsAndCategories = async () => {
@@ -95,8 +103,16 @@ const RestaurantDashboardPage: React.FC = () => {
     const handleAddMealClick = () => {
         setFormMode('add');
         setFormData({ // Reset form
-            name: '', description: '', price: '', quantity: '', category_id: categories[0]?.id.toString() || '', image_url: '' // Reset quantity, Default to first category if available
+            title: '', // Changed from name
+            description: '',
+            current_price: '', // Changed from price
+            original_price: '', // Reset original_price
+            quantity: '',
+            category_id: categories[0]?.id.toString() || '', // Default to first category if available
+            available_from: '', // Reset available_from
+            available_until: '', // Reset available_until
         });
+        setImageFile(null); // Clear selected file
         setFormError(null);
         setIsFormVisible(true);
         // If using a modal, trigger modal show here
@@ -106,13 +122,17 @@ const RestaurantDashboardPage: React.FC = () => {
         setFormMode('edit');
         setFormData({ // Pre-fill form
             id: meal.id,
-            name: meal.name, // Assuming 'name' is used consistently in frontend state, maps to 'title' on backend save
+            title: meal.title, // Changed from name
             description: meal.description,
-            price: String(meal.price), // Convert number to string for input
-            quantity: String(meal.quantity), // Convert number to string for input
-            category_id: String(meal.category_id), // Convert number to string for select
-            image_url: meal.image_url || '',
+            current_price: String(meal.current_price), // Changed from price
+            original_price: meal.original_price ? String(meal.original_price) : '', // Handle null/undefined
+            quantity: String(meal.quantity),
+            category_id: String(meal.category_id),
+            // Format ISO string from backend (e.g., 2023-10-27T10:00:00.000000Z) to datetime-local format (YYYY-MM-DDTHH:mm)
+            available_from: meal.available_from ? meal.available_from.slice(0, 16) : '',
+            available_until: meal.available_until ? meal.available_until.slice(0, 16) : '',
         });
+        setImageFile(null); // Clear previous file selection on edit
         setFormError(null);
         setIsFormVisible(true);
         // If using a modal, trigger modal show here
@@ -169,39 +189,64 @@ const RestaurantDashboardPage: React.FC = () => {
             setFormSubmitting(false);
             return;
         }
-        const headers = { Authorization: `Bearer ${token}` };
+        // Use FormData for file uploads
+        const apiFormData = new FormData();
+        apiFormData.append('title', formData.title); // Changed from name
+        apiFormData.append('description', formData.description);
+        apiFormData.append('current_price', formData.current_price); // Changed from price
+        // Only append original_price if it's not empty, let backend handle null/default
+        if (formData.original_price && formData.original_price.trim() !== '') {
+            apiFormData.append('original_price', formData.original_price);
+        }
+        apiFormData.append('quantity', formData.quantity);
+        apiFormData.append('category_id', formData.category_id);
+        apiFormData.append('available_from', formData.available_from); // Add available_from
+        apiFormData.append('available_until', formData.available_until); // Add available_until
 
-        // Prepare data for API (convert types)
-        const mealDataPayload = {
-            name: formData.name, // Will be mapped to 'title' in backend controller if needed
-            description: formData.description,
-            price: parseFloat(formData.price), // Convert string to number
-            quantity: parseInt(formData.quantity, 10), // Convert string to number
-            category_id: parseInt(formData.category_id, 10), // Convert string to number
-            image_url: formData.image_url || null, // Send null if empty
-        };
+        if (imageFile) {
+            apiFormData.append('image', imageFile); // 'image' is the key the backend will expect
+        }
 
         // Basic frontend validation (optional, backend validation is primary)
-        if (isNaN(mealDataPayload.price) || isNaN(mealDataPayload.quantity) || isNaN(mealDataPayload.category_id)) {
-            setFormError("Invalid price, quantity, or category. Please enter valid numbers.");
+        // Validate current_price is a number. original_price can be empty or a number.
+        if (isNaN(parseFloat(formData.current_price)) ||
+            (formData.original_price.trim() !== '' && isNaN(parseFloat(formData.original_price))) ||
+            isNaN(parseInt(formData.quantity, 10)) ||
+            isNaN(parseInt(formData.category_id, 10))) {
+            setFormError("Invalid current price, original price (if provided), quantity, or category. Please enter valid numbers.");
             setFormSubmitting(false);
             return;
         }
+        // Optional: Add validation rule: original_price >= current_price if original_price is set
+        if (formData.original_price.trim() !== '' && parseFloat(formData.original_price) < parseFloat(formData.current_price)) {
+             setFormError("Original price cannot be less than the current selling price.");
+             setFormSubmitting(false);
+             return;
+        }
+
+        // Axios headers for FormData are usually set automatically, but ensure Authorization is included
+        const headers = {
+            Authorization: `Bearer ${token}`,
+            // 'Content-Type': 'multipart/form-data' // Axios sets this automatically for FormData
+        };
 
         try {
             let response;
             if (formMode === 'add') {
                 // POST request to create a new meal
-                response = await axios.post('/api/provider/meals', mealDataPayload, { headers });
+                response = await axios.post('/api/provider/meals', apiFormData, { headers });
             } else {
-                // PUT request to update an existing meal
+                // PUT request to update an existing meal - NOTE: PUT doesn't always work well with FormData.
+                // Laravel handles this using a _method field.
                 if (!formData.id) {
                     throw new Error("Meal ID is missing for update.");
                 }
-                response = await axios.put(`/api/provider/meals/${formData.id}`, mealDataPayload, { headers });
+                apiFormData.append('_method', 'PUT'); // Spoof PUT method for Laravel
+                response = await axios.post(`/api/provider/meals/${formData.id}`, apiFormData, { headers }); // Use POST with _method
             }
 
             // Success
+            setImageFile(null); // Clear file after successful upload
             closeForm(); // Close the form
             await fetchMealsAndCategories(); // Refresh the meals list
 
@@ -227,8 +272,18 @@ const RestaurantDashboardPage: React.FC = () => {
     };
 
     const handleFormChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = event.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type } = event.target;
+
+        if (type === 'file') {
+            const input = event.target as HTMLInputElement;
+            if (input.files && input.files.length > 0) {
+                setImageFile(input.files[0]); // Store the selected file object
+            } else {
+                setImageFile(null);
+            }
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const closeForm = () => {
@@ -316,13 +371,13 @@ const RestaurantDashboardPage: React.FC = () => {
                             {formError && <div className="alert alert-danger">{formError}</div>}
                             <form onSubmit={handleFormSubmit}>
                                 <div className="mb-3">
-                                    <label htmlFor="name" className="form-label">Meal Name</label>
+                                    <label htmlFor="title" className="form-label">Meal Title</label> {/* Changed label and htmlFor */}
                                     <input
                                         type="text"
                                         className="form-control"
-                                        id="name"
-                                        name="name"
-                                        value={formData.name}
+                                        id="title" // Changed id
+                                        name="title" // Changed name
+                                        value={formData.title} // Changed value binding
                                         onChange={handleFormChange}
                                         required
                                         disabled={formSubmitting}
@@ -342,22 +397,41 @@ const RestaurantDashboardPage: React.FC = () => {
                                     ></textarea>
                                 </div>
                                 <div className="row mb-3">
-                                    <div className="col-md-6">
-                                        <label htmlFor="price" className="form-label">Price ($)</label>
+                                    {/* Original Price (Optional) */}
+                                    <div className="col-md-4">
+                                        <label htmlFor="original_price" className="form-label">Original Price (€) <small className="text-muted">(Optional)</small></label>
                                         <input
                                             type="number"
                                             step="0.01"
                                             min="0"
                                             className="form-control"
-                                            id="price"
-                                            name="price"
-                                            value={formData.price}
+                                            id="original_price"
+                                            name="original_price"
+                                            value={formData.original_price}
                                             onChange={handleFormChange}
-                                            required
+                                            placeholder="e.g., 15.00"
                                             disabled={formSubmitting}
                                         />
                                     </div>
-                                    <div className="col-md-6">
+                                    {/* Current Selling Price */}
+                                    <div className="col-md-4">
+                                        <label htmlFor="current_price" className="form-label">Current Selling Price (€)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            className="form-control"
+                                            id="current_price"
+                                            name="current_price"
+                                            value={formData.current_price}
+                                            onChange={handleFormChange}
+                                            required
+                                            placeholder="e.g., 9.99"
+                                            disabled={formSubmitting}
+                                        />
+                                    </div>
+                                    {/* Quantity */}
+                                    <div className="col-md-4">
                                         <label htmlFor="quantity" className="form-label">Quantity Available</label>
                                         <input
                                             type="number"
@@ -396,18 +470,62 @@ const RestaurantDashboardPage: React.FC = () => {
                                             <div className="form-text text-warning">No categories found. Please add categories first.</div>
                                         )}
                                     </div>
+                                    {/* Removed category column div end */}
+                                </div> {/* End row mb-3 for category */}
+
+                                {/* Pickup Time Window */}
+                                <div className="row mb-3">
+                                    <div className="col-md-6">
+                                        <label htmlFor="available_from" className="form-label">Available From (Pickup Start)</label>
+                                        <input
+                                            type="datetime-local"
+                                            className="form-control"
+                                            id="available_from"
+                                            name="available_from"
+                                            value={formData.available_from}
+                                            onChange={handleFormChange}
+                                            required
+                                            disabled={formSubmitting}
+                                        />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label htmlFor="available_until" className="form-label">Available Until (Pickup End)</label>
+                                        <input
+                                            type="datetime-local"
+                                            className="form-control"
+                                            id="available_until"
+                                            name="available_until"
+                                            value={formData.available_until}
+                                            onChange={handleFormChange}
+                                            required
+                                            disabled={formSubmitting}
+                                        />
+                                    </div>
                                 </div>
+                                {/* End Pickup Time Window */}
+
                                 <div className="mb-3">
-                                    <label htmlFor="image_url" className="form-label">Image URL (Optional)</label>
+                                    <label htmlFor="image" className="form-label">Meal Image (Optional)</label>
                                     <input
-                                        type="url"
+                                        type="file"
                                         className="form-control"
-                                        id="image_url"
-                                        name="image_url"
-                                        value={formData.image_url || ''}
-                                        onChange={handleFormChange}
+                                        id="image"
+                                        name="image" // Name matches the key used in FormData
+                                        accept="image/png, image/jpeg, image/gif" // Accept common image types
+                                        onChange={handleFormChange} // Use the updated handler
                                         disabled={formSubmitting}
                                     />
+                                    {imageFile && (
+                                        <div className="mt-2 text-muted">Selected: {imageFile.name}</div>
+                                    )}
+                                    {/* Display existing image preview if editing and image exists? Needs image_url from meal data */}
+                                    {formMode === 'edit' && formData.id /* && mealBeingEdited?.image_url */ && (
+                                        <div className="mt-2">
+                                            {/* Placeholder for showing current image - requires fetching meal data with image_url */}
+                                            {/* <img src={mealBeingEdited.image_url} alt="Current meal image" style={{ maxWidth: '100px', maxHeight: '100px' }} /> */}
+                                            <small className="d-block text-muted">Uploading a new image will replace the current one.</small>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="d-flex justify-content-end">
                                     <button
@@ -454,9 +572,9 @@ const RestaurantDashboardPage: React.FC = () => {
                     <table className="table table-striped table-hover">
                         <thead className="table-light">
                             <tr>
-                                <th>Name</th>
+                                <th>Title</th> {/* Changed from Name */}
                                 <th>Category</th>
-                                <th>Price</th>
+                                <th>Price</th> {/* Keep Price header, but display logic changes */}
                                 <th>Quantity</th>
                                 <th>Actions</th>
                             </tr>
@@ -465,14 +583,19 @@ const RestaurantDashboardPage: React.FC = () => {
                             {meals.length > 0 ? (
                                 meals.map((meal) => (
                                     <tr key={meal.id}>
-                                        <td>{meal.name}</td>
+                                        <td>{meal.title}</td>
                                         <td>{meal.category?.name || 'N/A'}</td>
                                         <td>
-                                            {typeof meal.price === 'number'
-                                                ? `$${meal.price.toFixed(2)}`
-                                                : 'N/A' }
+                                            {meal.original_price && meal.original_price > meal.current_price ? (
+                                                <>
+                                                    <strong className="text-danger me-1">€{meal.current_price.toFixed(2)}</strong>
+                                                    <small className="text-muted"><del>€{meal.original_price.toFixed(2)}</del></small>
+                                                </>
+                                            ) : (
+                                                <strong>€{meal.current_price.toFixed(2)}</strong>
+                                            )}
                                         </td>
-                                         <td>
+                                        <td>
                                             {typeof meal.quantity === 'number'
                                                 ? meal.quantity
                                                 : 'N/A'}
@@ -490,12 +613,12 @@ const RestaurantDashboardPage: React.FC = () => {
                                                 onClick={() => handleDeleteMeal(meal.id)}
                                                 title="Delete Meal"
                                             >
-                                                 <i className="fas fa-trash-alt"></i>
+                                                <i className="fas fa-trash-alt"></i>
                                             </button>
                                         </td>
                                     </tr>
                                 ))
-                                ) : (
+                            ) : (
                                 <tr>
                                     <td colSpan={5} className="text-center text-muted">No meals found. Add your first meal!</td>
                                 </tr>

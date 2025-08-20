@@ -7,6 +7,7 @@ use App\Models\Meal;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage; // Add Storage facade
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Models\Category; // Add Category model import
@@ -14,11 +15,24 @@ use App\Models\Category; // Add Category model import
 class MealController extends Controller
 {
     /**
+     * Create a new controller instance.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+        $this->authorizeResource(Meal::class, 'meal');
+    }
+
+    /**
      * Display a listing of the provider's meals.
      */
     public function index(Request $request)
     {
         $user = Auth::user();
+        
+        // Check if user can manage meals
+        $this->authorize('manage-meals');
+        
         // Assuming the provider user has one associated restaurant
         $restaurant = Restaurant::where('user_id', $user->id)->first();
 
@@ -39,6 +53,10 @@ class MealController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        
+        // Check if user can create meals
+        $this->authorize('create', Meal::class);
+        
         $restaurant = Restaurant::where('user_id', $user->id)->first();
 
         if (!$restaurant) {
@@ -46,16 +64,20 @@ class MealController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'title' => 'required|string|max:255', // Changed from name
             'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0', // Add validation for quantity
+            'current_price' => 'required|numeric|min:0', // Changed from price
+            'original_price' => 'nullable|numeric|min:0|gte:current_price', // Added original_price, must be >= current_price if present
+            'quantity' => 'required|integer|min:0',
             'category_id' => [
                 'required',
                 'integer',
                 Rule::exists('categories', 'id'), // Ensure category exists
             ],
-            'image_url' => 'nullable|url|max:2048', // Optional image URL
+            // 'image_url' => 'nullable|url|max:2048', // Optional image URL - REMOVED
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Optional image file upload
+            'available_from' => 'required|date|after_or_equal:now', // Must be a date, now or in the future
+            'available_until' => 'required|date|after:available_from', // Must be a date after available_from
         ]);
 
         if ($validator->fails()) {
@@ -65,17 +87,24 @@ class MealController extends Controller
         $validatedData = $validator->validated();
 
         $meal = new Meal();
-        // Map 'name' from request to 'title' in model
+        // Directly use validated data, no need to map 'name' anymore
         $mealDataToFill = $validatedData;
-        if (isset($mealDataToFill['name'])) {
-            $mealDataToFill['title'] = $mealDataToFill['name'];
-            unset($mealDataToFill['name']); // Remove 'name' before filling
+        // // Map 'image_url' from request to 'image' in model if necessary - REMOVED
+        // if (isset($mealDataToFill['image_url'])) {
+        //     $mealDataToFill['image'] = $mealDataToFill['image_url'];
+        //     unset($mealDataToFill['image_url']);
+        // }
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('public/meals'); // Store in storage/app/public/meals
+            // Store the relative path accessible via the public disk link
+            $mealDataToFill['image'] = Storage::url($path); // Get URL like /storage/meals/filename.jpg
+        } elseif (isset($mealDataToFill['image'])) {
+             // Ensure 'image' key is removed if no file is uploaded but was in validated data (shouldn't happen with file validation)
+             unset($mealDataToFill['image']);
         }
-        // Map 'image_url' from request to 'image' in model if necessary
-        if (isset($mealDataToFill['image_url'])) {
-            $mealDataToFill['image'] = $mealDataToFill['image_url'];
-            unset($mealDataToFill['image_url']);
-        }
+
 
         $meal->fill($mealDataToFill);
         $meal->restaurant_id = $restaurant->id; // Associate with the provider's restaurant
@@ -137,16 +166,21 @@ class MealController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|required|string|max:255', // sometimes: only validate if present
+            'title' => 'sometimes|required|string|max:255', // Changed from name
             'description' => 'sometimes|required|string',
-            'price' => 'sometimes|required|numeric|min:0',
+            'current_price' => 'sometimes|required|numeric|min:0', // Changed from price
+            'original_price' => 'nullable|numeric|min:0|gte:current_price', // Added original_price validation
+            'quantity' => 'sometimes|required|integer|min:0', // Added quantity validation
             'category_id' => [
                 'sometimes',
                 'required',
                 'integer',
                 Rule::exists('categories', 'id'),
             ],
-            'image_url' => 'nullable|url|max:2048',
+            // 'image_url' => 'nullable|url|max:2048', // REMOVED
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Optional image file upload for update
+            'available_from' => 'sometimes|required|date', // Allow updating start time
+            'available_until' => 'sometimes|required|date|after:available_from', // Allow updating end time, must be after start
         ]);
 
         if ($validator->fails()) {
@@ -155,17 +189,30 @@ class MealController extends Controller
 
         $validatedData = $validator->validated();
 
-        // Map 'name' from request to 'title' in model for update
+        // Directly use validated data, no need to map 'name' anymore
         $mealDataToFill = $validatedData;
-        if (isset($mealDataToFill['name'])) {
-            $mealDataToFill['title'] = $mealDataToFill['name'];
-            unset($mealDataToFill['name']);
+        // // Map 'image_url' from request to 'image' in model if necessary - REMOVED
+        // if (array_key_exists('image_url', $mealDataToFill)) { // Check existence even if null
+        //     $mealDataToFill['image'] = $mealDataToFill['image_url'];
+        //     unset($mealDataToFill['image_url']);
+        // }
+
+        // Handle image update
+        if ($request->hasFile('image')) {
+            // Delete old image if it exists
+            if ($meal->image) {
+                // Convert URL back to storage path if needed
+                $oldPath = str_replace('/storage/', 'public/', $meal->image);
+                Storage::delete($oldPath);
+            }
+            // Store new image
+            $path = $request->file('image')->store('public/meals');
+            $mealDataToFill['image'] = Storage::url($path); // Store the URL
+        } elseif (isset($mealDataToFill['image'])) {
+             // Ensure 'image' key is removed if no file is uploaded but was in validated data
+             unset($mealDataToFill['image']);
         }
-        // Map 'image_url' from request to 'image' in model if necessary
-        if (array_key_exists('image_url', $mealDataToFill)) { // Check existence even if null
-            $mealDataToFill['image'] = $mealDataToFill['image_url'];
-            unset($mealDataToFill['image_url']);
-        }
+
 
         $meal->fill($mealDataToFill);
         $meal->save();
@@ -196,6 +243,13 @@ class MealController extends Controller
         // Authorization check
         if ($meal->restaurant_id !== $restaurant->id) {
             return response()->json(['message' => 'Unauthorized access to delete this meal.'], 403);
+        }
+
+        // Delete associated image file before deleting the meal record
+        if ($meal->image) {
+            // Convert URL back to storage path
+             $imagePath = str_replace('/storage/', 'public/', $meal->image);
+             Storage::delete($imagePath);
         }
 
         $meal->delete();
