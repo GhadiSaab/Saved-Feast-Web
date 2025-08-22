@@ -1,5 +1,5 @@
 // resources/js/components/MealCard.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../context/CartContext'; // Import the useCart hook
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import auth from '../auth'; // Import the auth helper
@@ -28,6 +28,7 @@ interface MealCardProps {
 const MealCard: React.FC<MealCardProps> = ({ meal }) => {
     const { addToCart } = useCart(); // Get addToCart function from context
     const navigate = useNavigate(); // Get navigate function
+    const [showImageModal, setShowImageModal] = useState(false);
 
     const handleAddToCart = () => {
         if (auth.isAuthenticated()) {
@@ -48,84 +49,201 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
         }
     };
 
+    // Calculate savings percentage
+    const calculateSavings = () => {
+        if (meal.original_price && meal.original_price > meal.current_price) {
+            const savings = ((meal.original_price - meal.current_price) / meal.original_price) * 100;
+            return Math.round(savings);
+        }
+        return 0;
+    };
+
+    // Format pickup time
+    const formatPickupTime = () => {
+        if (meal.available_from && meal.available_until) {
+            const fromTime = new Date(meal.available_from).toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            const untilTime = new Date(meal.available_until).toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            return `${fromTime} - ${untilTime}`;
+        }
+        return 'Time TBD';
+    };
+
     // Construct the full image URL if the path is relative
-    // Assumes the backend provides a URL like '/storage/meals/image.jpg'
-    // If it provides just 'meals/image.jpg', you might need process.env.REACT_APP_API_URL or similar
-    const imageUrl = meal.image ? `${meal.image}` : null; // Use the image field directly
+    const imageUrl = meal.image ? `${meal.image}` : null;
+
+    const savingsPercentage = calculateSavings();
+
+    const handleCardClick = () => {
+        if (imageUrl) {
+            setShowImageModal(true);
+        }
+    };
+
+    const handleModalClose = () => {
+        setShowImageModal(false);
+    };
 
     return (
-        <div className="card h-100 shadow-sm"> {/* Use h-100 for equal height cards in a row */}
-            {imageUrl ? ( // Use the derived imageUrl
-                <img
-                    src={imageUrl} // Use the derived imageUrl
-                    className="card-img-top"
-                    alt={meal.title} // Use title for alt text
-                    style={{ height: '200px', objectFit: 'cover' }} // Consistent image height
-                />
-            ) : (
-                <div
-                    className="card-img-top bg-secondary d-flex align-items-center justify-content-center"
-                    style={{ height: '200px' }}
-                >
-                    <span className="text-light">No Image</span>
-                </div>
-            )}
-            <div className="card-body d-flex flex-column"> {/* Flex column for footer alignment */}
-                {/* Top section for Title and Restaurant */}
-                <div className="mb-2"> {/* Add some bottom margin */}
-                    <h5 className="card-title fw-bold">{meal.title}</h5> {/* Make title bold */}
+        <>
+            <div className="card h-100 meal-card" onClick={handleCardClick} style={{ cursor: imageUrl ? 'pointer' : 'default' }}>
+                {/* Image Placeholder Section */}
+                <div className="card-image-placeholder position-relative">
+                    <div className="image-placeholder bg-gradient-primary d-flex align-items-center justify-content-center">
+                        <div className="text-center">
+                            <i className="fas fa-utensils fa-2x text-white opacity-75 mb-2"></i>
+                            {imageUrl && (
+                                <div className="text-white opacity-75 small">
+                                    <i className="fas fa-eye me-1"></i>
+                                    Click to view
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    
+                    {/* Savings Badge */}
+                    {savingsPercentage > 0 && (
+                        <div className="savings-badge position-absolute top-0 start-0 m-2">
+                            <span className="badge bg-success fs-6 fw-bold">
+                                <i className="fas fa-percentage me-1"></i>
+                                {savingsPercentage}% OFF
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Restaurant Badge */}
                     {meal.restaurant && (
-                        <p className="card-subtitle text-muted">
-                            <small>From: {meal.restaurant.name}</small>
-                        </p>
+                        <div className="restaurant-badge position-absolute top-0 end-0 m-2">
+                            <span className="badge bg-primary fs-6 fw-bold">
+                                <i className="fas fa-store me-1"></i>
+                                {meal.restaurant.name}
+                            </span>
+                        </div>
                     )}
                 </div>
 
-                {/* Middle section for Description and Pickup */}
-                <div className="flex-grow-1 mb-3"> {/* Allow this section to grow, add bottom margin */}
-                    <p className="card-text small mb-2"> {/* Smaller text, add bottom margin */}
-                        {meal.description ? (meal.description.length > 100 ? `${meal.description.substring(0, 97)}...` : meal.description) : <span className="text-muted">No description available.</span>}
-                    </p>
-                    {/* Display Pickup Time Window */}
-                    <p className="card-text mb-0">
-                        <small className="text-muted">
-                            Pickup: {
-                                meal.available_from && meal.available_until
-                                ? `${new Date(meal.available_from).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(meal.available_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                                : '(Time window unavailable)'
-                            }
-                        </small>
-                    </p>
-                </div>
-
-                {/* Footer section for Price and Button */}
-                <div className="mt-auto d-flex justify-content-between align-items-center pt-2 border-top"> {/* Keep top padding and border */}
-                    <div className="price-display lh-1"> {/* Keep line height 1 */}
-                        {/* Display current price and original price if available and different */}
-                        {meal.original_price && meal.original_price > meal.current_price ? (
-                            <>
-                                <strong className="fs-5 text-danger me-2"> {/* Larger discounted price */}
-                                    €{meal.current_price.toFixed(2)}
-                                </strong>
-                                <small className="text-muted align-baseline"> {/* Align baseline */}
-                                    <del>€{meal.original_price.toFixed(2)}</del>
-                                </small>
-                            </>
-                        ) : (
-                            /* Otherwise, just display the current price */
-                            <strong className="fs-5"> {/* Larger standard price */}
-                                {typeof meal.current_price === 'number' || !isNaN(parseFloat(String(meal.current_price)))
-                                    ? `€${parseFloat(String(meal.current_price)).toFixed(2)}`
-                                    : 'Price N/A'}
-                            </strong>
+                {/* Card Body */}
+                <div className="card-body d-flex flex-column">
+                    {/* Title and Restaurant */}
+                    <div className="mb-3">
+                        <h5 className="card-title fw-bold mb-1 text-primary">{meal.title}</h5>
+                        {meal.restaurant && (
+                            <p className="card-subtitle text-muted mb-0 small">
+                                <i className="fas fa-store me-1"></i>
+                                {meal.restaurant.name}
+                            </p>
                         )}
                     </div>
-                    <button className="btn btn-primary btn-sm" onClick={handleAddToCart}>
-                        Add to Cart
-                    </button> {/* Keep button */}
+
+                    {/* Description */}
+                    <div className="flex-grow-1 mb-3">
+                        <p className="card-text small text-muted">
+                            {meal.description ? (
+                                meal.description.length > 120 
+                                    ? `${meal.description.substring(0, 117)}...` 
+                                    : meal.description
+                            ) : (
+                                <span className="text-muted">
+                                    <i className="fas fa-info-circle me-1"></i>
+                                    No description available.
+                                </span>
+                            )}
+                        </p>
+                    </div>
+
+                    {/* Pickup Time */}
+                    <div className="mb-3">
+                        <div className="pickup-time d-inline-block">
+                            <i className="fas fa-clock me-2"></i>
+                            <strong>Pickup:</strong> {formatPickupTime()}
+                        </div>
+                    </div>
+
+                    {/* Price and Action Section */}
+                    <div className="mt-auto">
+                        <div className="d-flex justify-content-between align-items-center">
+                            <div className="price-display">
+                                {meal.original_price && meal.original_price > meal.current_price ? (
+                                    <div className="d-flex align-items-baseline">
+                                        <span className="current-price me-2 fw-bold">
+                                            €{meal.current_price.toFixed(2)}
+                                        </span>
+                                        <span className="original-price text-muted">
+                                            <del>€{meal.original_price.toFixed(2)}</del>
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <span className="current-price fw-bold">
+                                        {typeof meal.current_price === 'number' || !isNaN(parseFloat(String(meal.current_price)))
+                                            ? `€${parseFloat(String(meal.current_price)).toFixed(2)}`
+                                            : 'Price N/A'}
+                                    </span>
+                                )}
+                            </div>
+                            
+                            <button 
+                                className="btn btn-primary btn-sm fw-bold" 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddToCart();
+                                }}
+                            >
+                                <i className="fas fa-cart-plus me-1"></i>
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Card Footer with Additional Info */}
+                <div className="card-footer bg-transparent border-top-0 pt-0">
+                    <div className="d-flex justify-content-between align-items-center">
+                        <small className="text-muted">
+                            <i className="fas fa-leaf me-1 text-success"></i>
+                            Food saved from waste
+                        </small>
+                        <small className="text-muted">
+                            <i className="fas fa-heart me-1 text-danger"></i>
+                            Fresh & delicious
+                        </small>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            {/* Image Modal */}
+            {showImageModal && imageUrl && (
+                <div className="image-modal-overlay" onClick={handleModalClose}>
+                    <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="image-modal-header">
+                            <h5 className="text-white mb-0">{meal.title}</h5>
+                            <button 
+                                className="btn-close btn-close-white" 
+                                onClick={handleModalClose}
+                                aria-label="Close"
+                            ></button>
+                        </div>
+                        <div className="image-modal-body">
+                            <img 
+                                src={imageUrl} 
+                                alt={meal.title} 
+                                className="img-fluid rounded"
+                            />
+                        </div>
+                        <div className="image-modal-footer">
+                            <p className="text-white mb-0 small">
+                                <i className="fas fa-store me-1"></i>
+                                {meal.restaurant?.name}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

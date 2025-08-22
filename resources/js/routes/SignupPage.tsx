@@ -62,25 +62,36 @@ const SignupPage: React.FC = () => {
     };
 
     return (
-        <div className="row justify-content-center">
-            <div className="col-md-6 col-lg-5"> {/* Slightly narrower on larger screens */}
-                <div className="card shadow-sm"> {/* Added shadow */}
-                    <div className="card-header text-center fs-4"> {/* Centered header */}
-                        Sign Up for SavedFeast
-                    </div>
-                    <div className="card-body p-4"> {/* Increased padding */}
-                        {error && !Object.keys(validationErrors).length && (
-                            <div className="alert alert-danger" role="alert">
-                                {error}
-                            </div>
-                        )}
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-3">
-                                <label htmlFor="first_name" className="form-label">First Name</label>
+        <div className="auth-container">
+            <div className="card">
+                <div className="card-header">
+                    <h3>
+                        <i className="fas fa-user-plus me-2"></i>
+                        Join SavedFeast
+                    </h3>
+                    <p className="mb-0 opacity-75">Start your journey to save food and money</p>
+                </div>
+                <div className="card-body">
+                    {error && !Object.keys(validationErrors).length && (
+                        <div className="alert alert-danger fade-in-up" role="alert">
+                            <i className="fas fa-exclamation-triangle me-2"></i>
+                            {error}
+                        </div>
+                    )}
+                    
+                    <form onSubmit={handleSubmit}>
+                        {/* Name Fields */}
+                        <div className="row">
+                            <div className="col-md-6 mb-3">
+                                <label htmlFor="first_name" className="form-label">
+                                    <i className="fas fa-user me-2"></i>
+                                    First Name
+                                </label>
                                 <input
                                     type="text"
                                     className={`form-control ${validationErrors.first_name ? 'is-invalid' : ''}`}
                                     id="first_name"
+                                    placeholder="Enter your first name"
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
                                     required
@@ -88,17 +99,22 @@ const SignupPage: React.FC = () => {
                                 />
                                 {validationErrors.first_name && (
                                     <div className="invalid-feedback">
+                                        <i className="fas fa-exclamation-circle me-1"></i>
                                         {validationErrors.first_name.join(', ')}
                                     </div>
                                 )}
                             </div>
 
-                            <div className="mb-3">
-                                <label htmlFor="last_name" className="form-label">Last Name</label>
+                            <div className="col-md-6 mb-3">
+                                <label htmlFor="last_name" className="form-label">
+                                    <i className="fas fa-user me-2"></i>
+                                    Last Name
+                                </label>
                                 <input
                                     type="text"
                                     className={`form-control ${validationErrors.last_name ? 'is-invalid' : ''}`}
                                     id="last_name"
+                                    placeholder="Enter your last name"
                                     value={lastName}
                                     onChange={(e) => setLastName(e.target.value)}
                                     required
@@ -106,35 +122,49 @@ const SignupPage: React.FC = () => {
                                 />
                                 {validationErrors.last_name && (
                                     <div className="invalid-feedback">
+                                        <i className="fas fa-exclamation-circle me-1"></i>
                                         {validationErrors.last_name.join(', ')}
                                     </div>
                                 )}
                             </div>
+                        </div>
 
-                            <div className="mb-3">
-                                <label htmlFor="email" className="form-label">Email address</label>
-                                <input
-                                    type="email"
-                                    className={`form-control ${validationErrors.email ? 'is-invalid' : ''}`}
-                                    id="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    disabled={loading}
-                                />
-                                {validationErrors.email && (
-                                    <div className="invalid-feedback">
-                                        {validationErrors.email.join(', ')}
-                                    </div>
-                                )}
-                            </div>
+                        {/* Email Field */}
+                        <div className="mb-3">
+                            <label htmlFor="email" className="form-label">
+                                <i className="fas fa-envelope me-2"></i>
+                                Email address
+                            </label>
+                            <input
+                                type="email"
+                                className={`form-control ${validationErrors.email ? 'is-invalid' : ''}`}
+                                id="email"
+                                placeholder="Enter your email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                disabled={loading}
+                            />
+                            {validationErrors.email && (
+                                <div className="invalid-feedback">
+                                    <i className="fas fa-exclamation-circle me-1"></i>
+                                    {validationErrors.email.join(', ')}
+                                </div>
+                            )}
+                        </div>
 
-                            <div className="mb-3 position-relative"> {/* Added position-relative */}
-                                <label htmlFor="password" className="form-label">Password</label>
+                        {/* Password Fields */}
+                        <div className="mb-3">
+                            <label htmlFor="password" className="form-label">
+                                <i className="fas fa-lock me-2"></i>
+                                Password
+                            </label>
+                            <div className="input-group">
                                 <input
-                                    type={showPassword ? 'text' : 'password'} // Toggle input type
+                                    type={showPassword ? 'text' : 'password'}
                                     className={`form-control ${validationErrors.password ? 'is-invalid' : ''}`}
                                     id="password"
+                                    placeholder="Create a strong password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
@@ -143,28 +173,36 @@ const SignupPage: React.FC = () => {
                                 />
                                 <button
                                     type="button"
-                                    className="btn btn-outline-secondary btn-sm position-absolute end-0 top-50 translate-middle-y me-2 mt-1" // Position the button (adjusted margin)
-                                    style={{ zIndex: 5 }} // Ensure button is clickable over input
+                                    className="btn btn-outline-secondary"
                                     onClick={() => setShowPassword(!showPassword)}
+                                    disabled={loading}
                                 >
-                                    {showPassword ? 'Hide' : 'Show'}
+                                    <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                 </button>
-                                <div id="passwordHelp" className="form-text">
-                                    Minimum 8 characters, including uppercase, lowercase, numbers, and symbols. {/* Updated hint */}
-                                </div>
-                                {validationErrors.password && (
-                                    <div className="invalid-feedback">
-                                        {validationErrors.password.join(', ')}
-                                    </div>
-                                )}
                             </div>
+                            <div id="passwordHelp" className="form-text">
+                                <i className="fas fa-info-circle me-1"></i>
+                                Minimum 8 characters, including uppercase, lowercase, numbers, and symbols.
+                            </div>
+                            {validationErrors.password && (
+                                <div className="invalid-feedback">
+                                    <i className="fas fa-exclamation-circle me-1"></i>
+                                    {validationErrors.password.join(', ')}
+                                </div>
+                            )}
+                        </div>
 
-                            <div className="mb-3 position-relative"> {/* Added position-relative */}
-                                <label htmlFor="password_confirmation" className="form-label">Confirm Password</label>
+                        <div className="mb-3">
+                            <label htmlFor="password_confirmation" className="form-label">
+                                <i className="fas fa-lock me-2"></i>
+                                Confirm Password
+                            </label>
+                            <div className="input-group">
                                 <input
-                                    type={showPasswordConfirmation ? 'text' : 'password'} // Toggle input type
+                                    type={showPasswordConfirmation ? 'text' : 'password'}
                                     className={`form-control ${validationErrors.password_confirmation ? 'is-invalid' : ''}`}
                                     id="password_confirmation"
+                                    placeholder="Confirm your password"
                                     value={passwordConfirmation}
                                     onChange={(e) => setPasswordConfirmation(e.target.value)}
                                     required
@@ -172,76 +210,141 @@ const SignupPage: React.FC = () => {
                                 />
                                 <button
                                     type="button"
-                                    className="btn btn-outline-secondary btn-sm position-absolute end-0 top-50 translate-middle-y me-2" // Position the button
-                                    style={{ zIndex: 5 }} // Ensure button is clickable over input
+                                    className="btn btn-outline-secondary"
                                     onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
+                                    disabled={loading}
                                 >
-                                    {showPasswordConfirmation ? 'Hide' : 'Show'}
+                                    <i className={`fas ${showPasswordConfirmation ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                 </button>
-                                {validationErrors.password_confirmation && (
-                                    <div className="invalid-feedback">
-                                        {validationErrors.password_confirmation.join(', ')}
-                                    </div>
-                                )}
                             </div>
+                            {validationErrors.password_confirmation && (
+                                <div className="invalid-feedback">
+                                    <i className="fas fa-exclamation-circle me-1"></i>
+                                    {validationErrors.password_confirmation.join(', ')}
+                                </div>
+                            )}
+                        </div>
 
-                            <div className="mb-3">
-                                <label htmlFor="phone" className="form-label">Phone</label>
+                        {/* Contact Fields */}
+                        <div className="row">
+                            <div className="col-md-6 mb-3">
+                                <label htmlFor="phone" className="form-label">
+                                    <i className="fas fa-phone me-2"></i>
+                                    Phone (Optional)
+                                </label>
                                 <input
-                                    type="text"
+                                    type="tel"
                                     className={`form-control ${validationErrors.phone ? 'is-invalid' : ''}`}
                                     id="phone"
+                                    placeholder="Enter your phone number"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     disabled={loading}
                                 />
                                 {validationErrors.phone && (
                                     <div className="invalid-feedback">
+                                        <i className="fas fa-exclamation-circle me-1"></i>
                                         {validationErrors.phone.join(', ')}
                                     </div>
                                 )}
                             </div>
 
-                            <div className="mb-3">
-                                <label htmlFor="address" className="form-label">Address</label>
+                            <div className="col-md-6 mb-3">
+                                <label htmlFor="address" className="form-label">
+                                    <i className="fas fa-map-marker-alt me-2"></i>
+                                    Address (Optional)
+                                </label>
                                 <input
                                     type="text"
                                     className={`form-control ${validationErrors.address ? 'is-invalid' : ''}`}
                                     id="address"
+                                    placeholder="Enter your address"
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
                                     disabled={loading}
                                 />
                                 {validationErrors.address && (
                                     <div className="invalid-feedback">
+                                        <i className="fas fa-exclamation-circle me-1"></i>
                                         {validationErrors.address.join(', ')}
                                     </div>
                                 )}
                             </div>
+                        </div>
 
-                            {error && Object.keys(validationErrors).length > 0 && (
-                                <div className="alert alert-danger mt-3" role="alert">
-                                    {error}
-                                </div>
-                            )}
-
-                            <button type="submit" className="btn btn-primary w-100" disabled={loading}> {/* Use primary color, make full width */}
-                                {loading ? (
-                                    <>
-                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                        Signing up...
-                                    </>
-                                ) : (
-                                    'Sign Up'
-                                )}
-                            </button>
-                            <div className="text-center mt-4"> {/* Centered link */}
-                                <Link to="/login" className="d-block auth-link">Already have an account? Login</Link>
+                        {error && Object.keys(validationErrors).length > 0 && (
+                            <div className="alert alert-danger fade-in-up" role="alert">
+                                <i className="fas fa-exclamation-triangle me-2"></i>
+                                {error}
                             </div>
-                            <p className="text-center text-muted small mt-4"> {/* Terms/Privacy text */}
-                                By signing up, you agree to our <a href="#" onClick={(e) => e.preventDefault()}>Terms of Service</a> and <a href="#" onClick={(e) => e.preventDefault()}>Privacy Policy</a>.
-                            </p>
-                        </form>
+                        )}
+
+                        <button 
+                            type="submit" 
+                            className="btn btn-primary w-100 mb-3" 
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Creating account...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fas fa-user-plus me-2"></i>
+                                    Create Account
+                                </>
+                            )}
+                        </button>
+                        
+                        <div className="text-center">
+                            <Link to="/login" className="auth-link">
+                                <i className="fas fa-sign-in-alt me-1"></i>
+                                Already have an account? Sign in
+                            </Link>
+                        </div>
+                        
+                        <div className="text-center mt-3">
+                            <small className="text-muted">
+                                <i className="fas fa-shield-alt me-1"></i>
+                                By signing up, you agree to our{' '}
+                                <a href="#" onClick={(e) => e.preventDefault()} className="text-decoration-none">
+                                    Terms of Service
+                                </a>{' '}
+                                and{' '}
+                                <a href="#" onClick={(e) => e.preventDefault()} className="text-decoration-none">
+                                    Privacy Policy
+                                </a>.
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            {/* Benefits Section */}
+            <div className="text-center mt-4">
+                <h5 className="mb-3">Why join SavedFeast?</h5>
+                <div className="row g-3">
+                    <div className="col-md-4">
+                        <div className="feature-item">
+                            <i className="fas fa-utensils fa-2x text-primary mb-2"></i>
+                            <h6>Delicious Meals</h6>
+                            <small className="text-muted">Fresh food from local restaurants</small>
+                        </div>
+                    </div>
+                    <div className="col-md-4">
+                        <div className="feature-item">
+                            <i className="fas fa-percentage fa-2x text-success mb-2"></i>
+                            <h6>Great Savings</h6>
+                            <small className="text-muted">Up to 70% off regular prices</small>
+                        </div>
+                    </div>
+                    <div className="col-md-4">
+                        <div className="feature-item">
+                            <i className="fas fa-globe fa-2x text-info mb-2"></i>
+                            <h6>Eco-Friendly</h6>
+                            <small className="text-muted">Help reduce food waste</small>
+                        </div>
                     </div>
                 </div>
             </div>

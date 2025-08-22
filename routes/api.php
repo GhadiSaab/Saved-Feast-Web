@@ -86,12 +86,14 @@ Route::middleware(['auth:sanctum', 'throttle:300,1'])->prefix('provider')->name(
 
 // Admin routes (Protected by admin-access gate) with rate limiting
 Route::middleware(['auth:sanctum', 'throttle:600,1'])->prefix('admin')->name('api.admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        Gate::authorize('admin-access');
-        return response()->json(['message' => 'Welcome to the Admin Dashboard!']);
-    })->name('dashboard');
-    
-    // Add more admin routes here as needed
+    Route::get('/dashboard', [App\Http\Controllers\API\AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/users', [App\Http\Controllers\API\AdminController::class, 'users'])->name('users');
+    Route::get('/restaurants', [App\Http\Controllers\API\AdminController::class, 'restaurants'])->name('restaurants');
+    Route::get('/orders', [App\Http\Controllers\API\AdminController::class, 'orders'])->name('orders');
+    Route::get('/meals', [App\Http\Controllers\API\AdminController::class, 'meals'])->name('meals');
+    Route::get('/analytics', [App\Http\Controllers\API\AdminController::class, 'analytics'])->name('analytics');
+    Route::put('/users/{user}/role', [App\Http\Controllers\API\AdminController::class, 'updateUserRole'])->name('users.updateRole');
+    Route::put('/users/{user}/status', [App\Http\Controllers\API\AdminController::class, 'toggleUserStatus'])->name('users.toggleStatus');
 });
 
 // Note: Using array syntax [Controller::class, 'method'] is the modern Laravel standard

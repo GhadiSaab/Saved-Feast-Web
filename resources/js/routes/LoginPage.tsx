@@ -39,42 +39,58 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="row justify-content-center">
-            <div className="col-md-6 col-lg-5"> {/* Slightly narrower on larger screens */}
-                <div className="card shadow-sm"> {/* Added shadow */}
-                    <div className="card-header text-center fs-4"> {/* Centered header */}
-                        Login to SavedFeast
-                    </div>
-                    <div className="card-body p-4"> {/* Increased padding */}
-                        {error && !validationErrors.email && !validationErrors.password && (
-                            <div className="alert alert-danger" role="alert">
-                                {error}
-                            </div>
-                        )}
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-3">
-                                <label htmlFor="email" className="form-label">Email address</label>
+        <div className="auth-container">
+            <div className="card">
+                <div className="card-header">
+                    <h3>
+                        <i className="fas fa-sign-in-alt me-2"></i>
+                        Welcome Back
+                    </h3>
+                    <p className="mb-0 opacity-75">Sign in to continue saving food and money</p>
+                </div>
+                <div className="card-body">
+                    {error && !validationErrors.email && !validationErrors.password && (
+                        <div className="alert alert-danger fade-in-up" role="alert">
+                            <i className="fas fa-exclamation-triangle me-2"></i>
+                            {error}
+                        </div>
+                    )}
+                    
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-3">
+                            <label htmlFor="email" className="form-label">
+                                <i className="fas fa-envelope me-2"></i>
+                                Email address
+                            </label>
+                            <input
+                                type="email"
+                                className={`form-control ${validationErrors.email ? 'is-invalid' : ''}`}
+                                id="email"
+                                placeholder="Enter your email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                disabled={loading}
+                            />
+                            {validationErrors.email && (
+                                <div className="invalid-feedback">
+                                    <i className="fas fa-exclamation-circle me-1"></i>
+                                    {validationErrors.email.join(', ')}
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="mb-3 position-relative">
+                            <label htmlFor="password" className="form-label">
+                                <i className="fas fa-lock me-2"></i>
+                                Password
+                            </label>
+                            <div className="input-group">
                                 <input
-                                    type="email"
-                                    className={`form-control ${validationErrors.email ? 'is-invalid' : ''}`}
-                                    id="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    disabled={loading}
-                                />
-                                {validationErrors.email && (
-                                    <div className="invalid-feedback">
-                                        {validationErrors.email.join(', ')}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="mb-3 position-relative"> {/* Added position-relative */}
-                                <label htmlFor="password" className="form-label">Password</label>
-                                <input
-                                    type={showPassword ? 'text' : 'password'} // Toggle input type
+                                    type={showPassword ? 'text' : 'password'}
                                     className={`form-control ${validationErrors.password ? 'is-invalid' : ''}`}
                                     id="password"
+                                    placeholder="Enter your password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
@@ -82,44 +98,102 @@ const LoginPage: React.FC = () => {
                                 />
                                 <button
                                     type="button"
-                                    className="btn btn-outline-secondary btn-sm position-absolute end-0 top-50 translate-middle-y me-2 mt-3" // Position the button
-                                    style={{ zIndex: 5 }} // Ensure button is clickable over input
+                                    className="btn btn-outline-secondary"
                                     onClick={() => setShowPassword(!showPassword)}
+                                    disabled={loading}
                                 >
-                                    {showPassword ? 'Hide' : 'Show'}
+                                    <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                 </button>
-                                {validationErrors.password && (
-                                    <div className="invalid-feedback">
-                                        {validationErrors.password.join(', ')}
-                                    </div>
-                                )}
                             </div>
-                            <div className="mb-3 form-check"> {/* Remember Me Checkbox */}
-                                <input type="checkbox" className="form-check-input" id="rememberMe" />
-                                <label className="form-check-label" htmlFor="rememberMe">Remember Me</label>
-                            </div>
-                             {error && (validationErrors.email || validationErrors.password) && (
-                                <div className="alert alert-danger mt-3" role="alert">
-                                    {error}
+                            {validationErrors.password && (
+                                <div className="invalid-feedback">
+                                    <i className="fas fa-exclamation-circle me-1"></i>
+                                    {validationErrors.password.join(', ')}
                                 </div>
                             )}
-                            <button type="submit" className="btn btn-primary w-100" disabled={loading}> {/* Use primary color, make full width */}
-                                {loading ? (
-                                    <>
-                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                        Logging in...
-                                    </>
-                                ) : (
-                                    'Login'
-                                )}
-                            </button>
-                            <div className="text-center mt-4"> {/* Centered links */}
-                                <Link to="/signup" className="d-block mb-2 auth-link">Don't have an account? Sign Up</Link>
-                                <a href="#" className="d-block auth-link text-muted" onClick={(e) => {e.preventDefault(); alert('Forgot Password functionality not yet implemented.');}}>
-                                    Forgot Password?
+                        </div>
+                        
+                        <div className="mb-3 form-check">
+                            <input type="checkbox" className="form-check-input" id="rememberMe" />
+                            <label className="form-check-label" htmlFor="rememberMe">
+                                <i className="fas fa-check-circle me-1"></i>
+                                Remember me
+                            </label>
+                        </div>
+                        
+                        {error && (validationErrors.email || validationErrors.password) && (
+                            <div className="alert alert-danger fade-in-up" role="alert">
+                                <i className="fas fa-exclamation-triangle me-2"></i>
+                                {error}
+                            </div>
+                        )}
+                        
+                        <button 
+                            type="submit" 
+                            className="btn btn-primary w-100 mb-3" 
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Signing in...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fas fa-sign-in-alt me-2"></i>
+                                    Sign In
+                                </>
+                            )}
+                        </button>
+                        
+                        <div className="text-center">
+                            <div className="mb-2">
+                                <Link to="/signup" className="auth-link">
+                                    <i className="fas fa-user-plus me-1"></i>
+                                    Don't have an account? Sign up
+                                </Link>
+                            </div>
+                            <div>
+                                <a 
+                                    href="#" 
+                                    className="auth-link text-muted" 
+                                    onClick={(e) => {
+                                        e.preventDefault(); 
+                                        alert('Forgot Password functionality not yet implemented.');
+                                    }}
+                                >
+                                    <i className="fas fa-key me-1"></i>
+                                    Forgot your password?
                                 </a>
                             </div>
-                        </form>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            {/* Additional Info Section */}
+            <div className="text-center mt-4">
+                <div className="row g-3">
+                    <div className="col-md-4">
+                        <div className="feature-item">
+                            <i className="fas fa-leaf fa-2x text-success mb-2"></i>
+                            <h6>Save Food</h6>
+                            <small className="text-muted">Reduce food waste</small>
+                        </div>
+                    </div>
+                    <div className="col-md-4">
+                        <div className="feature-item">
+                            <i className="fas fa-euro-sign fa-2x text-warning mb-2"></i>
+                            <h6>Save Money</h6>
+                            <small className="text-muted">Great discounts</small>
+                        </div>
+                    </div>
+                    <div className="col-md-4">
+                        <div className="feature-item">
+                            <i className="fas fa-heart fa-2x text-danger mb-2"></i>
+                            <h6>Save Planet</h6>
+                            <small className="text-muted">Eco-friendly choice</small>
+                        </div>
                     </div>
                 </div>
             </div>

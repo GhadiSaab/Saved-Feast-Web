@@ -87,59 +87,93 @@ const Navbar: React.FC = () => {
      };
 
      return (
-         <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4 shadow-sm">
+         <nav className="navbar navbar-expand-lg mb-4 shadow-sm">
             <div className="container">
                 <Link className="navbar-brand" to="/">SavedFeast</Link>
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNav">
-                    <ul className="navbar-nav ms-auto align-items-center"> {/* align-items-center for vertical alignment */}
+                    <ul className="navbar-nav ms-auto align-items-center">
                         <li className="nav-item">
-                            <Link className="nav-link" to="/">Feed</Link>
+                            <Link className="nav-link" to="/">
+                                <i className="fas fa-home me-1"></i>
+                                Feed
+                            </Link>
                         </li>
-                         <li className="nav-item"> {/* Added Partner link */}
-                            <Link className="nav-link" to="/partner-with-us">Become a Partner</Link>
+                         <li className="nav-item">
+                            <Link className="nav-link" to="/partner-with-us">
+                                <i className="fas fa-handshake me-1"></i>
+                                Become a Partner
+                            </Link>
                         </li>
                         {isAuthenticated ? (
                             <>
                                 {/* Conditionally show Dashboard link for providers */}
                                 {userHasRole('provider') && (
                                     <li className="nav-item">
-                                        <Link className="nav-link" to="/provider/dashboard">Restaurant Dashboard</Link>
+                                        <Link className="nav-link" to="/provider/dashboard">
+                                            <i className="fas fa-chart-line me-1"></i>
+                                            Restaurant Dashboard
+                                        </Link>
+                                    </li>
+                                )}
+                                {/* Conditionally show Admin Dashboard link for admins */}
+                                {userHasRole('admin') && (
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/admin/dashboard">
+                                            <i className="fas fa-shield-alt me-1"></i>
+                                            Admin Dashboard
+                                        </Link>
                                     </li>
                                 )}
                                 {/* Conditionally show My Orders link only for non-providers */}
                                 {!userHasRole('provider') && (
                                     <li className="nav-item">
-                                        <Link className="nav-link" to="/orders">My Orders</Link>
+                                        <Link className="nav-link" to="/orders">
+                                            <i className="fas fa-list-alt me-1"></i>
+                                            My Orders
+                                        </Link>
                                     </li>
                                 )}
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/profile">Profile</Link>
+                                    <Link className="nav-link" to="/profile">
+                                        <i className="fas fa-user me-1"></i>
+                                        Profile
+                                    </Link>
                                 </li>
                                 <li className="nav-item">
                                     {/* Use a button for actions like logout */}
-                                    <button className="nav-link btn btn-link" style={{ textDecoration: 'none' }} onClick={handleLogout}>Logout</button>
+                                    <button className="nav-link btn btn-link" style={{ textDecoration: 'none' }} onClick={handleLogout}>
+                                        <i className="fas fa-sign-out-alt me-1"></i>
+                                        Logout
+                                    </button>
                                 </li>
                             </>
                         ) : (
                             <>
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/login">Login</Link>
+                                    <Link className="nav-link" to="/login">
+                                        <i className="fas fa-sign-in-alt me-1"></i>
+                                        Login
+                                    </Link>
                                 </li>
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/signup">Sign Up</Link>
+                                    <Link className="nav-link" to="/signup">
+                                        <i className="fas fa-user-plus me-1"></i>
+                                        Sign Up
+                                    </Link>
                                 </li>
                             </>
                         )}
                         {/* Conditionally render Cart link only for authenticated non-providers */}
                         {isAuthenticated && !userHasRole('provider') && (
-                            <li className="nav-item ms-lg-2"> {/* Add some margin for the cart */}
+                            <li className="nav-item ms-lg-2">
                                 <Link className="btn btn-outline-primary btn-sm position-relative" to="/checkout">
+                                    <i className="fas fa-shopping-cart me-1"></i>
                                     Cart
                                     <span className="badge bg-primary rounded-pill position-absolute top-0 start-100 translate-middle">
-                                        {getItemCount()} {/* Display actual item count */}
+                                        {getItemCount()}
                                     </span>
                                 </Link>
                             </li>

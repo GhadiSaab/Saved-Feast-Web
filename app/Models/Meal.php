@@ -25,10 +25,10 @@ class Meal extends Model
         'original_price', // Added original_price
         'quantity', // Add quantity here
         'category_id',
+        'restaurant_id', // Add restaurant_id to fillable
         'image', // Assuming 'image' is the correct DB column for the URL/path
         'available_from', // Add available_from
         'available_until', // Add available_until
-        // 'restaurant_id' is assigned manually, not needed here
      ];
 
     /**

@@ -28,11 +28,12 @@ class OrderController extends Controller
 
         // Fetch orders based on user role
         if ($user->isProvider()) {
-            // Providers see orders for their restaurants
+            // Providers see orders for their restaurants through order items and meals
             $restaurantIds = $user->restaurants()->pluck('id');
-            $orders = Order::whereIn('restaurant_id', $restaurantIds)
-                          ->with('orderItems.meal')
-                          ->get();
+            $orders = Order::whereHas('orderItems.meal', function($query) use ($restaurantIds) {
+                $query->whereIn('restaurant_id', $restaurantIds);
+            })->with('orderItems.meal')
+              ->get();
         } else {
             // Consumers see their own orders
             $orders = Order::where('user_id', $user->id)
@@ -99,8 +100,8 @@ class OrderController extends Controller
                  $order->orderItems()->create([
                      'meal_id' => $meal->id,
                      'quantity' => $itemData['quantity'],
-                     'price' => $meal->price, // Use current price from Meal model
-                     'original_price' => $meal->original_price ?? $meal->price, // Use original_price, fallback to price if null
+                     'price' => $meal->current_price, // Use current_price from Meal model
+                     'original_price' => $meal->original_price ?? $meal->current_price, // Use original_price, fallback to current_price if null
                  ]);
 
                  // Optionally decrease meal quantity
@@ -164,7 +165,7 @@ class OrderController extends Controller
 
         // Cancel the order
         $order = Order::where('user_id', $user->id)->findOrFail($id);
-        $order->update(['status' => Order::STATUS_CANCELLED]);
+        $order->update(['status' => 'cancelled']);
 
         return response()->json([
             'status' => true,
@@ -178,7 +179,7 @@ class OrderController extends Controller
 
         // Complete the order
         $order = Order::where('user_id', $user->id)->findOrFail($id);
-        $order->update(['status' => Order::STATUS_COMPLETED]);
+        $order->update(['status' => 'completed']);
 
         return response()->json([
             'status' => true,

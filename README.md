@@ -24,9 +24,12 @@ SavedFeast is an innovative food delivery platform designed to combat food waste
 - **Frontend SPA**: React application with proper routing and state management
 - **Security**: Rate limiting, CORS configuration, input validation
 - **Database**: Complete schema with relationships and migrations
+- **Demo Data**: Comprehensive seeders for testing and demonstration
+- **Testing**: Feature tests for authentication and meal management
+- **CI/CD**: GitHub Actions workflow for automated testing
 
 ### 🔄 **In Progress**
-- Payment integration
+- Payment integration (Stripe packages installed, implementation planned)
 - Real-time notifications
 - Mobile app development
 
@@ -36,6 +39,14 @@ SavedFeast is an innovative food delivery platform designed to combat food waste
 - Multi-language support
 - Delivery tracking
 - Restaurant reviews
+
+### 🔧 **Recent Fixes**
+- Fixed User factory to match database schema (first_name, last_name)
+- Fixed Category and Restaurant factories to match actual columns
+- Updated test configuration to use MySQL for consistent testing environment
+- Added comprehensive API contract examples in README
+- Created GitHub Actions CI workflow
+- Fixed test dependencies and database relationships
 
 ## 🛠️ Technology Stack
 
@@ -94,7 +105,7 @@ npm install
 
 ### 3. Environment Configuration
 ```bash
-cp .env.example .env
+cp env.example .env
 ```
 
 #### Sample `.env` Configuration
@@ -131,6 +142,8 @@ FILESYSTEM_DISK=local
 STRIPE_KEY=
 STRIPE_SECRET=
 STRIPE_WEBHOOK_SECRET=
+
+**Note**: Stripe packages are installed but payment processing is not yet implemented. The checkout page shows a placeholder for future integration.
 
 # Queue (for background jobs)
 QUEUE_CONNECTION=sync
@@ -271,6 +284,191 @@ Authorization: Bearer {your_access_token}
 - **Provider endpoints**: 300 requests/minute
 - **Admin endpoints**: 600 requests/minute
 
+## 🧪 Testing
+
+### **Setup Test Environment**
+
+#### **Option 1: Automated Setup (Recommended)**
+```bash
+# Windows
+setup-test-db.bat
+
+# Linux/Mac
+chmod +x setup-test-db.sh
+./setup-test-db.sh
+```
+
+#### **Option 2: Manual Setup**
+```bash
+# Create test database
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS savedfeast_test;"
+
+# Run tests
+php artisan test
+```
+
+### **Test Configuration**
+- **Database**: MySQL (same as production for consistency)
+- **Environment**: Testing environment with isolated data
+- **Coverage**: Unit and Feature tests included
+
+### **Running Tests**
+```bash
+# Run all tests
+php artisan test
+
+# Run specific test file
+php artisan test --filter=AuthTest
+
+# Run with coverage (requires Xdebug)
+php artisan test --coverage
+
+# Run tests in parallel
+php artisan test --parallel
+```
+
+### **Test Database**
+- **Name**: `savedfeast_test`
+- **Host**: `127.0.0.1`
+- **User**: `root`
+- **Password**: (empty by default)
+
+### **API Contract Examples**
+
+#### **User Registration**
+```bash
+POST /api/register
+Content-Type: application/json
+
+{
+  "first_name": "John",
+  "last_name": "Doe", 
+  "email": "john@example.com",
+  "password": "SecurePass123!",
+  "password_confirmation": "SecurePass123!",
+  "phone": "+1234567890",
+  "address": "123 Main St"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "access_token": "1|abc123...",
+  "token_type": "Bearer",
+  "user": {
+    "id": 1,
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john@example.com",
+    "roles": [{"name": "consumer"}]
+  }
+}
+```
+
+#### **User Login**
+```bash
+POST /api/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User logged in successfully", 
+  "access_token": "1|abc123...",
+  "token_type": "Bearer",
+  "user": {
+    "id": 1,
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john@example.com",
+    "roles": [{"name": "consumer"}]
+  }
+}
+```
+
+#### **List Meals**
+```bash
+GET /api/meals?page=1&per_page=15&category_id=1&search=pizza
+```
+
+**Response:**
+```json
+{
+  "status": true,
+  "message": "Meals retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "title": "Margherita Pizza",
+      "description": "Classic tomato and mozzarella",
+      "original_price": 25.00,
+      "current_price": 15.00,
+      "quantity": 5,
+      "image": "meals/pizza.jpg",
+      "category": {"id": 1, "name": "Pizza"},
+      "restaurant": {"id": 1, "name": "Pizza Palace"}
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "last_page": 3,
+    "per_page": 15,
+    "total": 45,
+    "from": 1,
+    "to": 15,
+    "has_more_pages": true
+  }
+}
+```
+
+#### **Create Order**
+```bash
+POST /api/orders
+Authorization: Bearer 1|abc123...
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "meal_id": 1,
+      "quantity": 2
+    }
+  ],
+  "delivery_address": "123 Main St",
+  "delivery_instructions": "Ring doorbell"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Order created successfully",
+  "order": {
+    "id": 1,
+    "status": "pending",
+    "total_amount": 30.00,
+    "items": [
+      {
+        "meal_id": 1,
+        "quantity": 2,
+        "price": 15.00
+      }
+    ]
+  }
+}
+```
+
 ## 🎯 Usage Examples
 
 ### **Testing with Postman**
@@ -355,6 +553,39 @@ php artisan make:migration           # Create migration
 └── routes/api.php                   # API routes
 ```
 
+## 🎨 Frontend Application
+
+### **React SPA Features**
+- **Modern Stack**: React 18 + TypeScript + Vite
+- **Routing**: React Router DOM with protected routes
+- **State Management**: React Context for auth and cart
+- **UI Framework**: Bootstrap 5 with responsive design
+- **Components**: Reusable meal cards, loading spinners, navigation
+
+### **Available Pages**
+- **Feed Page**: Browse meals with filters and search
+- **Login/Signup**: User authentication forms
+- **Profile Page**: User account management
+- **Orders Page**: Order history and tracking
+- **Checkout Page**: Order completion (payment integration planned)
+- **Restaurant Dashboard**: Provider meal management
+- **Restaurant Application**: Business registration form
+
+### **Development Commands**
+```bash
+# Start frontend development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Start both backend and frontend
+npm run serve:full
+```
+
 ## 🔒 Security Features
 
 - **Rate Limiting**: Comprehensive rate limiting on all endpoints
@@ -363,6 +594,66 @@ php artisan make:migration           # Create migration
 - **Role-Based Access**: Policies and gates for authorization
 - **Token Authentication**: Laravel Sanctum for secure API access
 - **File Upload Security**: Validated and secure file uploads
+
+## 🛡️ Robustness & Quality
+
+### **Input Validation**
+All API endpoints include comprehensive validation:
+- **Registration**: Email uniqueness, password complexity, field length limits
+- **Meals**: Price ranges, category/restaurant existence, search term sanitization
+- **Orders**: Meal availability, quantity limits, address validation
+
+### **Pagination**
+- **Meals API**: Configurable page size (1-100 items per page)
+- **Orders API**: Paginated order history
+- **Consistent Response Format**: Includes metadata for easy client implementation
+
+### **Rate Limiting**
+- **Auth endpoints**: 6 requests/minute (prevents brute force)
+- **Public endpoints**: 60 requests/minute (balanced performance)
+- **Authenticated endpoints**: 120 requests/minute (user-friendly)
+- **Provider endpoints**: 300 requests/minute (business operations)
+- **Admin endpoints**: 600 requests/minute (management tasks)
+
+### **CORS Configuration**
+- **Development**: Localhost with any port allowed
+- **Production Ready**: Configurable origins for mobile apps and SPAs
+- **Credentials Support**: Enabled for secure token handling
+- **Headers**: Comprehensive header allowlist for modern clients
+
+## 🧪 Testing & CI/CD
+
+### **Test Coverage**
+- **Feature Tests**: Authentication, meal management, order processing
+- **Unit Tests**: Model relationships and business logic
+- **API Tests**: Endpoint validation and response formats
+
+### **Running Tests**
+```bash
+# Run all tests
+php artisan test
+
+# Run specific test file
+php artisan test tests/Feature/AuthTest.php
+
+# Run with coverage (requires Xdebug)
+php artisan test --coverage
+```
+
+### **Continuous Integration**
+- **GitHub Actions**: Automated testing on push/PR
+- **PHPUnit**: Test suite execution
+- **Laravel Pint**: Code style enforcement
+- **Security Audit**: Dependency vulnerability scanning
+- **MySQL Testing**: Database integration tests
+
+### **CI Pipeline**
+1. **Code Checkout**: Latest code from repository
+2. **Dependency Installation**: Composer and npm packages
+3. **Database Setup**: Test database creation and migrations
+4. **Test Execution**: PHPUnit with coverage reporting
+5. **Code Quality**: Laravel Pint style checking
+6. **Security Scan**: Composer audit for vulnerabilities
 
 ## 🚀 Deployment
 

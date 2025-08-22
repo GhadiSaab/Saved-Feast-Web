@@ -572,9 +572,9 @@ const RestaurantDashboardPage: React.FC = () => {
                     <table className="table table-striped table-hover">
                         <thead className="table-light">
                             <tr>
-                                <th>Title</th> {/* Changed from Name */}
+                                <th>Title</th>
                                 <th>Category</th>
-                                <th>Price</th> {/* Keep Price header, but display logic changes */}
+                                <th>Price</th>
                                 <th>Quantity</th>
                                 <th>Actions</th>
                             </tr>

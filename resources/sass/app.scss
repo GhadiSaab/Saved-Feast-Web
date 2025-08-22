@@ -1,99 +1,1039 @@
-// Variables
-@use './variables' as *;
+// Import our custom variables first
+@use './variables' as vars;
 
-// Bootstrap - Import and override primary color
+// Bootstrap - Import and override primary color with our custom values
 @use 'bootstrap/scss/bootstrap' as * with (
-  $primary: #fd7e14 // Set primary color to orange
+  $primary: vars.$primary,
+  $secondary: vars.$secondary,
+  $border-radius: vars.$border-radius,
+  $box-shadow: vars.$box-shadow
 );
 
-// Fonts
-@import url('https://fonts.bunny.net/css?family=Nunito');
+// Import additional fonts
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap');
 
 // Global Styles
+* {
+  box-sizing: border-box;
+}
+
 body {
-    font-family: 'Nunito', sans-serif;
-    background-color: #f8f9fa; // Light gray background for the body
+  font-family: vars.$font-family-sans-serif;
+  background: linear-gradient(135deg, vars.$warm-beige 0%, vars.$soft-cream 100%);
+  color: vars.$dark;
+  line-height: 1.6;
+  min-height: 100vh;
 }
 
-// Navbar Customization
-.navbar.bg-light { // Target the default light navbar specifically or remove .bg-light if you change it globally
-    background-color: #ffffff !important; // Make navbar white
-    border-bottom: 1px solid #dee2e6; // Add subtle bottom border
-    padding-top: 0.8rem; // Adjust vertical padding
-    padding-bottom: 0.8rem;
-
-    .navbar-brand {
-        font-weight: bold;
-        // color: $primary; // Use theme color if defined
-    }
-
-    .nav-link {
-        transition: color 0.2s ease-in-out;
-        &:hover {
-            color: $primary !important; // Use theme primary color on hover
-        }
-    }
-
-     // Style the cart button specifically if needed
-    .btn-outline-primary {
-        // Customize cart button styles
-    }
-    // Removed extra closing brace here
+// Custom Scrollbar
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-// Page Title Styles
-.page-title {
-    font-weight: 600; // Make title slightly bolder
-    color: #343a40; // Darker color for emphasis
-    // text-align: center; // Optional: Center the title
-    // border-bottom: 1px solid #dee2e6; // Optional: Add an underline
-    // padding-bottom: 0.5rem; // Optional: Add padding below underline
+::-webkit-scrollbar-track {
+  background: vars.$warm-beige;
 }
 
-// Auth Page Link Styles
-.auth-link {
-    font-size: 0.9rem;
+::-webkit-scrollbar-thumb {
+  background: vars.$sage-green;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: vars.$primary;
+}
+
+// App Container
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Enhanced Navbar
+.navbar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(vars.$primary, 0.1);
+  padding: 1rem 0;
+  transition: all 0.3s ease;
+
+  .navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: vars.$primary !important;
     text-decoration: none;
-    color: $secondary; // Use secondary color for less emphasis
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 
-    &:hover {
-        color: $primary; // Use primary color on hover
-        text-decoration: underline;
+    &::before {
+      content: "🌱";
+      font-size: 1.8rem;
     }
-}
-
-// Add subtle border to auth cards specifically
-.row.justify-content-center .card.shadow-sm {
-    border: 1px solid #dee2e6; // Add a light border
-}
-
-// Custom Styles for MealCard
-.card {
-    border-radius: 0.5rem; // Add rounded corners to cards
-    border: none; // Remove default card border if using shadow primarily
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; // Smooth transition for hover
 
     &:hover {
-        transform: translateY(-5px); // Lift effect
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; // Enhanced shadow on hover
+      color: vars.$secondary !important;
+      transform: scale(1.05);
+      transition: all 0.3s ease;
+    }
+  }
+
+  .nav-link {
+    font-weight: 500;
+    color: vars.$dark !important;
+    position: relative;
+    padding: 0.5rem 1rem !important;
+    border-radius: vars.$border-radius-sm;
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: vars.$primary !important;
+      background: rgba(vars.$primary, 0.1);
+      transform: translateY(-2px);
+    }
+
+    &.active {
+      color: vars.$primary !important;
+      background: rgba(vars.$primary, 0.15);
+    }
+  }
+
+  .btn-outline-primary {
+    border-color: vars.$primary;
+    color: vars.$primary;
+    font-weight: 500;
+    border-radius: vars.$border-radius;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: vars.$primary;
+      border-color: vars.$primary;
+      transform: translateY(-2px);
+      box-shadow: vars.$box-shadow-lg;
+    }
+
+    .badge {
+      background: vars.$warm-orange !important;
+      border: 2px solid white;
+    }
+  }
+}
+
+// Main Content Area
+main {
+  flex: 1;
+  padding: 2rem 0;
+}
+
+// Hero Section for Feed Page
+.hero-section {
+  background: linear-gradient(135deg, vars.$primary 0%, vars.$secondary 100%);
+  color: white;
+  padding: 4rem 0;
+  margin-bottom: 3rem;
+  border-radius: vars.$border-radius-lg;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+      &::before {
+        content: "🍽️";
+        display: block;
+        font-size: 4rem;
+        margin-bottom: 1rem;
+      }
+    }
+
+    p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 2rem;
+
+      .stat {
+        text-align: center;
+
+        .stat-number {
+          font-size: 2rem;
+          font-weight: 700;
+          color: vars.$warm-orange;
+        }
+
+        .stat-label {
+          font-size: 0.9rem;
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+}
+
+// Feed Page Container
+.feed-page-container {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: vars.$border-radius-lg;
+  border: 1px solid rgba(vars.$primary, 0.1);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: vars.$box-shadow-lg;
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: vars.$primary;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, vars.$primary, vars.$warm-orange);
+      border-radius: 2px;
+    }
+  }
+}
+
+// Enhanced Filters
+.filters-section {
+  background: vars.$soft-cream;
+  border-radius: vars.$border-radius;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(vars.$primary, 0.1);
+
+  .form-control, .form-select {
+    border: 2px solid rgba(vars.$primary, 0.2);
+    border-radius: vars.$border-radius-sm;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+
+    &:focus {
+      border-color: vars.$primary;
+      box-shadow: 0 0 0 0.2rem rgba(vars.$primary, 0.25);
+    }
+  }
+
+  .form-control::placeholder {
+    color: rgba(vars.$dark, 0.5);
+  }
+
+  .input-group-text {
+    background: rgba(vars.$primary, 0.1);
+    border: 2px solid rgba(vars.$primary, 0.2);
+    border-right: none;
+    color: vars.$primary;
+  }
+
+  .input-group .form-control {
+    border-left: none;
+  }
+}
+
+// Enhanced Meal Cards
+.card {
+  border: none;
+  border-radius: vars.$border-radius;
+  background: white;
+  box-shadow: vars.$box-shadow;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, vars.$primary, vars.$warm-orange);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: vars.$box-shadow-lg;
+    border-color: rgba(vars.$primary, 0.2);
+
+    &::before {
+      opacity: 1;
     }
 
     .card-img-top {
-        border-top-left-radius: 0.5rem; // Match card's rounded corner
-        border-top-right-radius: 0.5rem; // Match card's rounded corner
-        border-bottom: 1px solid #eee; // Subtle separator
+      transform: scale(1.05);
+    }
+  }
+
+  .card-img-top {
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+    border-bottom: 1px solid rgba(vars.$primary, 0.1);
+  }
+
+  .card-body {
+    padding: 1.5rem;
+
+    .card-title {
+      font-weight: 700;
+      color: vars.$primary;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      line-height: 1.3;
+    }
+
+    .card-subtitle {
+      color: vars.$secondary;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .card-text {
+      color: vars.$dark;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .pickup-time {
+      background: rgba(vars.$primary, 0.1);
+      color: vars.$primary;
+      padding: 0.5rem 0.75rem;
+      border-radius: vars.$border-radius-sm;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: inline-block;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(vars.$primary, 0.2);
+    }
+  }
+
+  .card-footer {
+    background: rgba(vars.$warm-beige, 0.5);
+    border-top: 1px solid rgba(vars.$primary, 0.1);
+    padding: 1rem 1.5rem;
+
+    .price-display {
+      .current-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: vars.$warm-orange;
+      }
+
+      .original-price {
+        color: rgba(vars.$dark, 0.5);
+        text-decoration: line-through;
+        font-size: 0.9rem;
+      }
+
+      .savings-badge {
+        background: vars.$success;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: vars.$border-radius-sm;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+      }
+    }
+
+    .btn-primary {
+      background: vars.$primary;
+      border: none;
+      border-radius: vars.$border-radius-sm;
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: darken(vars.$primary, 10%);
+        transform: translateY(-2px);
+        box-shadow: vars.$box-shadow;
+      }
+    }
+  }
+}
+
+// Meal Card Specific Styles
+.meal-card {
+  .card-body {
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: vars.$primary;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: rgba(vars.$dark, 0.6);
+      font-weight: 500;
+    }
+
+    .card-text {
+      font-size: 0.85rem;
+      color: rgba(vars.$dark, 0.7);
+      line-height: 1.4;
+    }
+
+    .pickup-time {
+      background: rgba(vars.$primary, 0.08);
+      color: vars.$primary;
+      padding: 0.4rem 0.6rem;
+      border-radius: vars.$border-radius-sm;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid rgba(vars.$primary, 0.15);
+    }
+
+    .price-display {
+      .current-price {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: vars.$warm-orange;
+      }
+
+      .original-price {
+        font-size: 0.85rem;
+        color: rgba(vars.$dark, 0.5);
+      }
+    }
+
+    .btn-primary {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: vars.$border-radius-sm;
+    }
+  }
+
+  .card-footer {
+    padding: 0.75rem 1.5rem;
+    background: rgba(vars.$warm-beige, 0.3);
+
+    small {
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+  }
+}
+
+// Card Image Container
+.card-image-container {
+  position: relative;
+  overflow: hidden;
+
+  .savings-badge, .restaurant-badge {
+    z-index: 10;
+  }
+
+  .badge {
+    font-size: 0.7rem !important;
+    padding: 0.4rem 0.6rem;
+    border-radius: vars.$border-radius-sm;
+    font-weight: 700;
+    box-shadow: vars.$box-shadow;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .savings-badge .badge {
+    background: vars.$success !important;
+    color: white;
+  }
+
+  .restaurant-badge .badge {
+    background: vars.$primary !important;
+    color: white;
+  }
+}
+
+// Image Placeholder
+.card-image-placeholder {
+  position: relative;
+  overflow: hidden;
+
+  .image-placeholder {
+    height: 150px;
+    background: linear-gradient(135deg, vars.$primary, vars.$secondary);
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: vars.$box-shadow;
+    }
+
+    .text-center {
+      .fa-utensils {
+        font-size: 2.5rem;
+      }
+
+      .small {
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .savings-badge, .restaurant-badge {
+    z-index: 10;
+  }
+
+  .badge {
+    font-size: 0.7rem !important;
+    padding: 0.4rem 0.6rem;
+    border-radius: vars.$border-radius-sm;
+    font-weight: 700;
+    box-shadow: vars.$box-shadow;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .savings-badge .badge {
+    background: vars.$success !important;
+    color: white;
+  }
+
+  .restaurant-badge .badge {
+    background: vars.$primary !important;
+    color: white;
+  }
+}
+
+// Image Modal
+.image-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease-out;
+
+  .image-modal-content {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: vars.$border-radius-lg;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: vars.$box-shadow-lg;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: slideIn 0.3s ease-out;
+
+    .image-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: rgba(vars.$primary, 0.9);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+      h5 {
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .btn-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.2);
+          transform: scale(1.1);
+        }
+      }
+    }
+
+    .image-modal-body {
+      padding: 1.5rem;
+      text-align: center;
+
+      img {
+        max-width: 100%;
+        max-height: 60vh;
+        object-fit: contain;
+        border-radius: vars.$border-radius;
+        box-shadow: vars.$box-shadow;
+      }
+    }
+
+    .image-modal-footer {
+      padding: 1rem 1.5rem;
+      background: rgba(vars.$dark, 0.8);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+      p {
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Modal Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// Enhanced Buttons
+.btn {
+  border-radius: vars.$border-radius-sm;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+  border: none;
+
+  &.btn-primary {
+    background: vars.$primary;
+    color: white;
+
+    &:hover {
+      background: darken(vars.$primary, 10%);
+      transform: translateY(-2px);
+      box-shadow: vars.$box-shadow;
+    }
+  }
+
+  &.btn-outline-primary {
+    border: 2px solid vars.$primary;
+    color: vars.$primary;
+
+    &:hover {
+      background: vars.$primary;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: vars.$box-shadow;
+    }
+  }
+
+  &.btn-success {
+    background: vars.$success;
+    color: white;
+
+    &:hover {
+      background: darken(vars.$success, 10%);
+      transform: translateY(-2px);
+      box-shadow: vars.$box-shadow;
+    }
+  }
+
+  &.btn-outline-secondary {
+    border: 2px solid rgba(vars.$dark, 0.2);
+    color: rgba(vars.$dark, 0.7);
+
+    &:hover {
+      background: rgba(vars.$dark, 0.1);
+      border-color: rgba(vars.$dark, 0.3);
+      color: vars.$dark;
+    }
+  }
+}
+
+// Enhanced Pagination
+.pagination {
+  .page-link {
+    border: none;
+    color: vars.$primary;
+    padding: 0.75rem 1rem;
+    margin: 0 0.25rem;
+    border-radius: vars.$border-radius-sm;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(vars.$primary, 0.1);
+      color: vars.$primary;
+      transform: translateY(-2px);
+    }
+  }
+
+  .page-item.active .page-link {
+    background: vars.$primary;
+    color: white;
+    box-shadow: vars.$box-shadow;
+  }
+
+  .page-item.disabled .page-link {
+    color: rgba(vars.$dark, 0.3);
+  }
+}
+
+// Loading Spinner
+.spinner-border {
+  color: vars.$primary;
+  width: 3rem;
+  height: 3rem;
+}
+
+// Alerts
+.alert {
+  border: none;
+  border-radius: vars.$border-radius;
+  padding: 1rem 1.5rem;
+
+  &.alert-danger {
+    background: rgba(vars.$danger, 0.1);
+    color: vars.$danger;
+    border-left: 4px solid vars.$danger;
+  }
+
+  &.alert-success {
+    background: rgba(vars.$success, 0.1);
+    color: vars.$success;
+    border-left: 4px solid vars.$success;
+  }
+}
+
+// Auth Pages Enhancement
+.auth-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  .card {
+    border: none;
+    border-radius: vars.$border-radius-lg;
+    box-shadow: vars.$box-shadow-lg;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+
+    .card-header {
+      background: linear-gradient(135deg, vars.$primary, vars.$secondary);
+      color: white;
+      text-align: center;
+      border-radius: vars.$border-radius-lg vars.$border-radius-lg 0 0;
+      padding: 2rem 1.5rem 1.5rem;
+
+      h3 {
+        margin: 0;
+        font-weight: 600;
+      }
     }
 
     .card-body {
-        .btn-primary {
-            padding: 0.3rem 0.6rem; // Slightly adjust button padding
-            font-size: 0.85rem; // Adjust font size if needed
-            transition: background-color 0.15s ease-in-out; // Smooth background transition
-
-            &:hover {
-                // Optional: Slightly darken or lighten on hover if desired
-                // background-color: darken($primary, 5%);
-            }
-        }
+      padding: 2rem 1.5rem;
     }
+  }
+
+  .form-control {
+    border: 2px solid rgba(vars.$primary, 0.2);
+    border-radius: vars.$border-radius-sm;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+
+    &:focus {
+      border-color: vars.$primary;
+      box-shadow: 0 0 0 0.2rem rgba(vars.$primary, 0.25);
+    }
+  }
+
+  .auth-link {
+    color: vars.$primary;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: vars.$secondary;
+      text-decoration: underline;
+    }
+  }
+
+  // Feature Items
+  .feature-item {
+    padding: 1rem;
+    border-radius: vars.$border-radius;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(vars.$primary, 0.1);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: vars.$box-shadow;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    h6 {
+      font-weight: 600;
+      color: vars.$primary;
+      margin-bottom: 0.5rem;
+    }
+
+    small {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// Checkout Page Styles
+.checkout-page {
+  .checkout-header {
+    .page-title {
+      color: vars.$primary;
+      font-weight: 700;
+    }
+  }
+
+  .order-items {
+    .order-item {
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba(vars.$primary, 0.05);
+      }
+
+      .item-details {
+        h6 {
+          color: vars.$primary;
+          font-weight: 600;
+        }
+      }
+
+      .item-controls {
+        .quantity-controls {
+          .form-control {
+            border: 2px solid rgba(vars.$primary, 0.2);
+            border-radius: vars.$border-radius-sm;
+            text-align: center;
+            font-weight: 500;
+
+            &:focus {
+              border-color: vars.$primary;
+              box-shadow: 0 0 0 0.2rem rgba(vars.$primary, 0.25);
+            }
+          }
+        }
+
+        .item-total {
+          min-width: 80px;
+        }
+      }
+    }
+  }
+
+  .savings-summary {
+    background: linear-gradient(135deg, rgba(vars.$success, 0.1), rgba(vars.$primary, 0.1)) !important;
+    border: 1px solid rgba(vars.$success, 0.2);
+  }
+
+  .price-breakdown {
+    font-size: 0.95rem;
+  }
+
+  .payment-placeholder {
+    background: linear-gradient(135deg, vars.$warm-beige, vars.$soft-cream) !important;
+    border: 2px dashed rgba(vars.$primary, 0.3) !important;
+  }
+}
+
+// Empty State
+.empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+
+  i {
+    opacity: 0.5;
+  }
+
+  h4 {
+    margin: 1rem 0 0.5rem;
+  }
+
+  p {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+// Enhanced Form Elements
+.form-label {
+  font-weight: 500;
+  color: vars.$primary;
+  margin-bottom: 0.5rem;
+}
+
+.form-check-input {
+  &:checked {
+    background-color: vars.$primary;
+    border-color: vars.$primary;
+  }
+}
+
+.form-check-label {
+  color: vars.$dark;
+  font-weight: 500;
+}
+
+// Input Groups
+.input-group {
+  .form-control {
+    border-right: none;
+  }
+
+  .btn {
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 2rem 0;
+
+    .hero-content h1 {
+      font-size: 2rem;
+    }
+
+    .hero-stats {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+
+  .feed-page-container {
+    padding: 1rem;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+
+  .auth-container {
+    padding: 1rem;
+  }
+
+  .feature-item {
+    margin-bottom: 1rem;
+  }
+
+  .checkout-page {
+    .order-item {
+      flex-direction: column;
+      align-items: flex-start !important;
+
+      .item-controls {
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+// Utility Classes
+.text-primary {
+  color: vars.$primary !important;
+}
+
+.text-secondary {
+  color: vars.$secondary !important;
+}
+
+.bg-primary {
+  background-color: vars.$primary !important;
+}
+
+.bg-secondary {
+  background-color: vars.$secondary !important;
+}
+
+.border-primary {
+  border-color: vars.$primary !important;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, vars.$primary, vars.$secondary) !important;
+}
+
+.opacity-75 {
+  opacity: 0.75 !important;
 }

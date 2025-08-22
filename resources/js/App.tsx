@@ -15,6 +15,7 @@ import OrdersPage from './routes/OrdersPage';
 import ProfilePage from './routes/ProfilePage';
 import RestaurantApplicationPage from './routes/RestaurantApplicationPage';
 import RestaurantDashboardPage from './routes/RestaurantDashboardPage';
+import AdminDashboardPage from './routes/AdminDashboardPage';
 
 // 404 Page
 const NotFoundPage = () => (
@@ -90,6 +91,16 @@ function App() {
                                 element={
                                     <ProtectedRoute requireRole="provider">
                                         <RestaurantDashboardPage />
+                                    </ProtectedRoute>
+                                } 
+                            />
+
+                            {/* Admin routes */}
+                            <Route 
+                                path="/admin/dashboard" 
+                                element={
+                                    <ProtectedRoute requireRole="admin">
+                                        <AdminDashboardPage />
                                     </ProtectedRoute>
                                 } 
                             />

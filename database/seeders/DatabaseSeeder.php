@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         // Run seeders in the correct order to respect dependencies
         $this->call([
             UserSeeder::class,
+            AdminSeeder::class,
             CategorySeeder::class,
             RestaurantSeeder::class,
             MealSeeder::class,

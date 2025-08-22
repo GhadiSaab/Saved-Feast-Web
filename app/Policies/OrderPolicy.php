@@ -29,9 +29,12 @@ class OrderPolicy
             return true;
         }
 
-        // Providers can view orders for their restaurants
+        // Providers can view orders for their restaurants through order items and meals
         if ($user->roles()->where('name', 'provider')->exists()) {
-            return $user->restaurants()->where('id', $order->restaurant_id)->exists();
+            $restaurantIds = $user->restaurants()->pluck('id');
+            return $order->orderItems()->whereHas('meal', function($query) use ($restaurantIds) {
+                $query->whereIn('restaurant_id', $restaurantIds);
+            })->exists();
         }
 
         // Admins can view all orders
@@ -61,9 +64,12 @@ class OrderPolicy
             return true;
         }
 
-        // Providers can update orders for their restaurants (e.g., status changes)
+        // Providers can update orders for their restaurants through order items and meals
         if ($user->roles()->where('name', 'provider')->exists()) {
-            return $user->restaurants()->where('id', $order->restaurant_id)->exists();
+            $restaurantIds = $user->restaurants()->pluck('id');
+            return $order->orderItems()->whereHas('meal', function($query) use ($restaurantIds) {
+                $query->whereIn('restaurant_id', $restaurantIds);
+            })->exists();
         }
 
         // Admins can update any order

@@ -1,7 +1,48 @@
+// Color Palette - Food Saving & Sustainability Theme
+$primary: #2d5a27; // Deep forest green - represents sustainability and nature
+$secondary: #8b4513; // Saddle brown - warm, earthy tone
+$success: #28a745; // Bootstrap green - for positive actions
+$info: #17a2b8; // Bootstrap blue - for information
+$warning: #ffc107; // Bootstrap yellow - for warnings
+$danger: #dc3545; // Bootstrap red - for errors
+$light: #f8f9fa; // Light gray
+$dark: #343a40; // Dark gray
+
+// Custom Theme Colors
+$warm-orange: #fd7e14; // Warm orange for food/savings emphasis
+$soft-cream: #fef7e0; // Soft cream background
+$sage-green: #9caf88; // Sage green for secondary elements
+$warm-beige: #f5f1eb; // Warm beige for backgrounds
+$earth-brown: #6b4423; // Earth brown for text and borders
+
 // Body
-$body-bg: #f8fafc;
+$body-bg: $warm-beige;
 
 // Typography
-$font-family-sans-serif: 'Nunito', sans-serif;
-$font-size-base: 0.9rem;
+$font-family-sans-serif: 'Nunito', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-size-base: 1rem;
 $line-height-base: 1.6;
+
+// Border radius
+$border-radius: 0.75rem;
+$border-radius-lg: 1rem;
+$border-radius-sm: 0.5rem;
+
+// Shadows
+$box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+$box-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+$box-shadow-sm: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.075);
+
+// Spacing
+$spacer: 1rem;
+$spacers: (
+  0: 0,
+  1: $spacer * 0.25,
+  2: $spacer * 0.5,
+  3: $spacer,
+  4: $spacer * 1.5,
+  5: $spacer * 3,
+  6: $spacer * 4,
+  7: $spacer * 5,
+  8: $spacer * 6,
+);
