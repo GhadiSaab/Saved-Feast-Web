@@ -47,14 +47,14 @@ jobs:
 
     - name: Create Database
       run: |
-        mysql -h mysql -u root -ppassword -e "CREATE DATABASE IF NOT EXISTS savedfeast_test;"
-        mysql -h mysql -u root -ppassword -e "GRANT ALL PRIVILEGES ON savedfeast_test.* TO 'root'@'%';"
-        mysql -h mysql -u root -ppassword -e "FLUSH PRIVILEGES;"
+        mysql -h 127.0.0.1 -u root -ppassword -e "CREATE DATABASE IF NOT EXISTS savedfeast_test;"
+        mysql -h 127.0.0.1 -u root -ppassword -e "GRANT ALL PRIVILEGES ON savedfeast_test.* TO 'root'@'%';"
+        mysql -h 127.0.0.1 -u root -ppassword -e "FLUSH PRIVILEGES;"
 
     - name: Run Migrations
       env:
         DB_CONNECTION: mysql
-        DB_HOST: mysql
+        DB_HOST: 127.0.0.1
         DB_PORT: 3306
         DB_DATABASE: savedfeast_test
         DB_USERNAME: root
@@ -65,7 +65,7 @@ jobs:
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       env:
         DB_CONNECTION: mysql
-        DB_HOST: mysql
+        DB_HOST: 127.0.0.1
         DB_PORT: 3306
         DB_DATABASE: savedfeast_test
         DB_USERNAME: root
