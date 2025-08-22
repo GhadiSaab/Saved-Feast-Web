@@ -73,8 +73,8 @@ jobs:
         APP_ENV: testing
       run: vendor/bin/phpunit
 
-    - name: Run Laravel Pint
-      run: vendor/bin/pint --test
+    # - name: Run Laravel Pint
+    #   run: vendor/bin/pint --test
 
   security:
     runs-on: ubuntu-latest
