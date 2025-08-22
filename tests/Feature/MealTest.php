@@ -63,7 +63,7 @@ class MealTest extends TestCase
             'restaurant_id' => $restaurant2->id
         ]);
 
-        $response = $this->getJson('/api/meals?restaurant_id=' . $this->restaurant->id);
+        $response = $this->getJson('/api/meals?restaurant_id='.$this->restaurant->id);
 
         $response->assertStatus(200);
         $this->assertEquals(1, count($response->json('data')));

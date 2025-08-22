@@ -43,7 +43,7 @@ class MealPolicy
     public function update(User $user, Meal $meal): bool
     {
         // Only providers can update meals, and only their own meals
-        if (!$user->roles()->where('name', 'provider')->exists()) {
+        if (! $user->roles()->where('name', 'provider')->exists()) {
             return false;
         }
 
@@ -57,7 +57,7 @@ class MealPolicy
     public function delete(User $user, Meal $meal): bool
     {
         // Only providers can delete meals, and only their own meals
-        if (!$user->roles()->where('name', 'provider')->exists()) {
+        if (! $user->roles()->where('name', 'provider')->exists()) {
             return false;
         }
 
@@ -71,7 +71,7 @@ class MealPolicy
     public function restore(User $user, Meal $meal): bool
     {
         // Only providers can restore meals, and only their own meals
-        if (!$user->roles()->where('name', 'provider')->exists()) {
+        if (! $user->roles()->where('name', 'provider')->exists()) {
             return false;
         }
 

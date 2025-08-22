@@ -34,19 +34,19 @@ class ServeWithFrontend extends Command
         $frontendPort = $this->option('frontend-port');
 
         $this->info('🚀 Starting SavedFeast Development Servers...');
-        $this->info('Backend: http://' . $host . ':' . $port);
-        $this->info('Frontend: http://' . $host . ':' . $frontendPort);
-        $this->info('API: http://' . $host . ':' . $port . '/api');
+        $this->info('Backend: http://'.$host.':'.$port);
+        $this->info('Frontend: http://'.$host.':'.$frontendPort);
+        $this->info('API: http://'.$host.':'.$port.'/api');
         $this->newLine();
 
         // Check if package.json exists (frontend dependencies installed)
-        if (!file_exists(base_path('package.json'))) {
+        if (! file_exists(base_path('package.json'))) {
             $this->error('Frontend dependencies not found. Please run: npm install');
             return 1;
         }
 
         // Check if node_modules exists
-        if (!is_dir(base_path('node_modules'))) {
+        if (! is_dir(base_path('node_modules'))) {
             $this->warn('Frontend dependencies not installed. Installing now...');
             $this->call('npm:install');
         }
@@ -56,7 +56,7 @@ class ServeWithFrontend extends Command
         $hasConcurrently = isset($packageJson['devDependencies']['concurrently']) || 
                           isset($packageJson['dependencies']['concurrently']);
 
-        if (!$hasConcurrently) {
+        if (! $hasConcurrently) {
             $this->warn('concurrently package not found. Installing now...');
             $this->call('npm:install', ['--save-dev', 'concurrently']);
         }

@@ -131,7 +131,7 @@ class User extends Authenticatable
      */
     public function ownsMeal(Meal $meal): bool
     {
-        if (!$this->isProvider()) {
+        if (! $this->isProvider()) {
             return false;
         }
         return $this->restaurants()->where('id', $meal->restaurant_id)->exists();
@@ -142,7 +142,7 @@ class User extends Authenticatable
      */
     public function ownsRestaurant(Restaurant $restaurant): bool
     {
-        if (!$this->isProvider()) {
+        if (! $this->isProvider()) {
             return false;
         }
         return $restaurant->user_id === $this->id;

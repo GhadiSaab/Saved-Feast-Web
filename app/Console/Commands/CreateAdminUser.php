@@ -34,14 +34,14 @@ class CreateAdminUser extends Command
         try {
             // Create admin role if it doesn't exist
             $adminRole = Role::firstOrCreate(['name' => 'admin']);
-            $this->info("Admin role created/found with ID: {$adminRole->id}");
+            $this->info('Admin role created/found with ID: '.$adminRole->id);
 
             // Check if user already exists
             $existingUser = User::where('email', $email)->first();
             if ($existingUser) {
-                $this->warn("User with email {$email} already exists!");
-                $this->info("User ID: {$existingUser->id}");
-                $this->info("User name: {$existingUser->first_name} {$existingUser->last_name}");
+                $this->warn('User with email '.$email.' already exists!');
+                $this->info('User ID: '.$existingUser->id);
+                $this->info('User name: '.$existingUser->first_name.' '.$existingUser->last_name);
                 
                 // Check if user has admin role
                 if ($existingUser->hasRole('admin')) {
@@ -65,21 +65,21 @@ class CreateAdminUser extends Command
             ]);
 
             $this->info("Admin user created successfully!");
-            $this->info("User ID: {$adminUser->id}");
-            $this->info("Email: {$adminUser->email}");
-            $this->info("Name: {$adminUser->first_name} {$adminUser->last_name}");
+            $this->info('User ID: '.$adminUser->id);
+            $this->info('Email: '.$adminUser->email);
+            $this->info('Name: '.$adminUser->first_name.' '.$adminUser->last_name);
 
             // Assign admin role
             $adminUser->roles()->attach($adminRole->id);
             $this->info("Admin role assigned successfully!");
 
             $this->info("\nLogin credentials:");
-            $this->info("Email: {$email}");
-            $this->info("Password: {$password}");
+            $this->info('Email: '.$email);
+            $this->info('Password: '.$password);
 
         } catch (\Exception $e) {
-            $this->error("Error creating admin user: " . $e->getMessage());
-            $this->error("Stack trace: " . $e->getTraceAsString());
+            $this->error('Error creating admin user: '.$e->getMessage());
+            $this->error('Stack trace: '.$e->getTraceAsString());
         }
     }
 }

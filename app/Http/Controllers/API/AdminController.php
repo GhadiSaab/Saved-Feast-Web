@@ -28,7 +28,7 @@ class AdminController extends Controller
         // User statistics
         $totalUsers = User::count();
         $newUsersThisMonth = User::where('created_at', '>=', $now->startOfMonth())->count();
-        $activeUsers = User::whereHas('orders', function($query) use ($thirtyDaysAgo) {
+        $activeUsers = User::whereHas('orders', function ($query) use ($thirtyDaysAgo) {
             $query->where('created_at', '>=', $thirtyDaysAgo);
         })->count();
         
@@ -54,7 +54,7 @@ class AdminController extends Controller
             
         // Restaurant statistics
         $totalRestaurants = Restaurant::count();
-        $activeRestaurants = Restaurant::whereHas('meals', function($query) {
+        $activeRestaurants = Restaurant::whereHas('meals', function ($query) {
             $query->where('quantity', '>', 0);
         })->count();
         
@@ -156,7 +156,7 @@ class AdminController extends Controller
         // Search functionality
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
                   ->orWhere('last_name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
@@ -166,7 +166,7 @@ class AdminController extends Controller
         // Filter by role
         if ($request->has('role')) {
             $role = $request->role;
-            $query->whereHas('roles', function($q) use ($role) {
+            $query->whereHas('roles', function ($q) use ($role) {
                 $q->where('name', $role);
             });
         }

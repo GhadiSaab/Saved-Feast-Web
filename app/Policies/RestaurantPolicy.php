@@ -43,7 +43,7 @@ class RestaurantPolicy
     public function update(User $user, Restaurant $restaurant): bool
     {
         // Only providers can update restaurants, and only their own restaurants
-        if (!$user->roles()->where('name', 'provider')->exists()) {
+        if (! $user->roles()->where('name', 'provider')->exists()) {
             return false;
         }
 
@@ -57,7 +57,7 @@ class RestaurantPolicy
     public function delete(User $user, Restaurant $restaurant): bool
     {
         // Only providers can delete restaurants, and only their own restaurants
-        if (!$user->roles()->where('name', 'provider')->exists()) {
+        if (! $user->roles()->where('name', 'provider')->exists()) {
             return false;
         }
 
@@ -70,7 +70,7 @@ class RestaurantPolicy
     public function restore(User $user, Restaurant $restaurant): bool
     {
         // Only providers can restore restaurants, and only their own restaurants
-        if (!$user->roles()->where('name', 'provider')->exists()) {
+        if (! $user->roles()->where('name', 'provider')->exists()) {
             return false;
         }
 
@@ -85,4 +85,4 @@ class RestaurantPolicy
         // Only admins can permanently delete restaurants
         return $user->roles()->where('name', 'admin')->exists();
     }
-} 
+}

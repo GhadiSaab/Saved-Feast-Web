@@ -44,7 +44,7 @@ class Meal extends Model
         'available_until' => 'datetime', // Cast available_until to datetime
     ];
 
-     public function restaurant()
+    public function restaurant()
     {
         return $this->belongsTo(Restaurant::class);
     }
@@ -69,7 +69,7 @@ class Meal extends Model
         return Attribute::make(
             get: fn ($value, $attributes) => $attributes['image']
                 ? Storage::url($attributes['image'])
-                : null // Or return a default image URL
+                : null, // Or return a default image URL
         );
     }
 }

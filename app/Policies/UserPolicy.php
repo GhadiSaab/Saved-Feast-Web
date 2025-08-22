@@ -99,4 +99,4 @@ class UserPolicy
         // Only admins can permanently delete users
         return $user->roles()->where('name', 'admin')->exists();
     }
-} 
+}

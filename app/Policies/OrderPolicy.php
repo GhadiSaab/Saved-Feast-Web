@@ -32,7 +32,7 @@ class OrderPolicy
         // Providers can view orders for their restaurants through order items and meals
         if ($user->roles()->where('name', 'provider')->exists()) {
             $restaurantIds = $user->restaurants()->pluck('id');
-            return $order->orderItems()->whereHas('meal', function($query) use ($restaurantIds) {
+            return $order->orderItems()->whereHas('meal', function ($query) use ($restaurantIds) {
                 $query->whereIn('restaurant_id', $restaurantIds);
             })->exists();
         }
@@ -67,7 +67,7 @@ class OrderPolicy
         // Providers can update orders for their restaurants through order items and meals
         if ($user->roles()->where('name', 'provider')->exists()) {
             $restaurantIds = $user->restaurants()->pluck('id');
-            return $order->orderItems()->whereHas('meal', function($query) use ($restaurantIds) {
+            return $order->orderItems()->whereHas('meal', function ($query) use ($restaurantIds) {
                 $query->whereIn('restaurant_id', $restaurantIds);
             })->exists();
         }
@@ -106,4 +106,4 @@ class OrderPolicy
         // Only admins can permanently delete orders
         return $user->roles()->where('name', 'admin')->exists();
     }
-} 
+}

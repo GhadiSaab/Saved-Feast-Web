@@ -29,7 +29,7 @@ class AssignDefaultRoles extends Command
     {
         $consumerRole = Role::where('name', 'consumer')->first();
         
-        if (!$consumerRole) {
+        if (! $consumerRole) {
             $this->error('Consumer role not found. Please run the roles migration first.');
             return 1;
         }
@@ -41,7 +41,7 @@ class AssignDefaultRoles extends Command
             return 0;
         }
 
-        $this->info("Found {$usersWithoutRoles->count()} users without roles.");
+        $this->info('Found '.$usersWithoutRoles->count().' users without roles.');
 
         $bar = $this->output->createProgressBar($usersWithoutRoles->count());
         $bar->start();
@@ -57,4 +57,4 @@ class AssignDefaultRoles extends Command
 
         return 0;
     }
-} 
+}

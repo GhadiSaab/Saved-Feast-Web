@@ -59,14 +59,14 @@ class AuthServiceProvider extends ServiceProvider
 
         // Gate for checking if user owns a specific resource
         Gate::define('own-meal', function (User $user, Meal $meal) {
-            if (!$user->roles()->where('name', 'provider')->exists()) {
+            if (! $user->roles()->where('name', 'provider')->exists()) {
                 return false;
             }
             return $user->restaurants()->where('id', $meal->restaurant_id)->exists();
         });
 
         Gate::define('own-restaurant', function (User $user, Restaurant $restaurant) {
-            if (!$user->roles()->where('name', 'provider')->exists()) {
+            if (! $user->roles()->where('name', 'provider')->exists()) {
                 return false;
             }
             return $restaurant->user_id === $user->id;

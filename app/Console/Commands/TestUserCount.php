@@ -38,14 +38,14 @@ class TestUserCount extends Command
 
             // Test user counts
             $totalUsers = User::count();
-            $this->info("Total Users: {$totalUsers}");
+            $this->info('Total Users: '.$totalUsers);
 
             $users = User::all(['id', 'first_name', 'last_name', 'email']);
             if ($users->count() > 0) {
                 $this->info("Users in database:");
                 foreach ($users as $user) {
                     $roles = $user->roles->pluck('name')->toArray();
-                    $this->info("- {$user->first_name} {$user->last_name} ({$user->email}) - Roles: " . implode(', ', $roles));
+                    $this->info('- '.$user->first_name.' '.$user->last_name.' ('.$user->email.') - Roles: '.implode(', ', $roles));
                 }
             } else {
                 $this->warn("No users found in database!");
@@ -53,19 +53,19 @@ class TestUserCount extends Command
 
             // Test other counts
             $totalOrders = Order::count();
-            $this->info("\nTotal Orders: {$totalOrders}");
+            $this->info("\nTotal Orders: ".$totalOrders);
 
             $totalRestaurants = Restaurant::count();
-            $this->info("Total Restaurants: {$totalRestaurants}");
+            $this->info('Total Restaurants: '.$totalRestaurants);
 
             $totalMeals = Meal::count();
-            $this->info("Total Meals: {$totalMeals}");
+            $this->info('Total Meals: '.$totalMeals);
 
             $totalCategories = Category::count();
-            $this->info("Total Categories: {$totalCategories}");
+            $this->info('Total Categories: '.$totalCategories);
 
             $totalReviews = Review::count();
-            $this->info("Total Reviews: {$totalReviews}");
+            $this->info('Total Reviews: '.$totalReviews);
 
             // Test role distribution
             $this->info("\n=== Role Distribution ===");
@@ -76,7 +76,7 @@ class TestUserCount extends Command
                 ->get();
 
             foreach ($roleDistribution as $role) {
-                $this->info("{$role->name}: {$role->count}");
+                $this->info($role->name.': '.$role->count);
             }
 
             // Test API endpoint
@@ -86,8 +86,8 @@ class TestUserCount extends Command
             $this->info("Make sure to include the Authorization header with your admin token.");
 
         } catch (\Exception $e) {
-            $this->error("Error: " . $e->getMessage());
-            $this->error("Stack trace: " . $e->getTraceAsString());
+            $this->error('Error: '.$e->getMessage());
+            $this->error('Stack trace: '.$e->getTraceAsString());
         }
     }
 }
