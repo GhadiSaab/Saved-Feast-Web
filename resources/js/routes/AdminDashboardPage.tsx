@@ -111,14 +111,10 @@ const AdminDashboardPage: React.FC = () => {
     const fetchDashboardData = async () => {
         try {
             const token = auth.getToken();
-            console.log('Fetching dashboard data with token:', token ? 'Token exists' : 'No token');
             
             const response = await axios.get('/api/admin/dashboard', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            
-            console.log('Dashboard API response:', response.data);
-            console.log('Users total from API:', response.data.overview?.users?.total);
             
             setDashboardData(response.data);
         } catch (err: any) {
@@ -286,16 +282,10 @@ const AdminDashboardPage: React.FC = () => {
 
     const renderOverview = () => {
         if (!dashboardData) {
-            console.log('No dashboard data available');
             return <div>Loading dashboard data...</div>;
         }
 
         const { overview, recent_activity, analytics } = dashboardData;
-        
-        console.log('Rendering overview with data:', dashboardData);
-        console.log('Overview users total:', overview?.users?.total);
-        console.log('Overview object:', overview);
-        console.log('Users object:', overview?.users);
 
         return (
             <div>
@@ -307,10 +297,7 @@ const AdminDashboardPage: React.FC = () => {
                                 <div className="d-flex justify-content-between">
                                     <div>
                                         <h4 className="card-title">
-                                            {overview?.users?.total !== undefined ? overview.users.total : 'Loading...'}
-                                            <small style={{fontSize: '12px', display: 'block'}}>
-                                                Debug: {JSON.stringify(overview?.users || 'No users data')}
-                                            </small>
+                                            {overview?.users?.total ?? 0}
                                         </h4>
                                         <p className="card-text">Total Users</p>
                                     </div>
