@@ -46,6 +46,10 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::get('/meals', [MealController::class, 'index'])->name('api.meals.index');
     Route::get('/meals/filters', [MealController::class, 'filters'])->name('api.meals.filters');
     Route::get('/categories', [CategoryController::class, 'index'])->name('api.categories.index');
+    Route::get('/restaurants', [App\Http\Controllers\API\RestaurantController::class, 'index'])->name('api.restaurants.index');
+    Route::get('/restaurants/{restaurant}', [App\Http\Controllers\API\RestaurantController::class, 'show'])->name('api.restaurants.show');
+    Route::get('/restaurants/{restaurant}/meals', [App\Http\Controllers\API\RestaurantController::class, 'meals'])->name('api.restaurants.meals');
+    Route::get('/restaurants/{restaurant}/ratings', [App\Http\Controllers\API\RestaurantController::class, 'ratings'])->name('api.restaurants.ratings');
 });
 
 // Protected routes - require authentication with rate limiting
@@ -53,6 +57,10 @@ Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function () {
     // Favorite routes
     Route::post('/meals/{id}/favorite', [MealController::class, 'toggleFavorite'])->name('api.meals.toggleFavorite');
     Route::get('/meals/favorites', [MealController::class, 'getFavorites'])->name('api.meals.favorites');
+    
+    // Restaurant routes
+    Route::post('/restaurants', [App\Http\Controllers\API\RestaurantController::class, 'store'])->name('api.restaurants.store');
+    Route::put('/restaurants/{restaurant}', [App\Http\Controllers\API\RestaurantController::class, 'update'])->name('api.restaurants.update');
     
     // Order routes (protected by policies)
     Route::apiResource('orders', OrderController::class)->names([
@@ -64,7 +72,7 @@ Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function () {
     ]);
     
     // Additional order actions
-    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('api.orders.cancel');
+    Route::patch('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('api.orders.cancel');
     Route::post('/orders/{order}/complete', [OrderController::class, 'complete'])->name('api.orders.complete');
 
     // User Profile Update (protected by UserPolicy)
@@ -96,18 +104,40 @@ Route::middleware(['auth:sanctum', 'throttle:300,1'])->prefix('provider')->name(
     // Provider Profile Routes (protected by UserPolicy)
     Route::get('/profile', [ProviderProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile/picture', [ProviderProfileController::class, 'updatePicture'])->name('profile.updatePicture');
+    
+    // Restaurant Management Routes for Providers
+    Route::post('/restaurants', [App\Http\Controllers\API\RestaurantController::class, 'store'])->name('restaurants.store');
+    Route::put('/restaurants/{restaurant}', [App\Http\Controllers\API\RestaurantController::class, 'update'])->name('restaurants.update');
+    Route::get('/restaurants', [App\Http\Controllers\API\RestaurantController::class, 'providerRestaurants'])->name('restaurants.index');
 });
 
 // Admin routes (Protected by admin-access gate) with rate limiting
 Route::middleware(['auth:sanctum', 'throttle:600,1'])->prefix('admin')->name('api.admin.')->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\API\AdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/users', [App\Http\Controllers\API\AdminController::class, 'users'])->name('users');
-    Route::get('/restaurants', [App\Http\Controllers\API\AdminController::class, 'restaurants'])->name('restaurants');
-    Route::get('/orders', [App\Http\Controllers\API\AdminController::class, 'orders'])->name('orders');
-    Route::get('/meals', [App\Http\Controllers\API\AdminController::class, 'meals'])->name('meals');
-    Route::get('/analytics', [App\Http\Controllers\API\AdminController::class, 'analytics'])->name('analytics');
-    Route::put('/users/{user}/role', [App\Http\Controllers\API\AdminController::class, 'updateUserRole'])->name('users.updateRole');
-    Route::put('/users/{user}/status', [App\Http\Controllers\API\AdminController::class, 'toggleUserStatus'])->name('users.toggleStatus');
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\API\AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/users', [App\Http\Controllers\API\AdminController::class, 'users'])->name('users');
+        Route::get('/users/{user}', [App\Http\Controllers\API\AdminController::class, 'showUser'])->name('users.show');
+        Route::get('/restaurants', [App\Http\Controllers\API\AdminController::class, 'restaurants'])->name('restaurants');
+        Route::get('/orders', [App\Http\Controllers\API\AdminController::class, 'orders'])->name('orders');
+        Route::get('/meals', [App\Http\Controllers\API\AdminController::class, 'meals'])->name('meals');
+        Route::get('/analytics', [App\Http\Controllers\API\AdminController::class, 'analytics'])->name('analytics');
+        Route::put('/users/{user}/roles', [App\Http\Controllers\API\AdminController::class, 'updateUserRole'])->name('users.updateRole');
+        Route::put('/users/{user}/status', [App\Http\Controllers\API\AdminController::class, 'toggleUserStatus'])->name('users.toggleStatus');
+        Route::put('/orders/{order}', [App\Http\Controllers\API\AdminController::class, 'updateOrder'])->name('orders.update');
+        
+        // Export routes
+        Route::get('/export/users', [App\Http\Controllers\API\AdminController::class, 'exportUsers'])->name('export.users');
+        Route::get('/export/orders', [App\Http\Controllers\API\AdminController::class, 'exportOrders'])->name('export.orders');
+        Route::get('/export/restaurants', [App\Http\Controllers\API\AdminController::class, 'exportRestaurants'])->name('export.restaurants');
+        
+        // Settings routes
+        Route::get('/settings', [App\Http\Controllers\API\AdminController::class, 'getSettings'])->name('settings.get');
+        Route::put('/settings', [App\Http\Controllers\API\AdminController::class, 'updateSettings'])->name('settings.update');
+        
+        // Restaurant approval routes
+        Route::put('/restaurants/{restaurant}/approve', [App\Http\Controllers\API\AdminController::class, 'approveRestaurant'])->name('restaurants.approve');
+        Route::put('/restaurants/{restaurant}/reject', [App\Http\Controllers\API\AdminController::class, 'rejectRestaurant'])->name('restaurants.reject');
+    });
 });
 
 // Note: Using array syntax [Controller::class, 'method'] is the modern Laravel standard

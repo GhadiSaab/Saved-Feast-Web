@@ -22,6 +22,10 @@ return new class extends Migration
             $table->string('website')->nullable();
             $table->string('image')->nullable();
             $table->string('profile_picture_path')->nullable(); // Added for provider profile picture
+            $table->string('cuisine_type')->nullable();
+            $table->decimal('delivery_radius', 8, 2)->default(5.0);
+            $table->boolean('is_active')->default(true);
+            $table->decimal('average_rating', 3, 2)->default(0.00);
             $table->timestamps();
         });
     }

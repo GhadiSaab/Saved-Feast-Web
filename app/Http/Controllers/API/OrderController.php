@@ -245,16 +245,31 @@ class OrderController extends Controller
             'message' => 'Order deleted successfully',
         ], 200);
     }
-    public function cancel($id, Request $request)
+    public function cancel(Order $order, Request $request)
     {
         $user = $request->user();
 
+        // Check if user can cancel this order
+        if ($order->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        // Check if order can be cancelled
+        if ($order->status === 'delivered' || $order->status === 'completed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot cancel completed order'
+            ], 422);
+        }
+
         // Cancel the order
-        $order = Order::where('user_id', $user->id)->findOrFail($id);
         $order->update(['status' => 'cancelled']);
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Order cancelled successfully',
             'data' => $order
         ], 200);

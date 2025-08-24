@@ -318,26 +318,51 @@ class AdminController extends Controller
     }
     
     /**
-     * Update user role
+     * Update user roles
      */
     public function updateUserRole(Request $request, User $user)
     {
         $request->validate([
-            'role' => 'required|string|in:admin,provider,customer'
+            'roles' => 'required|array',
+            'roles.*' => 'exists:roles,id'
         ]);
         
         // Remove all existing roles
         $user->roles()->detach();
         
-        // Add the new role
-        $role = \App\Models\Role::where('name', $request->role)->first();
-        if ($role) {
-            $user->roles()->attach($role->id);
-        }
+        // Add the new roles
+        $user->roles()->attach($request->roles);
         
         return response()->json([
-            'message' => 'User role updated successfully',
+            'message' => 'User roles updated successfully',
             'user' => $user->load('roles')
+        ]);
+    }
+    
+    /**
+     * Show user details
+     */
+    public function showUser(User $user)
+    {
+        return response()->json([
+            'user' => $user->load(['roles', 'orders', 'reviews'])
+        ]);
+    }
+    
+    /**
+     * Update order status
+     */
+    public function updateOrder(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,completed,cancelled'
+        ]);
+        
+        $order->update(['status' => $request->status]);
+        
+        return response()->json([
+            'message' => 'Order status updated successfully',
+            'order' => $order
         ]);
     }
     
@@ -351,6 +376,173 @@ class AdminController extends Controller
         return response()->json([
             'message' => 'User status updated successfully',
             'user' => $user
+        ]);
+    }
+
+    /**
+     * Export users data as CSV
+     */
+    public function exportUsers()
+    {
+        $users = User::with('roles')->get();
+        
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="users.csv"',
+        ];
+
+        $callback = function() use ($users) {
+            $file = fopen('php://output', 'w');
+            
+            // Add CSV headers
+            fputcsv($file, ['ID', 'First Name', 'Last Name', 'Email', 'Roles', 'Created At']);
+            
+            // Add data rows
+            foreach ($users as $user) {
+                $roles = $user->roles->pluck('name')->implode(', ');
+                fputcsv($file, [
+                    $user->id,
+                    $user->first_name,
+                    $user->last_name,
+                    $user->email,
+                    $roles,
+                    $user->created_at
+                ]);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export orders data as CSV
+     */
+    public function exportOrders()
+    {
+        $orders = Order::with(['user', 'orderItems.meal'])->get();
+        
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="orders.csv"',
+        ];
+
+        $callback = function() use ($orders) {
+            $file = fopen('php://output', 'w');
+            
+            // Add CSV headers
+            fputcsv($file, ['ID', 'User', 'Status', 'Total Amount', 'Created At']);
+            
+            // Add data rows
+            foreach ($orders as $order) {
+                fputcsv($file, [
+                    $order->id,
+                    $order->user->email,
+                    $order->status,
+                    $order->total_amount,
+                    $order->created_at
+                ]);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export restaurants data as CSV
+     */
+    public function exportRestaurants()
+    {
+        $restaurants = Restaurant::with('user')->get();
+        
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="restaurants.csv"',
+        ];
+
+        $callback = function() use ($restaurants) {
+            $file = fopen('php://output', 'w');
+            
+            // Add CSV headers
+            fputcsv($file, ['ID', 'Name', 'Owner', 'Cuisine Type', 'Status', 'Created At']);
+            
+            // Add data rows
+            foreach ($restaurants as $restaurant) {
+                fputcsv($file, [
+                    $restaurant->id,
+                    $restaurant->name,
+                    $restaurant->user->email,
+                    $restaurant->cuisine_type,
+                    $restaurant->is_active ? 'Active' : 'Inactive',
+                    $restaurant->created_at
+                ]);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Get system settings
+     */
+    public function getSettings()
+    {
+        // For now, return default settings
+        // In a real application, these would be stored in a settings table or config
+        return response()->json([
+            'delivery_fee' => 5.00,
+            'tax_rate' => 8.5,
+            'min_order_amount' => 10.00
+        ]);
+    }
+
+    /**
+     * Update system settings
+     */
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'delivery_fee' => 'required|numeric|min:0',
+            'tax_rate' => 'required|numeric|min:0|max:100',
+            'min_order_amount' => 'required|numeric|min:0'
+        ]);
+
+        // In a real application, these would be saved to a settings table or config
+        // For now, just return success
+        return response()->json([
+            'message' => 'Settings updated successfully',
+            'settings' => $request->only(['delivery_fee', 'tax_rate', 'min_order_amount'])
+        ]);
+    }
+
+    /**
+     * Approve restaurant
+     */
+    public function approveRestaurant(Restaurant $restaurant)
+    {
+        $restaurant->update(['is_active' => true]);
+
+        return response()->json([
+            'message' => 'Restaurant approved successfully',
+            'restaurant' => $restaurant
+        ]);
+    }
+
+    /**
+     * Reject restaurant
+     */
+    public function rejectRestaurant(Restaurant $restaurant)
+    {
+        $restaurant->update(['is_active' => false]);
+
+        return response()->json([
+            'message' => 'Restaurant rejected successfully',
+            'restaurant' => $restaurant
         ]);
     }
 }

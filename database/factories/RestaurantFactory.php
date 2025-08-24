@@ -26,6 +26,10 @@ class RestaurantFactory extends Factory
             'website' => fake()->url(),
             'image' => null,
             'profile_picture_path' => null,
+            'cuisine_type' => fake()->randomElement(['Italian', 'Mexican', 'Chinese', 'Japanese', 'Indian', 'American', 'Thai', 'French']),
+            'delivery_radius' => fake()->randomFloat(2, 1, 20),
+            'is_active' => true,
+            'average_rating' => fake()->randomFloat(2, 0, 5),
         ];
     }
 }
