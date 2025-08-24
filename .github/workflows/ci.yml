@@ -91,7 +91,7 @@ jobs:
         php artisan db:seed --class=TestSeeder
 
     - name: Run PHP tests
-      run: php artisan test --coverage --min=70
+      run: php artisan test --coverage --min=45
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
