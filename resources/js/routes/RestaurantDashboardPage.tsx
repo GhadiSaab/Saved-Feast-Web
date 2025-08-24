@@ -231,10 +231,9 @@ const RestaurantDashboardPage: React.FC = () => {
         };
 
         try {
-            let response;
             if (formMode === 'add') {
                 // POST request to create a new meal
-                response = await axios.post('/api/provider/meals', apiFormData, { headers });
+                await axios.post('/api/provider/meals', apiFormData, { headers });
             } else {
                 // PUT request to update an existing meal - NOTE: PUT doesn't always work well with FormData.
                 // Laravel handles this using a _method field.
@@ -242,7 +241,7 @@ const RestaurantDashboardPage: React.FC = () => {
                     throw new Error("Meal ID is missing for update.");
                 }
                 apiFormData.append('_method', 'PUT'); // Spoof PUT method for Laravel
-                response = await axios.post(`/api/provider/meals/${formData.id}`, apiFormData, { headers }); // Use POST with _method
+                await axios.post(`/api/provider/meals/${formData.id}`, apiFormData, { headers }); // Use POST with _method
             }
 
             // Success

@@ -1,0 +1,16 @@
+node_modules/
+vendor/
+dist/
+build/
+public/
+storage/
+bootstrap/
+config/
+database/
+routes/
+app/
+tests/
+*.config.js
+*.config.ts
+vite.config.js
+vitest.config.ts

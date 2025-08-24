@@ -56,7 +56,7 @@ const FeedPage: React.FC = () => {
     const [filters, setFilters] = useState<FilterOptions | null>(null);
     
     // Filter states
-    const [currentPage, setCurrentPage] = useState<number>(1);
+
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [selectedCategory, setSelectedCategory] = useState<number | ''>('');
     const [priceRange, setPriceRange] = useState<{ min: string; max: string }>({ min: '', max: '' });
@@ -100,7 +100,7 @@ const FeedPage: React.FC = () => {
             if (response.data.status) {
                 setMeals(response.data.data);
                 setPagination(response.data.pagination);
-                setCurrentPage(page);
+
             } else {
                 setError(response.data.message || 'Failed to fetch meals');
             }

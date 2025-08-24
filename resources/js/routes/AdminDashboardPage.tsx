@@ -256,11 +256,7 @@ const AdminDashboardPage: React.FC = () => {
         }
     };
 
-    const handleRoleFilter = () => {
-        if (activeTab === 'users') {
-            fetchUsers(1, searchTerm, roleFilter);
-        }
-    };
+
 
     if (loading) {
         return (
@@ -285,7 +281,7 @@ const AdminDashboardPage: React.FC = () => {
             return <div>Loading dashboard data...</div>;
         }
 
-        const { overview, recent_activity, analytics } = dashboardData;
+        const { overview, recent_activity } = dashboardData;
 
         return (
             <div>

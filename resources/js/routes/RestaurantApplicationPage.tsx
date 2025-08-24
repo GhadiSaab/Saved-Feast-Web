@@ -1,6 +1,5 @@
 import React, { useState, FormEvent } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 const RestaurantApplicationPage: React.FC = () => {
     const [restaurantName, setRestaurantName] = useState('');
@@ -13,7 +12,7 @@ const RestaurantApplicationPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-    const navigate = useNavigate();
+
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();

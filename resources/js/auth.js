@@ -55,29 +55,21 @@ export const auth = {
      * Login the user
      */
     async login(credentials) {
-        try {
-            const response = await axios.post('/api/login', credentials);
-            this.setToken(response.data.access_token); // Corrected key
-            window.dispatchEvent(new Event('authChange')); // Dispatch event
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        const response = await axios.post('/api/login', credentials);
+        this.setToken(response.data.access_token); // Corrected key
+        window.dispatchEvent(new Event('authChange')); // Dispatch event
+        return response.data;
     },
 
     /**
      * Register a new user
      */
     async register(userData) {
-        try {
-            // Use relative path and correct token key
-            const response = await axios.post('/api/register', userData); 
-            this.setToken(response.data.access_token); // Corrected key
-            window.dispatchEvent(new Event('authChange')); // Dispatch event
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        // Use relative path and correct token key
+        const response = await axios.post('/api/register', userData); 
+        this.setToken(response.data.access_token); // Corrected key
+        window.dispatchEvent(new Event('authChange')); // Dispatch event
+        return response.data;
     },
 
     /**

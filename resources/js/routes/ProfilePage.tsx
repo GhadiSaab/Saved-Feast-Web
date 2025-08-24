@@ -2,7 +2,7 @@
 import React, { useState, useEffect, FormEvent, useMemo } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext'; // Use AuthContext instead of direct auth import
-import { Order, ApiResponse as OrderApiResponse, OrderItem } from './OrdersPage'; // Correctly import named export OrderItem
+import { Order, ApiResponse as OrderApiResponse } from './OrdersPage'; // Correctly import named export OrderItem
 import ProviderProfile from '../components/ProviderProfile'; // Reverted to standard import
 import { Bar } from 'react-chartjs-2'; // Import Bar chart
 import {
