@@ -323,7 +323,7 @@ class AdminController extends Controller
     public function updateUserRole(Request $request, User $user)
     {
         $request->validate([
-            'role' => 'required|string|in:admin,provider,consumer'
+            'role' => 'required|string|in:admin,provider,customer'
         ]);
         
         // Remove all existing roles

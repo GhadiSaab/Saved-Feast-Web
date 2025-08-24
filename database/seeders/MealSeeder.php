@@ -55,10 +55,18 @@ class MealSeeder extends Seeder
             $status = $faker->randomElement($statusOptions);
 
             // Generate valid availability times regardless of status to meet validation rules
-            // available_from should be >= now
-            $availableFrom = Carbon::now()->addMinutes($faker->numberBetween(0, 120)); // Start time between now and 2 hours from now
-            // available_until should be > available_from
-            $availableUntil = $availableFrom->copy()->addHours($faker->numberBetween(2, 8)); // End time 2-8 hours after start time
+            // For available meals: available_from should be <= now (already started)
+            // For expired meals: available_until should be < now (already ended)
+            if ($status == 'available') {
+                $availableFrom = Carbon::now()->subMinutes($faker->numberBetween(0, 60)); // Start time between 1 hour ago and now
+                $availableUntil = Carbon::now()->addHours($faker->numberBetween(1, 6)); // End time 1-6 hours from now
+            } elseif ($status == 'expired') {
+                $availableFrom = Carbon::now()->subHours($faker->numberBetween(2, 8)); // Start time 2-8 hours ago
+                $availableUntil = Carbon::now()->subMinutes($faker->numberBetween(0, 60)); // End time between 1 hour ago and now
+            } else { // sold_out
+                $availableFrom = Carbon::now()->subMinutes($faker->numberBetween(0, 30)); // Start time between 30 minutes ago and now
+                $availableUntil = Carbon::now()->addHours($faker->numberBetween(1, 4)); // End time 1-4 hours from now
+            }
 
             // Generate prices
             $currentPrice = $faker->randomFloat(2, 5, 50);
@@ -72,7 +80,7 @@ class MealSeeder extends Seeder
                 'description' => $faker->paragraph(2),
                 'current_price' => $currentPrice, // Use current_price
                 'original_price' => $originalPrice, // Add original_price (can be null)
-                'quantity' => $status == 'sold_out' ? 0 : $faker->numberBetween(1, 20),
+                'quantity' => $status == 'sold_out' ? 0 : ($status == 'available' ? $faker->numberBetween(1, 20) : $faker->numberBetween(0, 5)),
                 'available_from' => $availableFrom,
                 'available_until' => $availableUntil,
                 'status' => $status,

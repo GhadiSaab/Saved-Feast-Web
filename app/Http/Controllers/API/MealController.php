@@ -10,6 +10,7 @@ use App\Models\Restaurant;
 use Illuminate\Validation\Rule;
 use Exception;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Favorite;
 
 class MealController extends Controller
 {
@@ -189,5 +190,63 @@ class MealController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getCategories()
+    {
+        $categories = Category::all();
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Categories retrieved successfully',
+            'data' => $categories
+        ], 200);
+    }
+
+    public function toggleFavorite(Request $request, $id)
+    {
+        $user = $request->user();
+        $meal = Meal::findOrFail($id);
+
+        $favorite = Favorite::where('user_id', $user->id)
+                           ->where('meal_id', $meal->id)
+                           ->first();
+
+        if ($favorite) {
+            $favorite->delete();
+            $isFavorited = false;
+            $message = 'Meal removed from favorites';
+        } else {
+            Favorite::create([
+                'user_id' => $user->id,
+                'meal_id' => $meal->id,
+            ]);
+            $isFavorited = true;
+            $message = 'Meal added to favorites';
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => $message,
+            'data' => [
+                'is_favorited' => $isFavorited,
+                'meal_id' => $meal->id
+            ]
+        ], 200);
+    }
+
+    public function getFavorites(Request $request)
+    {
+        $user = $request->user();
+        
+        $favorites = $user->favoriteMeals()
+                         ->with(['restaurant', 'category'])
+                         ->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Favorites retrieved successfully',
+            'data' => $favorites
+        ], 200);
     }
 }

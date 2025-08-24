@@ -182,7 +182,7 @@ const SignupPage: React.FC = () => {
                             </div>
                             <div id="passwordHelp" className="form-text">
                                 <i className="fas fa-info-circle me-1"></i>
-                                Minimum 8 characters, including uppercase, lowercase, numbers, and symbols.
+                                Minimum 8 characters required.
                             </div>
                             {validationErrors.password && (
                                 <div className="invalid-feedback">

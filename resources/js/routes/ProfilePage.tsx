@@ -1,7 +1,7 @@
 // resources/js/routes/ProfilePage.tsx
 import React, { useState, useEffect, FormEvent, useMemo } from 'react';
 import axios from 'axios';
-import auth from '../auth'; // Assuming auth helper is needed
+import { useAuth } from '../context/AuthContext'; // Use AuthContext instead of direct auth import
 import { Order, ApiResponse as OrderApiResponse, OrderItem } from './OrdersPage'; // Correctly import named export OrderItem
 import ProviderProfile from '../components/ProviderProfile'; // Reverted to standard import
 import { Bar } from 'react-chartjs-2'; // Import Bar chart
@@ -36,6 +36,7 @@ interface UserProfile {
 }
 
 const ProfilePage: React.FC = () => {
+    const { user, isAuthenticated, isLoading: authLoading } = useAuth(); // Use AuthContext
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [orders, setOrders] = useState<Order[]>([]); // State for orders
     const [loadingProfile, setLoadingProfile] = useState<boolean>(true);
@@ -55,28 +56,36 @@ const ProfilePage: React.FC = () => {
     const [passwordChangeError, setPasswordChangeError] = useState<string | null>(null);
     const [passwordChangeSuccess, setPasswordChangeSuccess] = useState<string | null>(null);
 
-
     // Fetch Profile Data
     useEffect(() => {
         const fetchProfile = async () => {
-            if (!auth.isAuthenticated()) {
+            if (!isAuthenticated) {
                 setError("Please log in to view your profile.");
                 setLoadingProfile(false);
                 setLoadingOrders(false); // Ensure orders loading also stops
                 return;
             }
 
+            if (!user) {
+                setError("Failed to fetch profile data.");
+                setLoadingProfile(false);
+                setLoadingOrders(false);
+                return;
+            }
+
             setLoadingProfile(true);
             setError(null); // Reset error on new fetch attempt
             try {
-                const user = await auth.getUser();
-                if (user) {
-                    setProfile(user);
-                    setName(user.name);
-                    setEmail(user.email);
-                } else {
-                    setError("Failed to fetch profile data.");
-                }
+                // Use the user data from AuthContext instead of making another API call
+                const userProfile: UserProfile = {
+                    id: user.id,
+                    name: `${user.first_name} ${user.last_name}`,
+                    email: user.email,
+                    roles: user.roles || []
+                };
+                setProfile(userProfile);
+                setName(userProfile.name);
+                setEmail(userProfile.email);
             } catch (err: any) {
                 setError('Failed to fetch profile. Please try again later.');
                 console.error("Error fetching profile:", err);
@@ -85,16 +94,19 @@ const ProfilePage: React.FC = () => {
             }
         };
 
-        fetchProfile();
-    }, []);
+        // Only fetch profile when auth loading is complete and user is authenticated
+        if (!authLoading) {
+            fetchProfile();
+        }
+    }, [isAuthenticated, user, authLoading]);
 
     // Fetch Order Data (runs after profile is potentially loaded or failed)
     useEffect(() => {
         // Only fetch orders if authenticated and profile loading is finished
-        if (!auth.isAuthenticated() || loadingProfile) {
+        if (!isAuthenticated || loadingProfile || authLoading) {
             // If not authenticated or profile still loading, don't fetch orders yet
             // If profile failed, error state will be set, so we might not need orders.
-             if (!auth.isAuthenticated() && !loadingProfile) {
+             if (!isAuthenticated && !loadingProfile && !authLoading) {
                  setLoadingOrders(false); // Ensure loading stops if not logged in
              }
             return;
@@ -105,7 +117,7 @@ const ProfilePage: React.FC = () => {
             // Don't reset main error here, let profile error persist if it occurred
             try {
                 const response = await axios.get<OrderApiResponse>('/api/orders', {
-                    headers: { Authorization: `Bearer ${auth.getToken()}` }
+                    headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
                 });
                 if (response.data.status && response.data.data) {
                     setOrders(response.data.data);
@@ -123,7 +135,7 @@ const ProfilePage: React.FC = () => {
         };
 
         fetchOrders();
-    }, [loadingProfile, error]); // Re-run when profile loading finishes or if an error occurred
+    }, [loadingProfile, error, isAuthenticated, authLoading]); // Re-run when profile loading finishes or if an error occurred
 
     // --- Statistics Calculation ---
     const completedOrders = useMemo(() => orders.filter(order => order.status === 'completed'), [orders]);
@@ -145,7 +157,6 @@ const ProfilePage: React.FC = () => {
     }, [completedOrders]);
     // --- End Statistics Calculation ---
 
-
     const handleEditInfoToggle = () => {
         if (isEditingInfo && profile) {
             // Reset fields if canceling edit
@@ -163,12 +174,21 @@ const ProfilePage: React.FC = () => {
         setError(null);
         try {
             // Use the new POST route for updating profile info
-            await axios.post('/api/user/profile', { name, email /* other fields */ }, {
-                 headers: { Authorization: `Bearer ${auth.getToken()}` }
+            const response = await axios.post('/api/user/profile', { name, email /* other fields */ }, {
+                 headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
             });
+            
             // Update local profile state on success
-            if (profile) {
-                setProfile({ ...profile, name, email });
+            if (profile && response.data.user) {
+                const updatedProfile: UserProfile = {
+                    id: response.data.user.id,
+                    name: `${response.data.user.first_name} ${response.data.user.last_name}`,
+                    email: response.data.user.email,
+                    roles: response.data.user.roles || []
+                };
+                setProfile(updatedProfile);
+                setName(updatedProfile.name);
+                setEmail(updatedProfile.email);
             }
             setIsEditingInfo(false); // Exit edit mode
             setError(null); // Clear general error on success
@@ -209,7 +229,7 @@ const ProfilePage: React.FC = () => {
                 new_password: newPassword,
                 new_password_confirmation: confirmPassword,
             }, {
-                 headers: { Authorization: `Bearer ${auth.getToken()}` }
+                 headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
             });
 
             setPasswordChangeSuccess("Password changed successfully!");
@@ -234,6 +254,35 @@ const ProfilePage: React.FC = () => {
         }
     };
 
+
+    // Show loading while auth is being checked
+    if (authLoading) {
+        return (
+            <div className="d-flex justify-content-center mt-5">
+                <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        );
+    }
+
+    // Redirect to login if not authenticated
+    if (!isAuthenticated) {
+        return (
+            <div className="container mt-5">
+                <div className="row justify-content-center">
+                    <div className="col-md-6 text-center">
+                        <h2>Authentication Required</h2>
+                        <p className="text-muted mb-4">Please log in or sign up to view your profile.</p>
+                        <div className="d-grid gap-2 d-md-block">
+                            <a href="/login" className="btn btn-primary me-md-2">Login</a>
+                            <a href="/signup" className="btn btn-outline-primary">Sign Up</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     // Combined loading state
     const isLoading = loadingProfile || loadingOrders;

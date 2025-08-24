@@ -27,7 +27,7 @@ return new class extends Migration
 
         // Seed default roles
         DB::table('roles')->insert([
-            ['name' => 'consumer', 'description' => 'Regular user who consumes services', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'customer', 'description' => 'Regular user who consumes services', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'provider', 'description' => 'Service provider', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'admin', 'description' => 'Administrator', 'created_at' => now(), 'updated_at' => now()],
         ]);

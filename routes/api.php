@@ -26,6 +26,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// Health check endpoint for API testing
+Route::get('/', function () {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'SavedFeast API is running',
+        'version' => '1.0.0',
+        'timestamp' => now()->toISOString()
+    ]);
+});
+
 // Apply rate limiting (6 attempts per minute) to login and register routes
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:6,1')->name('api.register');
 
@@ -38,13 +48,12 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::get('/categories', [CategoryController::class, 'index'])->name('api.categories.index');
 });
 
-// Restaurant Application Route (Public) with rate limiting
-Route::post('/restaurant-applications', [RestaurantApplicationController::class, 'store'])
-    ->middleware('throttle:3,1') // 3 attempts per minute for applications
-    ->name('api.restaurant-applications.store');
-
 // Protected routes - require authentication with rate limiting
 Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function () {
+    // Favorite routes
+    Route::post('/meals/{id}/favorite', [MealController::class, 'toggleFavorite'])->name('api.meals.toggleFavorite');
+    Route::get('/meals/favorites', [MealController::class, 'getFavorites'])->name('api.meals.favorites');
+    
     // Order routes (protected by policies)
     Route::apiResource('orders', OrderController::class)->names([
         'index' => 'api.orders.index',
@@ -67,6 +76,11 @@ Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function () {
     // Logout route
     Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
 });
+
+// Restaurant Application Route (Public) with rate limiting
+Route::post('/restaurant-applications', [RestaurantApplicationController::class, 'store'])
+    ->middleware('throttle:3,1') // 3 attempts per minute for applications
+    ->name('api.restaurant-applications.store');
 
 // Restaurant Provider Routes (Protected by auth and policies) with rate limiting
 Route::middleware(['auth:sanctum', 'throttle:300,1'])->prefix('provider')->name('api.provider.')->group(function () {

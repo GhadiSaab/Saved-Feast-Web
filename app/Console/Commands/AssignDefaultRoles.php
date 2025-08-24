@@ -20,17 +20,17 @@ class AssignDefaultRoles extends Command
      *
      * @var string
      */
-    protected $description = 'Assign default consumer role to users who have no roles';
+    protected $description = 'Assign default customer role to users who have no roles';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $consumerRole = Role::where('name', 'consumer')->first();
+        $customerRole = Role::where('name', 'customer')->first();
         
-        if (! $consumerRole) {
-            $this->error('Consumer role not found. Please run the roles migration first.');
+        if (! $customerRole) {
+            $this->error('Customer role not found. Please run the roles migration first.');
             return 1;
         }
 
@@ -47,13 +47,13 @@ class AssignDefaultRoles extends Command
         $bar->start();
 
         foreach ($usersWithoutRoles as $user) {
-            $user->roles()->attach($consumerRole->id);
+            $user->roles()->attach($customerRole->id);
             $bar->advance();
         }
 
         $bar->finish();
         $this->newLine();
-        $this->info('Successfully assigned consumer role to all users without roles.');
+        $this->info('Successfully assigned customer role to all users without roles.');
 
         return 0;
     }

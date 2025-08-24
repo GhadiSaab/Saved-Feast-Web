@@ -48,6 +48,16 @@ class User extends Authenticatable
         return $this->hasMany(Restaurant::class);
     }
 
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function favoriteMeals()
+    {
+        return $this->belongsToMany(Meal::class, 'favorites')->withTimestamps();
+    }
+
     public function roles()
     {
         return $this->belongsToMany(Role::class);
@@ -119,11 +129,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is a consumer
+     * Check if the user is a customer
      */
-    public function isConsumer(): bool
+    public function isCustomer(): bool
     {
-        return $this->hasRole('consumer');
+        return $this->hasRole('customer');
     }
 
     /**

@@ -53,8 +53,8 @@ class AuthServiceProvider extends ServiceProvider
             return $user->roles()->where('name', 'provider')->exists();
         });
 
-        Gate::define('consumer-access', function (User $user) {
-            return $user->roles()->where('name', 'consumer')->exists();
+        Gate::define('customer-access', function (User $user) {
+            return $user->roles()->where('name', 'customer')->exists();
         });
 
         // Gate for checking if user owns a specific resource

@@ -26,6 +26,8 @@ return [
         'http://127.0.0.1:5173',
         'http://localhost:8000',
         'http://127.0.0.1:8000',
+        'http://192.168.1.116:8000', // Mobile app IP
+        'http://192.168.1.116:*', // Allow any port from this IP
         // Add your production domains here
         // 'https://yourdomain.com',
         // 'https://app.yourdomain.com',
@@ -35,6 +37,8 @@ return [
         // Allow localhost with any port for development
         '/^http:\/\/localhost:\d+$/',
         '/^http:\/\/127\.0\.0\.1:\d+$/',
+        // Allow your local IP with any port for mobile development
+        '/^http:\/\/192\.168\.1\.116:\d+$/',
     ],
 
     'allowed_headers' => [

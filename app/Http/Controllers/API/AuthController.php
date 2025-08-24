@@ -20,8 +20,8 @@ class AuthController extends Controller
             'first_name' => 'required|string|max:255', // Added max length
             'last_name' => 'required|string|max:255', // Added max length
             'email' => 'required|string|email|max:255|unique:users,email', // Added max length and string type
-            // Use the Password rule for better complexity enforcement
-            'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
+            // Use a more user-friendly password rule
+            'password' => ['required', 'confirmed', Password::min(8)],
             'phone' => 'nullable|string|max:25', // Added max length
             'address' => 'nullable|string|max:255', // Added max length
         ]);
@@ -36,10 +36,10 @@ class AuthController extends Controller
             'address' => $request->address,
         ]);
 
-        // Assign default 'consumer' role to new users
-        $consumerRole = \App\Models\Role::where('name', 'consumer')->first();
-        if ($consumerRole) {
-            $user->roles()->attach($consumerRole->id);
+        // Assign default 'customer' role to new users
+        $customerRole = \App\Models\Role::where('name', 'customer')->first();
+        if ($customerRole) {
+            $user->roles()->attach($customerRole->id);
         }
 
         
@@ -119,7 +119,6 @@ class AuthController extends Controller
         $this->authorize('update', $user);
 
         $validatedData = $request->validate([
-            // Use first_name/last_name if those are the actual DB columns
             'name' => 'required|string|max:255',
             'email' => [
                 'required',
@@ -133,8 +132,17 @@ class AuthController extends Controller
             // 'address' => 'nullable|string|max:255',
         ]);
 
-        // Update only the validated fields
-        $user->update($validatedData);
+        // Split the name into first_name and last_name
+        $nameParts = explode(' ', trim($validatedData['name']), 2);
+        $firstName = $nameParts[0];
+        $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
+
+        // Update the user with first_name, last_name, and email
+        $user->update([
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $validatedData['email'],
+        ]);
 
         // Eager load roles to return updated user data consistently
         $user->load('roles');
