@@ -98,7 +98,7 @@ export const auth = {
    */
   async register(userData: UserData): Promise<AuthResponse> {
     // Use relative path and correct token key
-    const response = await axios.post('/api/register', userData); 
+    const response = await axios.post('/api/register', userData);
     this.setToken(response.data.access_token); // Corrected key
     window.dispatchEvent(new Event('authChange')); // Dispatch event
     return response.data;
@@ -117,7 +117,7 @@ export const auth = {
       this.removeToken();
       window.dispatchEvent(new Event('authChange')); // Dispatch event to update UI
     }
-  }
+  },
 };
 
 // Initialize auth header if token exists

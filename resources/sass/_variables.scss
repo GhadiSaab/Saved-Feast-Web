@@ -19,7 +19,14 @@ $earth-brown: #6b4423; // Earth brown for text and borders
 $body-bg: $warm-beige;
 
 // Typography
-$font-family-sans-serif: 'Nunito', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-sans-serif:
+  'Nunito',
+  'Inter',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
 $font-size-base: 1rem;
 $line-height-base: 1.6;
 

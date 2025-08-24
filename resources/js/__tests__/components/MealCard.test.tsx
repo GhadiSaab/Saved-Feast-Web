@@ -6,14 +6,14 @@ import MealCard from '../../components/MealCard';
 // Mock the context and auth
 vi.mock('../../context/CartContext', () => ({
   useCart: () => ({
-    addToCart: vi.fn()
-  })
+    addToCart: vi.fn(),
+  }),
 }));
 
 vi.mock('../../auth', () => ({
   default: {
-    isAuthenticated: () => true
-  }
+    isAuthenticated: () => true,
+  },
 }));
 
 // Mock meal data matching the actual interface
@@ -22,13 +22,13 @@ const mockMeal = {
   title: 'Margherita Pizza',
   description: 'Classic margherita pizza with tomato and mozzarella',
   current_price: 15.99,
-  original_price: 20.00,
+  original_price: 20.0,
   image: 'https://example.com/pizza.jpg',
   available_from: '2024-01-01T18:00:00Z',
   available_until: '2024-01-01T20:00:00Z',
   restaurant: {
-    name: 'Pizza Palace'
-  }
+    name: 'Pizza Palace',
+  },
 };
 
 describe('MealCard Component', () => {
@@ -38,9 +38,11 @@ describe('MealCard Component', () => {
         <MealCard meal={mockMeal} />
       </BrowserRouter>
     );
-    
+
     expect(screen.getByText('Margherita Pizza')).toBeInTheDocument();
-    expect(screen.getByText('Classic margherita pizza with tomato and mozzarella')).toBeInTheDocument();
+    expect(
+      screen.getByText('Classic margherita pizza with tomato and mozzarella')
+    ).toBeInTheDocument();
     expect(screen.getByText('€15.99')).toBeInTheDocument();
   });
 
@@ -50,7 +52,7 @@ describe('MealCard Component', () => {
         <MealCard meal={mockMeal} />
       </BrowserRouter>
     );
-    
+
     expect(screen.getByText('Pizza Palace')).toBeInTheDocument();
   });
 
@@ -60,7 +62,7 @@ describe('MealCard Component', () => {
         <MealCard meal={mockMeal} />
       </BrowserRouter>
     );
-    
+
     expect(screen.getByText('20% OFF')).toBeInTheDocument();
   });
 
@@ -70,7 +72,7 @@ describe('MealCard Component', () => {
         <MealCard meal={mockMeal} />
       </BrowserRouter>
     );
-    
+
     expect(screen.getByText('€20.00')).toBeInTheDocument();
   });
 
@@ -80,7 +82,7 @@ describe('MealCard Component', () => {
         <MealCard meal={mockMeal} />
       </BrowserRouter>
     );
-    
+
     expect(screen.getByText('Add to Cart')).toBeInTheDocument();
   });
 });

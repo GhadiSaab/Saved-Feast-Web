@@ -19,7 +19,11 @@
 
 body {
   font-family: vars.$font-family-sans-serif;
-  background: linear-gradient(135deg, vars.$warm-beige 0%, vars.$soft-cream 100%);
+  background: linear-gradient(
+    135deg,
+    vars.$warm-beige 0%,
+    vars.$soft-cream 100%
+  );
   color: vars.$dark;
   line-height: 1.6;
   min-height: 100vh;
@@ -68,7 +72,7 @@ body {
     gap: 0.5rem;
 
     &::before {
-      content: "🌱";
+      content: '🌱';
       font-size: 1.8rem;
     }
 
@@ -138,7 +142,7 @@ main {
   overflow: hidden;
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -160,7 +164,7 @@ main {
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 
       &::before {
-        content: "🍽️";
+        content: '🍽️';
         display: block;
         font-size: 4rem;
         margin-bottom: 1rem;
@@ -217,7 +221,7 @@ main {
     position: relative;
 
     &::after {
-      content: "";
+      content: '';
       position: absolute;
       bottom: -10px;
       left: 50%;
@@ -238,7 +242,8 @@ main {
   margin-bottom: 2rem;
   border: 1px solid rgba(vars.$primary, 0.1);
 
-  .form-control, .form-select {
+  .form-control,
+  .form-select {
     border: 2px solid rgba(vars.$primary, 0.2);
     border-radius: vars.$border-radius-sm;
     padding: 0.75rem 1rem;
@@ -278,7 +283,7 @@ main {
   position: relative;
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -463,7 +468,8 @@ main {
   position: relative;
   overflow: hidden;
 
-  .savings-badge, .restaurant-badge {
+  .savings-badge,
+  .restaurant-badge {
     z-index: 10;
   }
 
@@ -515,7 +521,8 @@ main {
     }
   }
 
-  .savings-badge, .restaurant-badge {
+  .savings-badge,
+  .restaurant-badge {
     z-index: 10;
   }
 
@@ -883,7 +890,11 @@ main {
   }
 
   .savings-summary {
-    background: linear-gradient(135deg, rgba(vars.$success, 0.1), rgba(vars.$primary, 0.1)) !important;
+    background: linear-gradient(
+      135deg,
+      rgba(vars.$success, 0.1),
+      rgba(vars.$primary, 0.1)
+    ) !important;
     border: 1px solid rgba(vars.$success, 0.2);
   }
 
@@ -892,7 +903,11 @@ main {
   }
 
   .payment-placeholder {
-    background: linear-gradient(135deg, vars.$warm-beige, vars.$soft-cream) !important;
+    background: linear-gradient(
+      135deg,
+      vars.$warm-beige,
+      vars.$soft-cream
+    ) !important;
     border: 2px dashed rgba(vars.$primary, 0.3) !important;
   }
 }
@@ -1031,7 +1046,11 @@ main {
 }
 
 .bg-gradient-primary {
-  background: linear-gradient(135deg, vars.$primary, vars.$secondary) !important;
+  background: linear-gradient(
+    135deg,
+    vars.$primary,
+    vars.$secondary
+  ) !important;
 }
 
 .opacity-75 {

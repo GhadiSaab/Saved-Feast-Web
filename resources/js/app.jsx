@@ -8,8 +8,8 @@ import './bootstrap'; // Import Bootstrap JS
 import '../sass/app.scss'; // Import global styles
 import axios from 'axios';
 
-
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+axios.defaults.baseURL =
+  import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 axios.defaults.headers.common['Accept'] = 'application/json';
 
 const rootElement = document.getElementById('app');
@@ -18,7 +18,9 @@ if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <React.StrictMode>
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <BrowserRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
         <App />
       </BrowserRouter>
     </React.StrictMode>
