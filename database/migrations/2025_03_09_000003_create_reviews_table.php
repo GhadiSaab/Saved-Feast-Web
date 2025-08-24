@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('restaurant_id')->constrained('restaurants')->onDelete('cascade');
-            $table->morphs('reviewable'); 
-            $table->integer('rating'); 
+            $table->morphs('reviewable');
+            $table->integer('rating');
             $table->text('comment')->nullable();
             $table->timestamps();
         });

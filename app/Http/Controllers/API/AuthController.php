@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth; // Import Auth facade
-use Illuminate\Validation\Rules\Password; // Import Password rule
-use Illuminate\Validation\ValidationException;
-use Illuminate\Validation\Rule; // Import Rule for unique email check
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash; // Import Auth facade
+use Illuminate\Validation\Rule; // Import Password rule
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException; // Import Rule for unique email check
 
 class AuthController extends Controller
 {
     public function register(Request $request): \Illuminate\Http\JsonResponse
     {
-        
+
         $request->validate([
             'first_name' => 'required|string|max:255', // Added max length
             'last_name' => 'required|string|max:255', // Added max length
@@ -26,12 +26,11 @@ class AuthController extends Controller
             'address' => 'nullable|string|max:255', // Added max length
         ]);
 
-        
         $user = User::create([
-            'first_name' => $request->first_name, 
+            'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
-            'password' => Hash::make($request->password), 
+            'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'address' => $request->address,
         ]);
@@ -42,7 +41,6 @@ class AuthController extends Controller
             $user->roles()->attach($customerRole->id);
         }
 
-        
         $token = $user->createToken('auth_token')->plainTextToken;
 
         // Eager load roles relationship
@@ -57,26 +55,22 @@ class AuthController extends Controller
         ]);
     }
 
-
     public function login(Request $request): \Illuminate\Http\JsonResponse
     {
-        
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
-        
         $user = User::where('email', $request->email)->first();
 
-        
         if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
 
-        
         $token = $user->createToken('auth_token')->plainTextToken;
 
         // Eager load roles relationship
@@ -107,9 +101,6 @@ class AuthController extends Controller
 
     /**
      * Update the authenticated user's profile information.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function updateProfile(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -154,11 +145,8 @@ class AuthController extends Controller
         ]);
     }
 
-     /**
+    /**
      * Change the authenticated user's password.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function changePassword(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -170,8 +158,8 @@ class AuthController extends Controller
         ]);
 
         // Check if the current password matches
-        if (!Hash::check($validatedData['current_password'], $user->password)) {
-             throw ValidationException::withMessages([
+        if (! Hash::check($validatedData['current_password'], $user->password)) {
+            throw ValidationException::withMessages([
                 'current_password' => ['The provided current password does not match our records.'],
             ]);
         }

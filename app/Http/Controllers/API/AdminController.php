@@ -3,16 +3,15 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Order;
-use App\Models\Meal;
-use App\Models\Restaurant;
 use App\Models\Category;
-use App\Models\Payment;
+use App\Models\Meal;
+use App\Models\Order;
+use App\Models\Restaurant;
 use App\Models\Review;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -24,21 +23,21 @@ class AdminController extends Controller
         // Get current date and last 30 days
         $now = Carbon::now();
         $thirtyDaysAgo = $now->copy()->subDays(30);
-        
+
         // User statistics
         $totalUsers = User::count();
         $newUsersThisMonth = User::where('created_at', '>=', $now->startOfMonth())->count();
         $activeUsers = User::whereHas('orders', function ($query) use ($thirtyDaysAgo) {
             $query->where('created_at', '>=', $thirtyDaysAgo);
         })->count();
-        
+
         // Role distribution
         $roleDistribution = DB::table('role_user')
             ->join('roles', 'role_user.role_id', '=', 'roles.id')
             ->select('roles.name', DB::raw('count(*) as count'))
             ->groupBy('roles.name')
             ->get();
-            
+
         // Order statistics
         $totalOrders = Order::count();
         $ordersThisMonth = Order::where('created_at', '>=', $now->startOfMonth())->count();
@@ -46,34 +45,34 @@ class AdminController extends Controller
         $revenueThisMonth = Order::where('status', Order::STATUS_COMPLETED)
             ->where('created_at', '>=', $now->startOfMonth())
             ->sum('total_amount');
-            
+
         // Order status distribution
         $orderStatusDistribution = Order::select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
             ->get();
-            
+
         // Restaurant statistics
         $totalRestaurants = Restaurant::count();
         $activeRestaurants = Restaurant::whereHas('meals', function ($query) {
             $query->where('quantity', '>', 0);
         })->count();
-        
+
         // Meal statistics
         $totalMeals = Meal::count();
         $activeMeals = Meal::where('quantity', '>', 0)->count();
         $totalCategories = Category::count();
-        
+
         // Recent activity
         $recentOrders = Order::with(['user', 'orderItems.meal'])
             ->latest()
             ->take(5)
             ->get();
-            
+
         $recentUsers = User::with('roles')
             ->latest()
             ->take(5)
             ->get();
-            
+
         // Sales analytics for the last 30 days
         $dailySales = Order::where('status', Order::STATUS_COMPLETED)
             ->where('created_at', '>=', $thirtyDaysAgo)
@@ -85,84 +84,84 @@ class AdminController extends Controller
             ->groupBy('date')
             ->orderBy('date')
             ->get();
-            
+
         // Top performing restaurants
         $topRestaurants = Restaurant::withCount('meals')
             ->withSum('orders', 'total_amount')
             ->orderByDesc('orders_sum_total_amount')
             ->take(10)
             ->get();
-            
+
         // Category performance
         $categoryPerformance = Category::withCount('meals')
             ->withSum('meals', 'quantity')
             ->orderByDesc('meals_count')
             ->get();
-            
+
         // Review statistics
         $totalReviews = Review::count();
         $averageRating = Review::avg('rating') ?? 0;
-        
+
         return response()->json([
             'overview' => [
                 'users' => [
                     'total' => $totalUsers,
                     'new_this_month' => $newUsersThisMonth,
                     'active' => $activeUsers,
-                    'role_distribution' => $roleDistribution
+                    'role_distribution' => $roleDistribution,
                 ],
                 'orders' => [
                     'total' => $totalOrders,
                     'this_month' => $ordersThisMonth,
-                    'status_distribution' => $orderStatusDistribution
+                    'status_distribution' => $orderStatusDistribution,
                 ],
                 'revenue' => [
                     'total' => round($totalRevenue, 2),
-                    'this_month' => round($revenueThisMonth, 2)
+                    'this_month' => round($revenueThisMonth, 2),
                 ],
                 'restaurants' => [
                     'total' => $totalRestaurants,
-                    'active' => $activeRestaurants
+                    'active' => $activeRestaurants,
                 ],
                 'meals' => [
                     'total' => $totalMeals,
                     'active' => $activeMeals,
-                    'categories' => $totalCategories
+                    'categories' => $totalCategories,
                 ],
                 'reviews' => [
                     'total' => $totalReviews,
-                    'average_rating' => round($averageRating, 1)
-                ]
+                    'average_rating' => round($averageRating, 1),
+                ],
             ],
             'recent_activity' => [
                 'orders' => $recentOrders,
-                'users' => $recentUsers
+                'users' => $recentUsers,
             ],
             'analytics' => [
                 'daily_sales' => $dailySales,
                 'top_restaurants' => $topRestaurants,
-                'category_performance' => $categoryPerformance
-            ]
+                'category_performance' => $categoryPerformance,
+            ],
         ]);
     }
-    
+
     /**
      * Get user management data
      */
     public function users(Request $request)
     {
         $query = User::with('roles');
-        
+
         // Search functionality
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
-        
+
         // Filter by role
         if ($request->has('role')) {
             $role = $request->role;
@@ -170,80 +169,80 @@ class AdminController extends Controller
                 $q->where('name', $role);
             });
         }
-        
+
         $users = $query->withCount(['orders', 'reviews'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
-            
+
         return response()->json($users);
     }
-    
+
     /**
      * Get restaurant management data
      */
     public function restaurants(Request $request)
     {
         $query = Restaurant::with(['user', 'meals']);
-        
+
         // Search functionality
         if ($request->has('search')) {
             $search = $request->search;
             $query->where('name', 'like', "%{$search}%");
         }
-        
+
         $restaurants = $query->withCount('meals')
             ->withSum('orders', 'total_amount')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
-            
+
         return response()->json($restaurants);
     }
-    
+
     /**
      * Get order management data
      */
     public function orders(Request $request)
     {
         $query = Order::with(['user', 'orderItems.meal.restaurant']);
-        
+
         // Filter by status
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
-        
+
         // Filter by date range
         if ($request->has('date_from')) {
             $query->where('created_at', '>=', $request->date_from);
         }
-        
+
         if ($request->has('date_to')) {
             $query->where('created_at', '<=', $request->date_to);
         }
-        
+
         $orders = $query->orderBy('created_at', 'desc')
             ->paginate(15);
-            
+
         return response()->json($orders);
     }
-    
+
     /**
      * Get meal management data
      */
     public function meals(Request $request)
     {
         $query = Meal::with(['restaurant', 'category']);
-        
+
         // Search functionality
         if ($request->has('search')) {
             $search = $request->search;
             $query->where('title', 'like', "%{$search}%");
         }
-        
+
         // Filter by category
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
         }
-        
+
         // Filter by availability
         if ($request->has('available')) {
             if ($request->available === 'true') {
@@ -252,13 +251,13 @@ class AdminController extends Controller
                 $query->where('quantity', '<=', 0);
             }
         }
-        
+
         $meals = $query->orderBy('created_at', 'desc')
             ->paginate(15);
-            
+
         return response()->json($meals);
     }
-    
+
     /**
      * Get system analytics
      */
@@ -266,7 +265,7 @@ class AdminController extends Controller
     {
         $period = $request->get('period', '30'); // Default to 30 days
         $startDate = Carbon::now()->subDays($period);
-        
+
         // Revenue trends
         $revenueTrends = Order::where('status', Order::STATUS_COMPLETED)
             ->where('created_at', '>=', $startDate)
@@ -278,7 +277,7 @@ class AdminController extends Controller
             ->groupBy('date')
             ->orderBy('date')
             ->get();
-            
+
         // User growth
         $userGrowth = User::where('created_at', '>=', $startDate)
             ->select(
@@ -288,7 +287,7 @@ class AdminController extends Controller
             ->groupBy('date')
             ->orderBy('date')
             ->get();
-            
+
         // Top selling meals
         $topMeals = DB::table('order_items')
             ->join('meals', 'order_items.meal_id', '=', 'meals.id')
@@ -301,22 +300,22 @@ class AdminController extends Controller
             ->orderByDesc('total_sold')
             ->limit(10)
             ->get();
-            
+
         // Restaurant performance
         $restaurantPerformance = Restaurant::withCount('meals')
             ->withSum('orders', 'total_amount')
             ->orderByDesc('orders_sum_total_amount')
             ->limit(10)
             ->get();
-            
+
         return response()->json([
             'revenue_trends' => $revenueTrends,
             'user_growth' => $userGrowth,
             'top_meals' => $topMeals,
-            'restaurant_performance' => $restaurantPerformance
+            'restaurant_performance' => $restaurantPerformance,
         ]);
     }
-    
+
     /**
      * Update user roles
      */
@@ -324,48 +323,48 @@ class AdminController extends Controller
     {
         $request->validate([
             'roles' => 'required|array',
-            'roles.*' => 'exists:roles,id'
+            'roles.*' => 'exists:roles,id',
         ]);
-        
+
         // Remove all existing roles
         $user->roles()->detach();
-        
+
         // Add the new roles
         $user->roles()->attach($request->roles);
-        
+
         return response()->json([
             'message' => 'User roles updated successfully',
-            'user' => $user->load('roles')
+            'user' => $user->load('roles'),
         ]);
     }
-    
+
     /**
      * Show user details
      */
     public function showUser(User $user)
     {
         return response()->json([
-            'user' => $user->load(['roles', 'orders', 'reviews'])
+            'user' => $user->load(['roles', 'orders', 'reviews']),
         ]);
     }
-    
+
     /**
      * Update order status
      */
     public function updateOrder(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'required|in:pending,completed,cancelled'
+            'status' => 'required|in:pending,completed,cancelled',
         ]);
-        
+
         $order->update(['status' => $request->status]);
-        
+
         return response()->json([
             'message' => 'Order status updated successfully',
-            'order' => $order
+            'order' => $order,
         ]);
     }
-    
+
     /**
      * Toggle user status (active/inactive)
      */
@@ -375,7 +374,7 @@ class AdminController extends Controller
         // For now, we'll just return success
         return response()->json([
             'message' => 'User status updated successfully',
-            'user' => $user
+            'user' => $user,
         ]);
     }
 
@@ -385,18 +384,18 @@ class AdminController extends Controller
     public function exportUsers()
     {
         $users = User::with('roles')->get();
-        
+
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="users.csv"',
         ];
 
-        $callback = function() use ($users) {
+        $callback = function () use ($users) {
             $file = fopen('php://output', 'w');
-            
+
             // Add CSV headers
             fputcsv($file, ['ID', 'First Name', 'Last Name', 'Email', 'Roles', 'Created At']);
-            
+
             // Add data rows
             foreach ($users as $user) {
                 $roles = $user->roles->pluck('name')->implode(', ');
@@ -406,10 +405,10 @@ class AdminController extends Controller
                     $user->last_name,
                     $user->email,
                     $roles,
-                    $user->created_at
+                    $user->created_at,
                 ]);
             }
-            
+
             fclose($file);
         };
 
@@ -422,18 +421,18 @@ class AdminController extends Controller
     public function exportOrders()
     {
         $orders = Order::with(['user', 'orderItems.meal'])->get();
-        
+
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="orders.csv"',
         ];
 
-        $callback = function() use ($orders) {
+        $callback = function () use ($orders) {
             $file = fopen('php://output', 'w');
-            
+
             // Add CSV headers
             fputcsv($file, ['ID', 'User', 'Status', 'Total Amount', 'Created At']);
-            
+
             // Add data rows
             foreach ($orders as $order) {
                 fputcsv($file, [
@@ -441,10 +440,10 @@ class AdminController extends Controller
                     $order->user->email,
                     $order->status,
                     $order->total_amount,
-                    $order->created_at
+                    $order->created_at,
                 ]);
             }
-            
+
             fclose($file);
         };
 
@@ -457,18 +456,18 @@ class AdminController extends Controller
     public function exportRestaurants()
     {
         $restaurants = Restaurant::with('user')->get();
-        
+
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="restaurants.csv"',
         ];
 
-        $callback = function() use ($restaurants) {
+        $callback = function () use ($restaurants) {
             $file = fopen('php://output', 'w');
-            
+
             // Add CSV headers
             fputcsv($file, ['ID', 'Name', 'Owner', 'Cuisine Type', 'Status', 'Created At']);
-            
+
             // Add data rows
             foreach ($restaurants as $restaurant) {
                 fputcsv($file, [
@@ -477,10 +476,10 @@ class AdminController extends Controller
                     $restaurant->user->email,
                     $restaurant->cuisine_type,
                     $restaurant->is_active ? 'Active' : 'Inactive',
-                    $restaurant->created_at
+                    $restaurant->created_at,
                 ]);
             }
-            
+
             fclose($file);
         };
 
@@ -497,7 +496,7 @@ class AdminController extends Controller
         return response()->json([
             'delivery_fee' => 5.00,
             'tax_rate' => 8.5,
-            'min_order_amount' => 10.00
+            'min_order_amount' => 10.00,
         ]);
     }
 
@@ -509,14 +508,14 @@ class AdminController extends Controller
         $request->validate([
             'delivery_fee' => 'required|numeric|min:0',
             'tax_rate' => 'required|numeric|min:0|max:100',
-            'min_order_amount' => 'required|numeric|min:0'
+            'min_order_amount' => 'required|numeric|min:0',
         ]);
 
         // In a real application, these would be saved to a settings table or config
         // For now, just return success
         return response()->json([
             'message' => 'Settings updated successfully',
-            'settings' => $request->only(['delivery_fee', 'tax_rate', 'min_order_amount'])
+            'settings' => $request->only(['delivery_fee', 'tax_rate', 'min_order_amount']),
         ]);
     }
 
@@ -529,7 +528,7 @@ class AdminController extends Controller
 
         return response()->json([
             'message' => 'Restaurant approved successfully',
-            'restaurant' => $restaurant
+            'restaurant' => $restaurant,
         ]);
     }
 
@@ -542,7 +541,7 @@ class AdminController extends Controller
 
         return response()->json([
             'message' => 'Restaurant rejected successfully',
-            'restaurant' => $restaurant
+            'restaurant' => $restaurant,
         ]);
     }
 }

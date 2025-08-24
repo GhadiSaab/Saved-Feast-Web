@@ -1,4 +1,4 @@
-import React from 'react';
+// React import removed as it's not used directly
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';

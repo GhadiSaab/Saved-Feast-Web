@@ -22,7 +22,8 @@
     "resources/js/**/*.ts",
     "resources/js/**/*.tsx",
     "resources/js/**/*.js",
-    "resources/js/**/*.jsx"
+    "resources/js/**/*.jsx",
+    "resources/js/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",

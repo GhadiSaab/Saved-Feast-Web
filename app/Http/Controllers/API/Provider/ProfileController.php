@@ -3,20 +3,16 @@
 namespace App\Http\Controllers\API\Provider;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Restaurant;
 use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Meal;
+use App\Models\Restaurant;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
     /**
      * Display the provider's profile information and statistics.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request)
@@ -25,8 +21,8 @@ class ProfileController extends Controller
 
         // Eager load meals and their associated order items
         $restaurant = Restaurant::with(['meals.orderItems'])
-                                ->where('user_id', $user->id)
-                                ->firstOrFail();
+            ->where('user_id', $user->id)
+            ->firstOrFail();
 
         $mealsSold = 0;
         $foodSavedQuantity = 0;
@@ -54,13 +50,12 @@ class ProfileController extends Controller
             'food_saved_quantity' => $foodSavedQuantity,
             'total_revenue' => $totalRevenue,
         ];
-         // Add full URL for profile picture if it exists
+        // Add full URL for profile picture if it exists
         if ($restaurant->profile_picture_path) {
             $profileData['profile_picture_url'] = Storage::url($restaurant->profile_picture_path);
         } else {
             $profileData['profile_picture_url'] = null; // Or a default image URL
         }
-
 
         return response()->json($profileData);
     }
@@ -68,7 +63,6 @@ class ProfileController extends Controller
     /**
      * Update the provider's profile picture.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function updatePicture(Request $request)
@@ -94,7 +88,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'message' => 'Profile picture updated successfully.',
-            'profile_picture_url' => Storage::url($path) // Return the new URL
+            'profile_picture_url' => Storage::url($path), // Return the new URL
         ]);
     }
 }

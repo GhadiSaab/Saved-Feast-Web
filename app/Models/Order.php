@@ -13,7 +13,9 @@ class Order extends Model
      * Order status constants
      */
     const STATUS_PENDING = 'pending';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
@@ -37,7 +39,7 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
-    
+
     /**
      * Get the payment record associated with the order
      */
@@ -45,6 +47,4 @@ class Order extends Model
     {
         return $this->hasOne(Payment::class);
     }
-
-
 }

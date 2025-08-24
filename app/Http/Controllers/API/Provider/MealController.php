@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\API\Provider;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Meal;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage; // Add Storage facade
+use Illuminate\Support\Facades\Auth; // Add Storage facade
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use App\Models\Category; // Add Category model import
+use Illuminate\Validation\Rule; // Add Category model import
 
 class MealController extends Controller
 {
@@ -29,14 +29,14 @@ class MealController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
         // Check if user can manage meals
         $this->authorize('manage-meals');
-        
+
         // Assuming the provider user has one associated restaurant
         $restaurant = Restaurant::where('user_id', $user->id)->first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json(['message' => 'Restaurant not found for this provider.'], 404);
         }
 
@@ -53,13 +53,13 @@ class MealController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        
+
         // Check if user can create meals
         $this->authorize('create', Meal::class);
-        
+
         $restaurant = Restaurant::where('user_id', $user->id)->first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json(['message' => 'Restaurant not found for this provider.'], 404);
         }
 
@@ -86,7 +86,7 @@ class MealController extends Controller
 
         $validatedData = $validator->validated();
 
-        $meal = new Meal();
+        $meal = new Meal;
         // Directly use validated data, no need to map 'name' anymore
         $mealDataToFill = $validatedData;
         // // Map 'image_url' from request to 'image' in model if necessary - REMOVED
@@ -101,10 +101,9 @@ class MealController extends Controller
             // Store the relative path accessible via the public disk link
             $mealDataToFill['image'] = Storage::url($path); // Get URL like /storage/meals/filename.jpg
         } elseif (isset($mealDataToFill['image'])) {
-             // Ensure 'image' key is removed if no file is uploaded but was in validated data (shouldn't happen with file validation)
-             unset($mealDataToFill['image']);
+            // Ensure 'image' key is removed if no file is uploaded but was in validated data (shouldn't happen with file validation)
+            unset($mealDataToFill['image']);
         }
-
 
         $meal->fill($mealDataToFill);
         $meal->restaurant_id = $restaurant->id; // Associate with the provider's restaurant
@@ -124,13 +123,13 @@ class MealController extends Controller
         $user = Auth::user();
         $restaurant = Restaurant::where('user_id', $user->id)->first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json(['message' => 'Restaurant not found for this provider.'], 404);
         }
 
         $meal = Meal::with('category')->find($id);
 
-        if (!$meal) {
+        if (! $meal) {
             return response()->json(['message' => 'Meal not found.'], 404);
         }
 
@@ -150,13 +149,13 @@ class MealController extends Controller
         $user = Auth::user();
         $restaurant = Restaurant::where('user_id', $user->id)->first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json(['message' => 'Restaurant not found for this provider.'], 404);
         }
 
         $meal = Meal::find($id);
 
-        if (!$meal) {
+        if (! $meal) {
             return response()->json(['message' => 'Meal not found.'], 404);
         }
 
@@ -209,10 +208,9 @@ class MealController extends Controller
             $path = $request->file('image')->store('public/meals');
             $mealDataToFill['image'] = Storage::url($path); // Store the URL
         } elseif (isset($mealDataToFill['image'])) {
-             // Ensure 'image' key is removed if no file is uploaded but was in validated data
-             unset($mealDataToFill['image']);
+            // Ensure 'image' key is removed if no file is uploaded but was in validated data
+            unset($mealDataToFill['image']);
         }
-
 
         $meal->fill($mealDataToFill);
         $meal->save();
@@ -230,13 +228,13 @@ class MealController extends Controller
         $user = Auth::user();
         $restaurant = Restaurant::where('user_id', $user->id)->first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json(['message' => 'Restaurant not found for this provider.'], 404);
         }
 
         $meal = Meal::find($id);
 
-        if (!$meal) {
+        if (! $meal) {
             return response()->json(['message' => 'Meal not found.'], 404);
         }
 
@@ -248,8 +246,8 @@ class MealController extends Controller
         // Delete associated image file before deleting the meal record
         if ($meal->image) {
             // Convert URL back to storage path
-             $imagePath = str_replace('/storage/', 'public/', $meal->image);
-             Storage::delete($imagePath);
+            $imagePath = str_replace('/storage/', 'public/', $meal->image);
+            Storage::delete($imagePath);
         }
 
         $meal->delete();

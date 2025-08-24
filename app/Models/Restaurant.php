@@ -21,13 +21,13 @@ class Restaurant extends Model
         'cuisine_type',
         'delivery_radius',
         'is_active',
-        'average_rating'
+        'average_rating',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'delivery_radius' => 'decimal:2',
-        'average_rating' => 'decimal:2'
+        'average_rating' => 'decimal:2',
     ];
 
     public function user()

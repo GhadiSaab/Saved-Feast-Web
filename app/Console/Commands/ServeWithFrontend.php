@@ -42,6 +42,7 @@ class ServeWithFrontend extends Command
         // Check if package.json exists (frontend dependencies installed)
         if (! file_exists(base_path('package.json'))) {
             $this->error('Frontend dependencies not found. Please run: npm install');
+
             return 1;
         }
 
@@ -53,7 +54,7 @@ class ServeWithFrontend extends Command
 
         // Check if concurrently is installed
         $packageJson = json_decode(file_get_contents(base_path('package.json')), true);
-        $hasConcurrently = isset($packageJson['devDependencies']['concurrently']) || 
+        $hasConcurrently = isset($packageJson['devDependencies']['concurrently']) ||
                           isset($packageJson['dependencies']['concurrently']);
 
         if (! $hasConcurrently) {
@@ -62,15 +63,15 @@ class ServeWithFrontend extends Command
         }
 
         $this->info('Starting both servers using npm script...');
-        
+
         // Use the npm script which uses concurrently
         $process = new Process(['npm', 'run', 'serve:full'], base_path());
         $process->setTimeout(null);
         $process->setIdleTimeout(null);
-        
+
         // Run the process with real-time output
         $process->run(function ($type, $buffer) {
-            if (Process::ERR === $type) {
+            if ($type === Process::ERR) {
                 $this->error($buffer);
             } else {
                 $this->line($buffer);

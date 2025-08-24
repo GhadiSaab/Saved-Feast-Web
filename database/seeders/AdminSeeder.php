@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
@@ -16,7 +16,7 @@ class AdminSeeder extends Seeder
     {
         // Create admin role if it doesn't exist
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        
+
         // Create admin user if it doesn't exist
         $adminUser = User::firstOrCreate(
             ['email' => 'admin@savedfeast.com'],
@@ -26,13 +26,13 @@ class AdminSeeder extends Seeder
                 'email' => 'admin@savedfeast.com',
                 'password' => Hash::make('admin123'),
                 'phone' => '+1234567890',
-                'address' => 'Admin Address'
+                'address' => 'Admin Address',
             ]
         );
-        
+
         // Assign admin role to user
         $adminUser->roles()->sync([$adminRole->id]);
-        
+
         $this->command->info('Admin user created successfully!');
         $this->command->info('Email: admin@savedfeast.com');
         $this->command->info('Password: admin123');

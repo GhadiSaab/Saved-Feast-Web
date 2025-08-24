@@ -4,11 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
-use App\Models\Meal;
-use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class RestaurantController extends Controller
 {
@@ -49,8 +46,8 @@ class RestaurantController extends Controller
                 'total' => $restaurants->total(),
                 'from' => $restaurants->firstItem(),
                 'to' => $restaurants->lastItem(),
-                'has_more_pages' => $restaurants->hasMorePages()
-            ]
+                'has_more_pages' => $restaurants->hasMorePages(),
+            ],
         ]);
     }
 
@@ -75,8 +72,8 @@ class RestaurantController extends Controller
                 'delivery_radius' => $restaurant->delivery_radius,
                 'average_rating' => $restaurant->average_rating,
                 'is_active' => $restaurant->is_active,
-                'meals' => $restaurant->meals
-            ]
+                'meals' => $restaurant->meals,
+            ],
         ]);
     }
 
@@ -96,9 +93,9 @@ class RestaurantController extends Controller
                     'title' => $meal->title,
                     'description' => $meal->description,
                     'current_price' => $meal->current_price,
-                    'is_available' => $meal->quantity > 0
+                    'is_available' => $meal->quantity > 0,
                 ];
-            })
+            }),
         ]);
     }
 
@@ -108,7 +105,7 @@ class RestaurantController extends Controller
     public function ratings(Restaurant $restaurant)
     {
         $reviews = $restaurant->reviews()->with('user')->get();
-        
+
         $ratingsBreakdown = $reviews->groupBy('rating')
             ->map(function ($group) {
                 return count($group);
@@ -120,8 +117,8 @@ class RestaurantController extends Controller
             'data' => [
                 'average_rating' => $restaurant->average_rating,
                 'total_reviews' => $reviews->count(),
-                'ratings_breakdown' => $ratingsBreakdown
-            ]
+                'ratings_breakdown' => $ratingsBreakdown,
+            ],
         ]);
     }
 
@@ -137,7 +134,7 @@ class RestaurantController extends Controller
             'phone' => 'nullable|string',
             'email' => 'required|email|unique:restaurants,email',
             'cuisine_type' => 'nullable|string',
-            'delivery_radius' => 'nullable|numeric|min:0'
+            'delivery_radius' => 'nullable|numeric|min:0',
         ]);
 
         $restaurant = Restaurant::create([
@@ -149,7 +146,7 @@ class RestaurantController extends Controller
             'email' => $request->email,
             'cuisine_type' => $request->cuisine_type,
             'delivery_radius' => $request->delivery_radius ?? 5.0,
-            'is_active' => false // New restaurants need approval
+            'is_active' => false, // New restaurants need approval
         ]);
 
         return response()->json([
@@ -160,8 +157,8 @@ class RestaurantController extends Controller
                 'name' => $restaurant->name,
                 'description' => $restaurant->description,
                 'address' => $restaurant->address,
-                'user_id' => $restaurant->user_id
-            ]
+                'user_id' => $restaurant->user_id,
+            ],
         ], 201);
     }
 
@@ -174,7 +171,7 @@ class RestaurantController extends Controller
         if ($restaurant->user_id !== Auth::id()) {
             return response()->json([
                 'status' => false,
-                'message' => 'Unauthorized'
+                'message' => 'Unauthorized',
             ], 403);
         }
 
@@ -182,16 +179,16 @@ class RestaurantController extends Controller
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'cuisine_type' => 'nullable|string',
-            'delivery_radius' => 'nullable|numeric|min:0'
+            'delivery_radius' => 'nullable|numeric|min:0',
         ]);
 
         $restaurant->update($request->only([
-            'name', 'description', 'cuisine_type', 'delivery_radius'
+            'name', 'description', 'cuisine_type', 'delivery_radius',
         ]));
 
         return response()->json([
             'status' => true,
-            'message' => 'Restaurant updated successfully'
+            'message' => 'Restaurant updated successfully',
         ]);
     }
 
@@ -207,7 +204,7 @@ class RestaurantController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Provider restaurants retrieved successfully',
-            'data' => $restaurants
+            'data' => $restaurants,
         ]);
     }
 }

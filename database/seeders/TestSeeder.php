@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Role;
 use App\Models\Category;
-use App\Models\Restaurant;
 use App\Models\Meal;
+use App\Models\Restaurant;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class TestSeeder extends Seeder
@@ -31,7 +31,7 @@ class TestSeeder extends Seeder
                 'email' => 'admin@test.com',
                 'password' => Hash::make('password123'),
                 'phone' => '+1234567890',
-                'address' => '123 Admin St'
+                'address' => '123 Admin St',
             ]
         );
         $admin->roles()->sync([$adminRole->id]);
@@ -44,7 +44,7 @@ class TestSeeder extends Seeder
                 'email' => 'user@test.com',
                 'password' => Hash::make('password123'),
                 'phone' => '+1234567891',
-                'address' => '456 User St'
+                'address' => '456 User St',
             ]
         );
         $user->roles()->sync([$userRole->id]);
@@ -57,7 +57,7 @@ class TestSeeder extends Seeder
                 'email' => 'provider@test.com',
                 'password' => Hash::make('password123'),
                 'phone' => '+1234567892',
-                'address' => '789 Provider St'
+                'address' => '789 Provider St',
             ]
         );
         $provider->roles()->sync([$providerRole->id]);
@@ -68,7 +68,7 @@ class TestSeeder extends Seeder
             'Mexican' => 'Mexican cuisine',
             'Asian' => 'Asian cuisine',
             'American' => 'American cuisine',
-            'Vegetarian' => 'Vegetarian options'
+            'Vegetarian' => 'Vegetarian options',
         ];
 
         foreach ($categories as $name => $description) {
@@ -77,7 +77,7 @@ class TestSeeder extends Seeder
                 [
                     'name' => $name,
                     'description' => $description,
-                    'is_active' => true
+                    'is_active' => true,
                 ]
             );
         }
@@ -95,7 +95,7 @@ class TestSeeder extends Seeder
                 'is_active' => true,
                 'cuisine_type' => 'Italian',
                 'delivery_radius' => 5.0,
-                'average_rating' => 4.5
+                'average_rating' => 4.5,
             ]
         );
 
@@ -110,7 +110,7 @@ class TestSeeder extends Seeder
                 'is_available' => true,
                 'preparation_time' => 20,
                 'calories' => 800,
-                'is_vegetarian' => true
+                'is_vegetarian' => true,
             ],
             [
                 'title' => 'Chicken Burger',
@@ -121,7 +121,7 @@ class TestSeeder extends Seeder
                 'is_available' => true,
                 'preparation_time' => 15,
                 'calories' => 650,
-                'is_vegetarian' => false
+                'is_vegetarian' => false,
             ],
             [
                 'title' => 'Vegetable Stir Fry',
@@ -132,8 +132,8 @@ class TestSeeder extends Seeder
                 'is_available' => true,
                 'preparation_time' => 12,
                 'calories' => 450,
-                'is_vegetarian' => true
-            ]
+                'is_vegetarian' => true,
+            ],
         ];
 
         foreach ($meals as $mealData) {

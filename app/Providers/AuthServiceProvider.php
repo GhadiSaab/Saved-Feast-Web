@@ -2,16 +2,16 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use App\Models\User;
 use App\Models\Meal;
-use App\Models\Restaurant;
 use App\Models\Order;
+use App\Models\Restaurant;
+use App\Models\User;
 use App\Policies\MealPolicy;
-use App\Policies\RestaurantPolicy;
 use App\Policies\OrderPolicy;
+use App\Policies\RestaurantPolicy;
 use App\Policies\UserPolicy;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -62,6 +62,7 @@ class AuthServiceProvider extends ServiceProvider
             if (! $user->roles()->where('name', 'provider')->exists()) {
                 return false;
             }
+
             return $user->restaurants()->where('id', $meal->restaurant_id)->exists();
         });
 
@@ -69,6 +70,7 @@ class AuthServiceProvider extends ServiceProvider
             if (! $user->roles()->where('name', 'provider')->exists()) {
                 return false;
             }
+
             return $restaurant->user_id === $user->id;
         });
 

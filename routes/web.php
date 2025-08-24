@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Models\User; // Keep this if needed, otherwise remove
+// Keep this if needed, otherwise remove
 use Illuminate\Support\Facades\View; // Add this for view check
 
 /*
@@ -60,7 +60,6 @@ use Illuminate\Support\Facades\View; // Add this for view check
 // // Route::get('/meals/{meal}', 'MealController@show')->name('meals.show');
 // // Route::get('/providers/{provider}', 'ProviderController@show')->name('providers.show');
 
-
 // Catch-all route for the React SPA
 // This route should be the last route defined in this file.
 // It ensures that any web request that doesn't match a previous route
@@ -74,6 +73,6 @@ Route::get('/{any?}', function () {
     } else {
         // Fallback or error handling if 'app.blade.php' is missing
         // This could be a simple 404 or a more informative error page
-        abort(404, "Application entry point not found.");
+        abort(404, 'Application entry point not found.');
     }
 })->where('any', '^(?!api).*$'); // Exclude routes starting with 'api/'

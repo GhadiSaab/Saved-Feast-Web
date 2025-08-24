@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Role; // Import Role model
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB; // Import DB facade for role check/creation
+use App\Models\Role;
+use App\Models\User; // Import Role model
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB; // Import DB facade for role check/creation
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -36,7 +36,6 @@ class UserSeeder extends Seeder
         // Assign Admin Role
         $adminUser->roles()->attach($adminRole->id);
 
-
         // --- Create Provider User ---
         $providerUser = User::create([
             'first_name' => 'Restaurant',
@@ -49,7 +48,6 @@ class UserSeeder extends Seeder
         // Assign Provider Role
         $providerUser->roles()->attach($providerRole->id);
 
-
         // --- Create Regular Customer Users ---
         for ($i = 0; $i < 10; $i++) {
             $customerUser = User::create([
@@ -57,8 +55,8 @@ class UserSeeder extends Seeder
                 'last_name' => $faker->lastName(),
                 'email' => $faker->unique()->safeEmail(), // Use faker for unique emails
                 'password' => Hash::make('password'),
-            'phone' => $faker->phoneNumber(),
-            'address' => $faker->address(),
+                'phone' => $faker->phoneNumber(),
+                'address' => $faker->address(),
             ]);
             // Assign Customer Role
             $customerUser->roles()->attach($customerRole->id);

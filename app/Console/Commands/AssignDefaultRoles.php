@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
+use Illuminate\Console\Command;
 
 class AssignDefaultRoles extends Command
 {
@@ -28,16 +28,18 @@ class AssignDefaultRoles extends Command
     public function handle()
     {
         $customerRole = Role::where('name', 'customer')->first();
-        
+
         if (! $customerRole) {
             $this->error('Customer role not found. Please run the roles migration first.');
+
             return 1;
         }
 
         $usersWithoutRoles = User::whereDoesntHave('roles')->get();
-        
+
         if ($usersWithoutRoles->isEmpty()) {
             $this->info('All users already have roles assigned.');
+
             return 0;
         }
 

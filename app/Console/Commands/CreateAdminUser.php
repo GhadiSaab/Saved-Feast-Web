@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 
 class CreateAdminUser extends Command
@@ -42,15 +42,16 @@ class CreateAdminUser extends Command
                 $this->warn('User with email '.$email.' already exists!');
                 $this->info('User ID: '.$existingUser->id);
                 $this->info('User name: '.$existingUser->first_name.' '.$existingUser->last_name);
-                
+
                 // Check if user has admin role
                 if ($existingUser->hasRole('admin')) {
-                    $this->info("User already has admin role!");
+                    $this->info('User already has admin role!');
                 } else {
-                    $this->info("Assigning admin role to existing user...");
+                    $this->info('Assigning admin role to existing user...');
                     $existingUser->roles()->sync([$adminRole->id]);
-                    $this->info("Admin role assigned successfully!");
+                    $this->info('Admin role assigned successfully!');
                 }
+
                 return;
             }
 
@@ -61,17 +62,17 @@ class CreateAdminUser extends Command
                 'email' => $email,
                 'password' => Hash::make($password),
                 'phone' => '+1234567890',
-                'address' => 'Admin Address'
+                'address' => 'Admin Address',
             ]);
 
-            $this->info("Admin user created successfully!");
+            $this->info('Admin user created successfully!');
             $this->info('User ID: '.$adminUser->id);
             $this->info('Email: '.$adminUser->email);
             $this->info('Name: '.$adminUser->first_name.' '.$adminUser->last_name);
 
             // Assign admin role
             $adminUser->roles()->attach($adminRole->id);
-            $this->info("Admin role assigned successfully!");
+            $this->info('Admin role assigned successfully!');
 
             $this->info("\nLogin credentials:");
             $this->info('Email: '.$email);

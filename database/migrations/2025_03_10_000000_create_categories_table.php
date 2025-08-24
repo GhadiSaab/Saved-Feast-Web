@@ -17,9 +17,9 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->timestamps();
         });
-        
+
         // Add category_id to meals table if it doesn't exist
-        if (!Schema::hasColumn('meals', 'category_id')) {
+        if (! Schema::hasColumn('meals', 'category_id')) {
             Schema::table('meals', function (Blueprint $table) {
                 $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');
             });
@@ -38,7 +38,7 @@ return new class extends Migration
                 $table->dropColumn('category_id');
             });
         }
-        
+
         Schema::dropIfExists('categories');
     }
 };

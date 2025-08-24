@@ -1,15 +1,15 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\MealController;
 use App\Http\Controllers\API\OrderController;
-use App\Http\Controllers\API\RestaurantApplicationController; // Import RestaurantApplicationController
-use App\Http\Controllers\API\Provider\MealController as ProviderMealController; // Import Provider Meal Controller
-use App\Http\Controllers\API\Provider\ProfileController as ProviderProfileController; // Import Provider Profile Controller
-use App\Http\Controllers\API\CategoryController; // Import Category Controller
-use Illuminate\Support\Facades\Gate; // Import Gate facade
+use App\Http\Controllers\API\Provider\MealController as ProviderMealController;
+use App\Http\Controllers\API\Provider\ProfileController as ProviderProfileController; // Import RestaurantApplicationController
+use App\Http\Controllers\API\RestaurantApplicationController; // Import Provider Meal Controller
+use Illuminate\Http\Request; // Import Provider Profile Controller
+use Illuminate\Support\Facades\Gate; // Import Category Controller
+use Illuminate\Support\Facades\Route; // Import Gate facade
 
 /*
 |--------------------------------------------------------------------------
@@ -32,7 +32,7 @@ Route::get('/', function () {
         'status' => 'success',
         'message' => 'SavedFeast API is running',
         'version' => '1.0.0',
-        'timestamp' => now()->toISOString()
+        'timestamp' => now()->toISOString(),
     ]);
 });
 
@@ -57,11 +57,11 @@ Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function () {
     // Favorite routes
     Route::post('/meals/{id}/favorite', [MealController::class, 'toggleFavorite'])->name('api.meals.toggleFavorite');
     Route::get('/meals/favorites', [MealController::class, 'getFavorites'])->name('api.meals.favorites');
-    
+
     // Restaurant routes
     Route::post('/restaurants', [App\Http\Controllers\API\RestaurantController::class, 'store'])->name('api.restaurants.store');
     Route::put('/restaurants/{restaurant}', [App\Http\Controllers\API\RestaurantController::class, 'update'])->name('api.restaurants.update');
-    
+
     // Order routes (protected by policies)
     Route::apiResource('orders', OrderController::class)->names([
         'index' => 'api.orders.index',
@@ -70,7 +70,7 @@ Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function () {
         'update' => 'api.orders.update',
         'destroy' => 'api.orders.destroy',
     ]);
-    
+
     // Additional order actions
     Route::patch('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('api.orders.cancel');
     Route::post('/orders/{order}/complete', [OrderController::class, 'complete'])->name('api.orders.complete');
@@ -95,6 +95,7 @@ Route::middleware(['auth:sanctum', 'throttle:300,1'])->prefix('provider')->name(
     // Dashboard data (protected by provider-access gate)
     Route::get('/dashboard-data', function () {
         Gate::authorize('provider-access');
+
         return response()->json(['message' => 'Welcome to the Provider Dashboard!']);
     })->name('dashboard');
 
@@ -104,7 +105,7 @@ Route::middleware(['auth:sanctum', 'throttle:300,1'])->prefix('provider')->name(
     // Provider Profile Routes (protected by UserPolicy)
     Route::get('/profile', [ProviderProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile/picture', [ProviderProfileController::class, 'updatePicture'])->name('profile.updatePicture');
-    
+
     // Restaurant Management Routes for Providers
     Route::post('/restaurants', [App\Http\Controllers\API\RestaurantController::class, 'store'])->name('restaurants.store');
     Route::put('/restaurants/{restaurant}', [App\Http\Controllers\API\RestaurantController::class, 'update'])->name('restaurants.update');
@@ -124,16 +125,16 @@ Route::middleware(['auth:sanctum', 'throttle:600,1'])->prefix('admin')->name('ap
         Route::put('/users/{user}/roles', [App\Http\Controllers\API\AdminController::class, 'updateUserRole'])->name('users.updateRole');
         Route::put('/users/{user}/status', [App\Http\Controllers\API\AdminController::class, 'toggleUserStatus'])->name('users.toggleStatus');
         Route::put('/orders/{order}', [App\Http\Controllers\API\AdminController::class, 'updateOrder'])->name('orders.update');
-        
+
         // Export routes
         Route::get('/export/users', [App\Http\Controllers\API\AdminController::class, 'exportUsers'])->name('export.users');
         Route::get('/export/orders', [App\Http\Controllers\API\AdminController::class, 'exportOrders'])->name('export.orders');
         Route::get('/export/restaurants', [App\Http\Controllers\API\AdminController::class, 'exportRestaurants'])->name('export.restaurants');
-        
+
         // Settings routes
         Route::get('/settings', [App\Http\Controllers\API\AdminController::class, 'getSettings'])->name('settings.get');
         Route::put('/settings', [App\Http\Controllers\API\AdminController::class, 'updateSettings'])->name('settings.update');
-        
+
         // Restaurant approval routes
         Route::put('/restaurants/{restaurant}/approve', [App\Http\Controllers\API\AdminController::class, 'approveRestaurant'])->name('restaurants.approve');
         Route::put('/restaurants/{restaurant}/reject', [App\Http\Controllers\API\AdminController::class, 'rejectRestaurant'])->name('restaurants.reject');

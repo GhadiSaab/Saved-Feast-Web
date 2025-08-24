@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,7 +29,7 @@ class Meal extends Model
         'image', // Assuming 'image' is the correct DB column for the URL/path
         'available_from', // Add available_from
         'available_until', // Add available_until
-     ];
+    ];
 
     /**
      * The attributes that should be cast.
@@ -71,8 +71,6 @@ class Meal extends Model
 
     /**
      * Get the full URL for the meal's image.
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     protected function imageUrl(): Attribute
     {

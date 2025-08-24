@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Meal;
 use App\Models\Category;
-use App\Models\Restaurant;
-use Illuminate\Validation\Rule;
-use Exception;
-use Illuminate\Support\Facades\Validator;
 use App\Models\Favorite;
+use App\Models\Meal;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class MealController extends Controller
 {
@@ -44,7 +42,7 @@ class MealController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Validation failed',
-                    'errors' => $validator->errors()
+                    'errors' => $validator->errors(),
                 ], 422);
             }
 
@@ -73,22 +71,22 @@ class MealController extends Controller
                 $now = now();
                 $available = $request->string('available');
                 $isAvailable = in_array($available, ['true', '1']);
-                
+
                 if ($isAvailable) {
                     // Show only available meals
                     $query->where(function ($q) use ($now) {
                         $q->whereNull('available_from')
-                          ->orWhere('available_from', '<=', $now);
+                            ->orWhere('available_from', '<=', $now);
                     })->where(function ($q) use ($now) {
                         $q->whereNull('available_until')
-                          ->orWhere('available_until', '>=', $now);
+                            ->orWhere('available_until', '>=', $now);
                     })->where('quantity', '>', 0);
                 } else {
                     // Show unavailable meals
                     $query->where(function ($q) use ($now) {
                         $q->where('available_from', '>', $now)
-                          ->orWhere('available_until', '<', $now)
-                          ->orWhere('quantity', '<=', 0);
+                            ->orWhere('available_until', '<', $now)
+                            ->orWhere('quantity', '<=', 0);
                     });
                 }
             }
@@ -98,13 +96,13 @@ class MealController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('title', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%")
-                      ->orWhereHas('category', function ($categoryQuery) use ($search) {
-                          $categoryQuery->where('name', 'like', "%{$search}%");
-                      })
-                      ->orWhereHas('restaurant', function ($restaurantQuery) use ($search) {
-                          $restaurantQuery->where('name', 'like', "%{$search}%");
-                      });
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhereHas('category', function ($categoryQuery) use ($search) {
+                            $categoryQuery->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('restaurant', function ($restaurantQuery) use ($search) {
+                            $restaurantQuery->where('name', 'like', "%{$search}%");
+                        });
                 });
             }
 
@@ -140,7 +138,7 @@ class MealController extends Controller
                     'search' => $request->search,
                     'sort_by' => $sortBy,
                     'sort_order' => $sortOrder,
-                ]
+                ],
             ];
 
             return response()->json($response, 200);
@@ -149,7 +147,7 @@ class MealController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to retrieve meals',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -174,20 +172,20 @@ class MealController extends Controller
                 'sort_orders' => [
                     ['value' => 'asc', 'label' => 'Ascending'],
                     ['value' => 'desc', 'label' => 'Descending'],
-                ]
+                ],
             ];
 
             return response()->json([
                 'status' => true,
                 'message' => 'Filters retrieved successfully',
-                'data' => $filters
+                'data' => $filters,
             ], 200);
 
         } catch (Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to retrieve filters',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -195,11 +193,11 @@ class MealController extends Controller
     public function getCategories()
     {
         $categories = Category::all();
-        
+
         return response()->json([
             'status' => true,
             'message' => 'Categories retrieved successfully',
-            'data' => $categories
+            'data' => $categories,
         ], 200);
     }
 
@@ -209,8 +207,8 @@ class MealController extends Controller
         $meal = Meal::findOrFail($id);
 
         $favorite = Favorite::where('user_id', $user->id)
-                           ->where('meal_id', $meal->id)
-                           ->first();
+            ->where('meal_id', $meal->id)
+            ->first();
 
         if ($favorite) {
             $favorite->delete();
@@ -230,23 +228,23 @@ class MealController extends Controller
             'message' => $message,
             'data' => [
                 'is_favorited' => $isFavorited,
-                'meal_id' => $meal->id
-            ]
+                'meal_id' => $meal->id,
+            ],
         ], 200);
     }
 
     public function getFavorites(Request $request)
     {
         $user = $request->user();
-        
+
         $favorites = $user->favoriteMeals()
-                         ->with(['restaurant', 'category'])
-                         ->get();
+            ->with(['restaurant', 'category'])
+            ->get();
 
         return response()->json([
             'status' => true,
             'message' => 'Favorites retrieved successfully',
-            'data' => $favorites
+            'data' => $favorites,
         ], 200);
     }
 }

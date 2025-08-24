@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Meal;
 use App\Models\Restaurant;
-use App\Models\Category;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Faker\Factory as Faker;
 use Carbon\Carbon;
+use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class MealSeeder extends Seeder
 {
@@ -18,28 +17,29 @@ class MealSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-        
+
         // Get all restaurant IDs
         $restaurantIds = Restaurant::pluck('id')->toArray();
-        
+
         // Get all category IDs
         $categoryIds = Category::pluck('id')->toArray();
-        
+
         // If no restaurants or categories exist, we can't create meals
         if (empty($restaurantIds) || empty($categoryIds)) {
             $this->command->info('Please seed restaurants and categories first!');
+
             return;
         }
-        
+
         // Sample meal names for more realistic data
         $mealNames = [
-            'Chicken Biryani', 'Veggie Pizza', 'Beef Burger', 'Caesar Salad', 
+            'Chicken Biryani', 'Veggie Pizza', 'Beef Burger', 'Caesar Salad',
             'Sushi Platter', 'Pasta Carbonara', 'Grilled Salmon', 'Chicken Alfredo',
             'Margherita Pizza', 'Vegetable Stir Fry', 'Fish and Chips', 'Beef Steak',
             'Vegetable Curry', 'Mushroom Risotto', 'Chicken Wings', 'Lamb Chops',
-            'Vegetable Lasagna', 'Shrimp Scampi', 'Beef Tacos', 'Greek Salad'
+            'Vegetable Lasagna', 'Shrimp Scampi', 'Beef Tacos', 'Greek Salad',
         ];
-        
+
         // Statuses with weighted distribution
         $statuses = ['available' => 7, 'expired' => 2, 'sold_out' => 1];
         $statusOptions = [];
@@ -48,7 +48,7 @@ class MealSeeder extends Seeder
                 $statusOptions[] = $status;
             }
         }
-        
+
         // Create 50 meals
         for ($i = 0; $i < 50; $i++) {
             $restaurantId = $faker->randomElement($restaurantIds);
@@ -84,7 +84,7 @@ class MealSeeder extends Seeder
                 'available_from' => $availableFrom,
                 'available_until' => $availableUntil,
                 'status' => $status,
-                'image' => 'meals/meal-' . $faker->numberBetween(1, 10) . '.jpg',
+                'image' => 'meals/meal-'.$faker->numberBetween(1, 10).'.jpg',
             ]);
         }
     }

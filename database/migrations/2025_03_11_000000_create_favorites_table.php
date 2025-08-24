@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('meal_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-            
+
             // Ensure a user can only favorite a meal once
             $table->unique(['user_id', 'meal_id']);
         });

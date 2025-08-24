@@ -3,18 +3,15 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log; // Import Log facade
-use Illuminate\Support\Facades\Mail; // Import Mail facade
-use App\Mail\RestaurantApplicationReceived; // We will create this Mail class later
+use App\Mail\RestaurantApplicationReceived;
+use Illuminate\Http\Request; // Import Log facade
+use Illuminate\Support\Facades\Log; // Import Mail facade
+use Illuminate\Support\Facades\Mail; // We will create this Mail class later
 
 class RestaurantApplicationController extends Controller
 {
     /**
      * Store a newly submitted restaurant application.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -46,7 +43,7 @@ class RestaurantApplicationController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to process restaurant application:', [
                 'error' => $e->getMessage(),
-                'data' => $validatedData
+                'data' => $validatedData,
             ]);
 
             return response()->json([

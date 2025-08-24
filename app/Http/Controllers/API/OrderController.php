@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\API; // Corrected namespace
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Meal;
 use App\Models\Order;
-use App\Models\Meal; // Import Meal model
+use Illuminate\Http\Request; // Import Meal model
 use Illuminate\Support\Facades\Log; // Import Log facade
 
 class OrderController extends Controller
@@ -30,21 +30,21 @@ class OrderController extends Controller
         if ($user->isProvider()) {
             // Providers see orders for their restaurants through order items and meals
             $restaurantIds = $user->restaurants()->pluck('id');
-            $orders = Order::whereHas('orderItems.meal', function($query) use ($restaurantIds) {
+            $orders = Order::whereHas('orderItems.meal', function ($query) use ($restaurantIds) {
                 $query->whereIn('restaurant_id', $restaurantIds);
             })->with('orderItems.meal')
-              ->get();
+                ->get();
         } else {
             // Consumers see their own orders
             $orders = Order::where('user_id', $user->id)
-                          ->with('orderItems.meal')
-                          ->get();
+                ->with('orderItems.meal')
+                ->get();
         }
 
         return response()->json([
             'status' => true,
             'message' => 'Orders retrieved successfully',
-            'data' => $orders
+            'data' => $orders,
         ], 200);
     }
 
@@ -61,7 +61,7 @@ class OrderController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Order retrieved successfully',
-            'data' => $order
+            'data' => $order,
         ], 200);
     }
 
@@ -92,9 +92,9 @@ class OrderController extends Controller
             // Validate meal availability and calculate total
             foreach ($request->items as $itemData) {
                 $meal = Meal::with('restaurant')->findOrFail($itemData['meal_id']);
-                
+
                 // Check if meal is available
-                if (!$meal->quantity || $meal->quantity < $itemData['quantity']) {
+                if (! $meal->quantity || $meal->quantity < $itemData['quantity']) {
                     throw new \Exception("Insufficient quantity available for meal: {$meal->title}");
                 }
 
@@ -115,16 +115,16 @@ class OrderController extends Controller
                 ];
 
                 // Track restaurant for notifications
-                if ($meal->restaurant && !isset($restaurantNotifications[$meal->restaurant->id])) {
+                if ($meal->restaurant && ! isset($restaurantNotifications[$meal->restaurant->id])) {
                     $restaurantNotifications[$meal->restaurant->id] = [
                         'restaurant' => $meal->restaurant,
-                        'meals' => []
+                        'meals' => [],
                     ];
                 }
                 if ($meal->restaurant) {
                     $restaurantNotifications[$meal->restaurant->id]['meals'][] = [
                         'meal' => $meal,
-                        'quantity' => $itemData['quantity']
+                        'quantity' => $itemData['quantity'],
                     ];
                 }
             }
@@ -141,11 +141,11 @@ class OrderController extends Controller
             // Create order items and update meal quantities
             foreach ($orderItems as $itemData) {
                 $order->orderItems()->create($itemData);
-                
+
                 // Decrease meal quantity
                 $meal = Meal::find($itemData['meal_id']);
                 $meal->decrement('quantity', $itemData['quantity']);
-                
+
                 // If meal is now out of stock, log it
                 if ($meal->fresh()->quantity <= 0) {
                     Log::info("Meal {$meal->title} is now out of stock after order {$order->id}");
@@ -166,21 +166,21 @@ class OrderController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Order created successfully',
-                'data' => $order
+                'data' => $order,
             ], 201);
 
         } catch (\Exception $e) {
             // Rollback transaction on error
             \DB::rollBack();
-            
-            Log::error('Order creation failed: ' . $e->getMessage(), [
+
+            Log::error('Order creation failed: '.$e->getMessage(), [
                 'user_id' => $user->id,
-                'request_data' => $request->all()
+                'request_data' => $request->all(),
             ]);
 
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 400);
         }
     }
@@ -190,14 +190,14 @@ class OrderController extends Controller
         try {
             $restaurant = $restaurantData['restaurant'];
             $meals = $restaurantData['meals'];
-            
+
             // Log the notification (in a real app, you'd send push notifications, emails, etc.)
             Log::info("New order notification for restaurant: {$restaurant->name}", [
                 'order_id' => $order->id,
                 'restaurant_id' => $restaurant->id,
                 'meals' => $meals,
                 'total_amount' => $order->total_amount,
-                'pickup_time' => $order->pickup_time
+                'pickup_time' => $order->pickup_time,
             ]);
 
             // Here you could implement:
@@ -205,9 +205,9 @@ class OrderController extends Controller
             // - Email notifications
             // - SMS notifications
             // - Webhook calls to restaurant systems
-            
+
         } catch (\Exception $e) {
-            Log::error('Failed to notify restaurant: ' . $e->getMessage());
+            Log::error('Failed to notify restaurant: '.$e->getMessage());
         }
     }
 
@@ -229,9 +229,10 @@ class OrderController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Order updated successfully',
-            'data' => $order
+            'data' => $order,
         ], 200);
     }
+
     public function destroy($id, Request $request)
     {
         $user = $request->user();
@@ -245,6 +246,7 @@ class OrderController extends Controller
             'message' => 'Order deleted successfully',
         ], 200);
     }
+
     public function cancel(Order $order, Request $request)
     {
         $user = $request->user();
@@ -253,7 +255,7 @@ class OrderController extends Controller
         if ($order->user_id !== $user->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized'
+                'message' => 'Unauthorized',
             ], 403);
         }
 
@@ -261,7 +263,7 @@ class OrderController extends Controller
         if ($order->status === 'delivered' || $order->status === 'completed') {
             return response()->json([
                 'success' => false,
-                'message' => 'Cannot cancel completed order'
+                'message' => 'Cannot cancel completed order',
             ], 422);
         }
 
@@ -271,9 +273,10 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Order cancelled successfully',
-            'data' => $order
+            'data' => $order,
         ], 200);
     }
+
     public function complete($id, Request $request)
     {
         $user = $request->user();
@@ -285,7 +288,7 @@ class OrderController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Order completed successfully',
-            'data' => $order
+            'data' => $order,
         ], 200);
     }
 }

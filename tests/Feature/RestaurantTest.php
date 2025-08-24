@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Restaurant;
 use App\Models\Category;
 use App\Models\Meal;
+use App\Models\Restaurant;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use App\Models\Role; // Added this import
+use Tests\TestCase; // Added this import
 
 class RestaurantTest extends TestCase
 {
@@ -18,14 +18,14 @@ class RestaurantTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->provider = User::factory()->create();
-        
+
         // Create provider role and assign it to the provider user
         $providerRole = Role::firstOrCreate(['name' => 'provider']);
         $this->provider->roles()->attach($providerRole->id);
-        
+
         $this->category = Category::factory()->create();
     }
 
@@ -35,22 +35,22 @@ class RestaurantTest extends TestCase
 
         $response = $this->getJson('/api/restaurants');
 
-                    $response->assertStatus(200)
-                    ->assertJsonStructure([
-                        'status',
-                        'message',
-                        'data' => [
-                            '*' => [
-                                'id',
-                                'name',
-                                'description',
-                                'address',
-                                'cuisine_type',
-                                'average_rating',
-                                'is_active'
-                            ]
-                        ]
-                    ]);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'message',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'description',
+                        'address',
+                        'cuisine_type',
+                        'average_rating',
+                        'is_active',
+                    ],
+                ],
+            ]);
     }
 
     public function test_can_get_restaurant_details()
@@ -59,24 +59,24 @@ class RestaurantTest extends TestCase
 
         $response = $this->getJson("/api/restaurants/{$restaurant->id}");
 
-                    $response->assertStatus(200)
-                    ->assertJsonStructure([
-                        'status',
-                        'message',
-                        'data' => [
-                            'id',
-                            'name',
-                            'description',
-                            'address',
-                            'phone',
-                            'email',
-                            'cuisine_type',
-                            'delivery_radius',
-                            'average_rating',
-                            'is_active',
-                            'meals'
-                        ]
-                    ]);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'message',
+                'data' => [
+                    'id',
+                    'name',
+                    'description',
+                    'address',
+                    'phone',
+                    'email',
+                    'cuisine_type',
+                    'delivery_radius',
+                    'average_rating',
+                    'is_active',
+                    'meals',
+                ],
+            ]);
     }
 
     public function test_can_filter_restaurants_by_cuisine()
@@ -111,54 +111,54 @@ class RestaurantTest extends TestCase
             'phone' => '+1234567890',
             'email' => 'new@restaurant.com',
             'cuisine_type' => 'Italian',
-            'delivery_radius' => 5.0
+            'delivery_radius' => 5.0,
         ];
 
         $response = $this->actingAs($this->provider)
-                        ->postJson('/api/restaurants', $restaurantData);
+            ->postJson('/api/restaurants', $restaurantData);
 
-                    $response->assertStatus(201)
-                    ->assertJsonStructure([
-                        'status',
-                        'message',
-                        'data' => [
-                            'id',
-                            'name',
-                            'description',
-                            'address',
-                            'user_id'
-                        ]
-                    ]);
+        $response->assertStatus(201)
+            ->assertJsonStructure([
+                'status',
+                'message',
+                'data' => [
+                    'id',
+                    'name',
+                    'description',
+                    'address',
+                    'user_id',
+                ],
+            ]);
 
         $this->assertDatabaseHas('restaurants', [
             'name' => 'New Restaurant',
-            'user_id' => $this->provider->id
+            'user_id' => $this->provider->id,
         ]);
     }
 
     public function test_provider_can_update_their_restaurant()
     {
         $restaurant = Restaurant::factory()->create([
-            'user_id' => $this->provider->id
+            'user_id' => $this->provider->id,
         ]);
 
         $updateData = [
             'name' => 'Updated Restaurant Name',
-            'description' => 'Updated description'
+            'description' => 'Updated description',
         ];
 
         $response = $this->actingAs($this->provider)
-                        ->putJson("/api/restaurants/{$restaurant->id}", $updateData);
+            ->putJson("/api/restaurants/{$restaurant->id}", $updateData);
 
-                    $response->assertStatus(200)
-                    ->assertJson([
-                        'status' => true,
-                        'message' => 'Restaurant updated successfully'
-                    ]);
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Restaurant updated successfully',
+            ]);
 
         $this->assertDatabaseHas('restaurants', [
             'id' => $restaurant->id,
-            'name' => 'Updated Restaurant Name'
+            'name' => 'Updated Restaurant Name',
         ]);
     }
 
@@ -166,15 +166,15 @@ class RestaurantTest extends TestCase
     {
         $otherProvider = User::factory()->create();
         $restaurant = Restaurant::factory()->create([
-            'user_id' => $otherProvider->id
+            'user_id' => $otherProvider->id,
         ]);
 
         $updateData = [
-            'name' => 'Updated Restaurant Name'
+            'name' => 'Updated Restaurant Name',
         ];
 
         $response = $this->actingAs($this->provider)
-                        ->putJson("/api/restaurants/{$restaurant->id}", $updateData);
+            ->putJson("/api/restaurants/{$restaurant->id}", $updateData);
 
         $response->assertStatus(403);
     }
@@ -183,25 +183,25 @@ class RestaurantTest extends TestCase
     {
         $restaurant = Restaurant::factory()->create();
         $meals = Meal::factory()->count(3)->create([
-            'restaurant_id' => $restaurant->id
+            'restaurant_id' => $restaurant->id,
         ]);
 
         $response = $this->getJson("/api/restaurants/{$restaurant->id}/meals");
 
-                    $response->assertStatus(200)
-                    ->assertJsonStructure([
-                        'status',
-                        'message',
-                        'data' => [
-                            '*' => [
-                                'id',
-                                'title',
-                                'description',
-                                'current_price',
-                                'is_available'
-                            ]
-                        ]
-                    ]);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'message',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'title',
+                        'description',
+                        'current_price',
+                        'is_available',
+                    ],
+                ],
+            ]);
 
         $this->assertEquals(3, count($response->json('data')));
     }
@@ -210,11 +210,11 @@ class RestaurantTest extends TestCase
     {
         $invalidData = [
             'name' => '', // Empty name
-            'email' => 'invalid-email' // Invalid email
+            'email' => 'invalid-email', // Invalid email
         ];
 
         $response = $this->actingAs($this->provider)
-                        ->postJson('/api/restaurants', $invalidData);
+            ->postJson('/api/restaurants', $invalidData);
 
         $response->assertStatus(422);
     }
@@ -225,15 +225,15 @@ class RestaurantTest extends TestCase
 
         $response = $this->getJson("/api/restaurants/{$restaurant->id}/ratings");
 
-                    $response->assertStatus(200)
-                    ->assertJsonStructure([
-                        'status',
-                        'message',
-                        'data' => [
-                            'average_rating',
-                            'total_reviews',
-                            'ratings_breakdown'
-                        ]
-                    ]);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'message',
+                'data' => [
+                    'average_rating',
+                    'total_reviews',
+                    'ratings_breakdown',
+                ],
+            ]);
     }
 }

@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
@@ -20,30 +20,30 @@ class AuthTest extends TestCase
             'password' => 'SecurePass123!',
             'password_confirmation' => 'SecurePass123!',
             'phone' => '+1234567890',
-            'address' => '123 Main St'
+            'address' => '123 Main St',
         ];
 
         $response = $this->postJson('/api/register', $userData);
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'success',
-                    'message',
-                    'access_token',
-                    'token_type',
-                    'user' => [
-                        'id',
-                        'first_name',
-                        'last_name',
-                        'email',
-                        'roles'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'access_token',
+                'token_type',
+                'user' => [
+                    'id',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'roles',
+                ],
+            ]);
 
         $this->assertDatabaseHas('users', [
             'email' => 'john@example.com',
             'first_name' => 'John',
-            'last_name' => 'Doe'
+            'last_name' => 'Doe',
         ]);
     }
 
@@ -51,34 +51,34 @@ class AuthTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
-            'password' => bcrypt('password123')
+            'password' => bcrypt('password123'),
         ]);
 
         $response = $this->postJson('/api/login', [
             'email' => 'test@example.com',
-            'password' => 'password123'
+            'password' => 'password123',
         ]);
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'success',
-                    'message',
-                    'access_token',
-                    'token_type',
-                    'user'
-                ]);
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'access_token',
+                'token_type',
+                'user',
+            ]);
     }
 
     public function test_user_cannot_login_with_invalid_credentials()
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
-            'password' => bcrypt('password123')
+            'password' => bcrypt('password123'),
         ]);
 
         $response = $this->postJson('/api/login', [
             'email' => 'test@example.com',
-            'password' => 'wrongpassword'
+            'password' => 'wrongpassword',
         ]);
 
         $response->assertStatus(422);
