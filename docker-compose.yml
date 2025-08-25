@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # Laravel Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: savedfeast-app
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=savedfeast
+      - DB_USERNAME=savedfeast_user
+      - DB_PASSWORD=savedfeast_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - savedfeast-network
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: savedfeast-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=savedfeast
+      - MYSQL_USER=savedfeast_user
+      - MYSQL_PASSWORD=savedfeast_password
+      - MYSQL_ROOT_PASSWORD=root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - savedfeast-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: savedfeast-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - savedfeast-network
+
+  # Nginx (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: savedfeast-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./public:/var/www/html/public
+    depends_on:
+      - app
+    networks:
+      - savedfeast-network
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  savedfeast-network:
+    driver: bridge

@@ -14,6 +14,7 @@
 [![Code Coverage](https://img.shields.io/badge/Code%20Coverage-90%25-brightgreen?style=flat-square)](https://github.com/yourusername/savedfeast-web)
 [![Dependencies](https://img.shields.io/badge/Dependencies-Up%20to%20Date-brightgreen?style=flat-square)](https://github.com/yourusername/savedfeast-web)
 [![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=flat-square&logo=php&logoColor=white)](https://github.com/yourusername/savedfeast-web)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](https://github.com/yourusername/savedfeast-web)
 
 </div>
 
@@ -108,7 +109,35 @@
 
 ## 🚀 Quick Start
 
-### **Prerequisites**
+### **Option 1: Docker Setup (Recommended)**
+
+The easiest way to get started is using Docker. See [DOCKER.md](DOCKER.md) for detailed instructions.
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/savedfeast-web.git
+cd savedfeast-web
+
+# Copy environment file
+cp .env.example .env
+
+# Build and start services
+docker-compose up -d --build
+
+# Setup application
+docker-compose exec app php artisan key:generate
+docker-compose exec app php artisan migrate
+docker-compose exec app php artisan db:seed
+docker-compose exec app php artisan storage:link
+
+# Access the application
+# Web Application: http://localhost:8000
+# API Endpoints: http://localhost:8000/api
+```
+
+### **Option 2: Local Development Setup**
+
+#### **Prerequisites**
 
 - **PHP** 8.2 or higher
 - **Composer** 2.0+
@@ -116,7 +145,7 @@
 - **MySQL** 8.0+
 - **Git**
 
-### **Installation**
+#### **Installation**
 
 1. **Clone the repository**
    ```bash
