@@ -18,6 +18,7 @@ class MealFactory extends Factory
     {
         return [
             'restaurant_id' => \App\Models\Restaurant::factory(),
+            'category_id' => \App\Models\Category::factory(),
             'title' => fake()->words(3, true),
             'description' => fake()->paragraph(),
             'original_price' => fake()->randomFloat(2, 10, 50),

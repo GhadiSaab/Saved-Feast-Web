@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('meals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('restaurant_id')->references('id')->on('restaurants')->onDelete('cascade');
+            $table->unsignedBigInteger('category_id')->nullable();
             $table->string('title');
             $table->text('description')->nullable();
             $table->decimal('current_price', 8, 2); // Renamed from 'price' - This is the discounted price

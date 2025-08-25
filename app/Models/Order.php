@@ -22,6 +22,18 @@ class Order extends Model
         'user_id',
         'total_amount',
         'status',
+        'pickup_time',
+        'notes',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'total_amount' => 'decimal:2',
+        'pickup_time' => 'datetime',
     ];
 
     /**
