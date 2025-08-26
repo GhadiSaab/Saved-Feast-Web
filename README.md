@@ -10,11 +10,13 @@
 
 **A professional full-stack web platform for SavedFeast - an innovative food delivery platform that combats food waste by connecting restaurants with consumers.**
 
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square)](https://github.com/yourusername/savedfeast-web)
-[![Code Coverage](https://img.shields.io/badge/Code%20Coverage-90%25-brightgreen?style=flat-square)](https://github.com/yourusername/savedfeast-web)
-[![Dependencies](https://img.shields.io/badge/Dependencies-Up%20to%20Date-brightgreen?style=flat-square)](https://github.com/yourusername/savedfeast-web)
-[![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=flat-square&logo=php&logoColor=white)](https://github.com/yourusername/savedfeast-web)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](https://github.com/yourusername/savedfeast-web)
+[![CI/CD Pipeline](https://github.com/GhadiSaab/savedfeast-web/workflows/CI%20Pipeline/badge.svg)](https://github.com/GhadiSaab/savedfeast-web/actions/workflows/ci.yml)
+[![Code Coverage](https://img.shields.io/badge/Code%20Coverage-50%25-brightgreen?style=flat-square)](https://github.com/GhadiSaab/savedfeast-web)
+[![Dependencies](https://img.shields.io/badge/Dependencies-Up%20to%20Date-brightgreen?style=flat-square)](https://github.com/GhadiSaab/savedfeast-web)
+[![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=flat-square&logo=php&logoColor=white)](https://github.com/GhadiSaab/savedfeast-web)
+[![Laravel Version](https://img.shields.io/badge/Laravel-11.0-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://github.com/GhadiSaab/savedfeast-web)
+[![React Version](https://img.shields.io/badge/React-18.2.0-61DAFB?style=flat-square&logo=react&logoColor=black)](https://github.com/GhadiSaab/savedfeast-web)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](https://github.com/GhadiSaab/savedfeast-web)
 
 </div>
 
@@ -535,8 +537,11 @@ For support and questions:
 
 **Built with ❤️ for a sustainable future**
 
-[![GitHub stars](https://img.shields.io/github/stars/yourusername/savedfeast-web?style=social)](https://github.com/yourusername/savedfeast-web)
-[![GitHub forks](https://img.shields.io/github/forks/yourusername/savedfeast-web?style=social)](https://github.com/yourusername/savedfeast-web)
-[![GitHub issues](https://img.shields.io/github/issues/yourusername/savedfeast-web)](https://github.com/yourusername/savedfeast-web/issues)
+[![GitHub stars](https://img.shields.io/github/stars/GhadiSaab/savedfeast-web?style=social)](https://github.com/GhadiSaab/savedfeast-web)
+[![GitHub forks](https://img.shields.io/github/forks/GhadiSaab/savedfeast-web?style=social)](https://github.com/GhadiSaab/savedfeast-web)
+[![GitHub issues](https://img.shields.io/github/issues/GhadiSaab/savedfeast-web)](https://github.com/GhadiSaab/savedfeast-web/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/GhadiSaab/savedfeast-web)](https://github.com/GhadiSaab/savedfeast-web/pulls)
+[![GitHub license](https://img.shields.io/github/license/GhadiSaab/savedfeast-web)](https://github.com/GhadiSaab/savedfeast-web/blob/main/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/GhadiSaab/savedfeast-web)](https://github.com/GhadiSaab/savedfeast-web/commits/main)
 
 </div>
