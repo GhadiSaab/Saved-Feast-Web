@@ -121,9 +121,9 @@ resources/js/
 
 #### **Comprehensive Rate Limiting** (`routes/api.php`)
 ```php
-// Auth endpoints: 6 requests per minute
+// Auth endpoints: 20 requests per minute
 Route::post('/login', [AuthController::class, 'login'])
-    ->middleware('throttle:6,1');
+    ->middleware('throttle:20,1');
 
 // Public endpoints: 60 requests per minute
 Route::middleware('throttle:60,1')->group(function () {

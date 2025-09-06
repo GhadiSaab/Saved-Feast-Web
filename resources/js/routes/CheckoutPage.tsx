@@ -17,6 +17,7 @@ const CheckoutPage: React.FC = () => {
   const navigate = useNavigate(); // Hook for navigation
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'CASH_ON_PICKUP' | 'ONLINE'>('CASH_ON_PICKUP');
 
   // Function to handle placing the order
   const handlePlaceOrder = async () => {
@@ -29,13 +30,11 @@ const CheckoutPage: React.FC = () => {
 
     // Prepare data for the API
     const orderData = {
-      total_amount: getCartTotal(),
-      // Map cart items to the format expected by the backend API
-      order_items: cartItems.map(item => ({
+      items: cartItems.map(item => ({
         meal_id: item.id,
         quantity: item.quantity,
-        price: item.price, // Send the price per item at time of order
       })),
+      payment_method: paymentMethod,
       // Add other required fields if any (e.g., delivery address - not implemented yet)
     };
 
@@ -173,29 +172,72 @@ const CheckoutPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Payment Information */}
+            {/* Payment Method Selection */}
             <div className="card shadow-sm mb-4">
               <div className="card-header">
                 <h5 className="mb-0">
                   <i className="fas fa-credit-card me-2"></i>
-                  Payment Information
+                  Payment Method
                 </h5>
               </div>
               <div className="card-body">
-                <div className="alert alert-info">
-                  <i className="fas fa-info-circle me-2"></i>
-                  <strong>Payment Integration Coming Soon!</strong> Stripe
-                  payment processing will be integrated here for secure
-                  transactions.
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="paymentMethod"
+                        id="cashOnPickup"
+                        value="CASH_ON_PICKUP"
+                        checked={paymentMethod === 'CASH_ON_PICKUP'}
+                        onChange={(e) => setPaymentMethod(e.target.value as 'CASH_ON_PICKUP' | 'ONLINE')}
+                      />
+                      <label className="form-check-label" htmlFor="cashOnPickup">
+                        <div className="d-flex align-items-center">
+                          <i className="fas fa-money-bill-wave text-success me-2"></i>
+                          <div>
+                            <strong>Cash on Pickup</strong>
+                            <br />
+                            <small className="text-muted">Pay when you collect your order</small>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="paymentMethod"
+                        id="onlinePayment"
+                        value="ONLINE"
+                        checked={paymentMethod === 'ONLINE'}
+                        onChange={(e) => setPaymentMethod(e.target.value as 'CASH_ON_PICKUP' | 'ONLINE')}
+                        disabled
+                      />
+                      <label className="form-check-label text-muted" htmlFor="onlinePayment">
+                        <div className="d-flex align-items-center">
+                          <i className="fas fa-credit-card text-muted me-2"></i>
+                          <div>
+                            <strong>Online Payment</strong>
+                            <br />
+                            <small className="text-muted">Coming soon</small>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Placeholder for Stripe Elements */}
-                <div className="payment-placeholder p-4 border rounded bg-light text-center">
-                  <i className="fas fa-credit-card fa-2x text-muted mb-3"></i>
-                  <p className="text-muted mb-0">
-                    Secure payment form will appear here
-                  </p>
-                </div>
+                {paymentMethod === 'CASH_ON_PICKUP' && (
+                  <div className="alert alert-info mt-3">
+                    <i className="fas fa-info-circle me-2"></i>
+                    <strong>Cash on Pickup:</strong> You'll pay for your order when you collect it from the restaurant. 
+                    This helps reduce food waste and saves you money!
+                  </div>
+                )}
               </div>
             </div>
           </div>

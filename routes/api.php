@@ -6,6 +6,8 @@ use App\Http\Controllers\API\MealController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\Provider\MealController as ProviderMealController;
 use App\Http\Controllers\API\Provider\ProfileController as ProviderProfileController; // Import RestaurantApplicationController
+use App\Http\Controllers\API\Provider\SettlementsController as ProviderSettlementsController;
+use App\Http\Controllers\API\Admin\SettlementsController as AdminSettlementsController;
 use App\Http\Controllers\API\RestaurantApplicationController; // Import Provider Meal Controller
 use Illuminate\Http\Request; // Import Provider Profile Controller
 use Illuminate\Support\Facades\Gate; // Import Category Controller
@@ -36,10 +38,10 @@ Route::get('/', function () {
     ]);
 });
 
-// Apply rate limiting (6 attempts per minute) to login and register routes
-Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:6,1')->name('api.register');
+// Apply rate limiting (20 attempts per minute) to login and register routes
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:20,1')->name('api.register');
 
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1')->name('api.login');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:20,1')->name('api.login');
 
 // Public routes with rate limiting
 Route::middleware('throttle:60,1')->group(function () {
@@ -110,6 +112,13 @@ Route::middleware(['auth:sanctum', 'throttle:300,1'])->prefix('provider')->name(
     Route::post('/restaurants', [App\Http\Controllers\API\RestaurantController::class, 'store'])->name('restaurants.store');
     Route::put('/restaurants/{restaurant}', [App\Http\Controllers\API\RestaurantController::class, 'update'])->name('restaurants.update');
     Route::get('/restaurants', [App\Http\Controllers\API\RestaurantController::class, 'providerRestaurants'])->name('restaurants.index');
+
+    // Provider Settlements Routes
+    Route::get('/settlements/summary', [ProviderSettlementsController::class, 'summary'])->name('settlements.summary');
+    Route::get('/settlements/invoices', [ProviderSettlementsController::class, 'invoices'])->name('settlements.invoices');
+    Route::get('/settlements/invoices/{id}', [ProviderSettlementsController::class, 'showInvoice'])->name('settlements.invoices.show');
+    Route::get('/settlements/invoices/{id}/download', [ProviderSettlementsController::class, 'downloadInvoice'])->name('settlements.invoices.download');
+    Route::get('/settlements/orders', [ProviderSettlementsController::class, 'recentOrders'])->name('settlements.orders');
 });
 
 // Admin routes (Protected by admin-access gate) with rate limiting
@@ -138,6 +147,20 @@ Route::middleware(['auth:sanctum', 'throttle:600,1'])->prefix('admin')->name('ap
         // Restaurant approval routes
         Route::put('/restaurants/{restaurant}/approve', [App\Http\Controllers\API\AdminController::class, 'approveRestaurant'])->name('restaurants.approve');
         Route::put('/restaurants/{restaurant}/reject', [App\Http\Controllers\API\AdminController::class, 'rejectRestaurant'])->name('restaurants.reject');
+
+        // User and provider creation routes
+        Route::get('/roles', [App\Http\Controllers\API\AdminController::class, 'getRoles'])->name('roles.get');
+        Route::post('/users', [App\Http\Controllers\API\AdminController::class, 'createUser'])->name('users.create');
+        Route::post('/providers', [App\Http\Controllers\API\AdminController::class, 'createProvider'])->name('providers.create');
+
+        // Admin Settlements Routes
+        Route::post('/settlements/generate', [AdminSettlementsController::class, 'generate'])->name('settlements.generate');
+        Route::get('/settlements/invoices', [AdminSettlementsController::class, 'invoices'])->name('settlements.invoices');
+        Route::post('/settlements/invoices/{id}/mark-sent', [AdminSettlementsController::class, 'markSent'])->name('settlements.invoices.mark-sent');
+        Route::post('/settlements/invoices/{id}/mark-paid', [AdminSettlementsController::class, 'markPaid'])->name('settlements.invoices.mark-paid');
+        Route::post('/settlements/invoices/{id}/mark-overdue', [AdminSettlementsController::class, 'markOverdue'])->name('settlements.invoices.mark-overdue');
+        Route::get('/settlements/invoices/{id}', [AdminSettlementsController::class, 'show'])->name('settlements.invoices.show');
+        Route::get('/settlements/invoices/{id}/download', [AdminSettlementsController::class, 'download'])->name('settlements.invoices.download');
     });
 });
 

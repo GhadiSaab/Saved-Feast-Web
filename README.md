@@ -275,7 +275,7 @@ Authorization: Bearer {your_access_token}
 ```
 
 ### **Rate Limits**
-- **Auth endpoints**: 6 requests/minute
+- **Auth endpoints**: 20 requests/minute
 - **Public endpoints**: 60 requests/minute
 - **Authenticated endpoints**: 120 requests/minute
 - **Provider endpoints**: 300 requests/minute

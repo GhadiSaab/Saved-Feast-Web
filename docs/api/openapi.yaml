@@ -15,7 +15,7 @@ info:
     - Authenticated endpoints: 120 requests per minute
     - Provider endpoints: 300 requests per minute
     - Admin endpoints: 600 requests per minute
-    - Auth endpoints: 6 requests per minute
+    - Auth endpoints: 20 requests per minute
     - Restaurant applications: 3 requests per minute
     
     ## Error Responses

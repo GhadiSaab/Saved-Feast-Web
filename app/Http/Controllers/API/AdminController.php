@@ -8,10 +8,13 @@ use App\Models\Meal;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\Review;
+use App\Models\Role;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
@@ -543,5 +546,157 @@ class AdminController extends Controller
             'message' => 'Restaurant rejected successfully',
             'restaurant' => $restaurant,
         ]);
+    }
+
+    /**
+     * Create a new provider profile (user + restaurant)
+     */
+    public function createProvider(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            // User data
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:500',
+            'password' => 'required|string|min:8|confirmed',
+            
+            // Restaurant data
+            'restaurant_name' => 'required|string|max:255',
+            'restaurant_description' => 'nullable|string',
+            'restaurant_address' => 'required|string|max:500',
+            'restaurant_phone' => 'nullable|string|max:20',
+            'restaurant_email' => 'required|email|unique:restaurants,email',
+            'restaurant_website' => 'nullable|url',
+            'cuisine_type' => 'nullable|string|max:100',
+            'delivery_radius' => 'nullable|numeric|min:0|max:50',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Create the user
+            $user = User::create([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'password' => Hash::make($request->password),
+            ]);
+
+            // Assign provider role
+            $providerRole = Role::where('name', 'provider')->first();
+            if ($providerRole) {
+                $user->roles()->attach($providerRole->id);
+            }
+
+            // Create the restaurant
+            $restaurant = Restaurant::create([
+                'user_id' => $user->id,
+                'name' => $request->restaurant_name,
+                'description' => $request->restaurant_description,
+                'address' => $request->restaurant_address,
+                'phone' => $request->restaurant_phone,
+                'email' => $request->restaurant_email,
+                'website' => $request->restaurant_website,
+                'cuisine_type' => $request->cuisine_type,
+                'delivery_radius' => $request->delivery_radius ?? 5.0,
+                'is_active' => true, // Admin-created restaurants are automatically active
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Provider profile created successfully',
+                'data' => [
+                    'user' => $user->load('roles'),
+                    'restaurant' => $restaurant,
+                ],
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to create provider profile',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get available roles for assignment
+     */
+    public function getRoles()
+    {
+        $roles = Role::select('id', 'name', 'description')->get();
+        
+        return response()->json([
+            'status' => true,
+            'data' => $roles,
+        ]);
+    }
+
+    /**
+     * Create a new user with specified role
+     */
+    public function createUser(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:500',
+            'password' => 'required|string|min:8|confirmed',
+            'role_id' => 'required|exists:roles,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $user = User::create([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'password' => Hash::make($request->password),
+            ]);
+
+            // Assign role
+            $user->roles()->attach($request->role_id);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'User created successfully',
+                'data' => $user->load('roles'),
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to create user',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

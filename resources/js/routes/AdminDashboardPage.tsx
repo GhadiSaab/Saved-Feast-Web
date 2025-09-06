@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import auth from '../auth';
+import CreateProviderModal from '../components/admin/CreateProviderModal';
 
 // Interfaces for TypeScript
 interface DashboardData {
@@ -91,6 +92,7 @@ const AdminDashboardPage: React.FC = () => {
   >('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showCreateProviderModal, setShowCreateProviderModal] = useState(false);
 
   // Dashboard data
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
@@ -500,8 +502,15 @@ const AdminDashboardPage: React.FC = () => {
   const renderUsers = () => (
     <div>
       <div className="card">
-        <div className="card-header">
+        <div className="card-header d-flex justify-content-between align-items-center">
           <h5 className="mb-0">User Management</h5>
+          <button
+            className="btn btn-success"
+            onClick={() => setShowCreateProviderModal(true)}
+          >
+            <i className="fas fa-plus me-2"></i>
+            Create Provider
+          </button>
         </div>
         <div className="card-body">
           <div className="row mb-3">
@@ -969,6 +978,22 @@ const AdminDashboardPage: React.FC = () => {
           </ul>
         </nav>
       )}
+
+      {/* Create Provider Modal */}
+      <CreateProviderModal
+        isOpen={showCreateProviderModal}
+        onClose={() => setShowCreateProviderModal(false)}
+        onSuccess={() => {
+          // Refresh users list when a new provider is created
+          if (activeTab === 'users') {
+            fetchUsers(1, searchTerm, roleFilter);
+          }
+          // Also refresh restaurants list
+          if (activeTab === 'restaurants') {
+            fetchRestaurants(1, searchTerm);
+          }
+        }}
+      />
     </div>
   );
 };

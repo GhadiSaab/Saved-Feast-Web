@@ -75,18 +75,22 @@ class MealController extends Controller
                 if ($isAvailable) {
                     // Show only available meals
                     $query->where(function ($q) use ($now) {
+                        // Available from: null means always available, or date is in the past/now
                         $q->whereNull('available_from')
                             ->orWhere('available_from', '<=', $now);
                     })->where(function ($q) use ($now) {
+                        // Available until: null means always available, or date is in the future/now
                         $q->whereNull('available_until')
                             ->orWhere('available_until', '>=', $now);
-                    })->where('quantity', '>', 0);
+                    })->where('quantity', '>', 0)
+                    ->where('status', '!=', 'expired'); // Exclude explicitly expired meals
                 } else {
                     // Show unavailable meals
                     $query->where(function ($q) use ($now) {
                         $q->where('available_from', '>', $now)
                             ->orWhere('available_until', '<', $now)
-                            ->orWhere('quantity', '<=', 0);
+                            ->orWhere('quantity', '<=', 0)
+                            ->orWhere('status', 'expired');
                     });
                 }
             }

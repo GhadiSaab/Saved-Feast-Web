@@ -25,28 +25,43 @@ class UserSeeder extends Seeder
         $customerRole = Role::firstOrCreate(['name' => 'customer']);
 
         // --- Create Admin User ---
-        $adminUser = User::create([
-            'first_name' => 'Admin',
-            'last_name' => 'User',
-            'email' => 'admin@savedfeast.com', // Fixed email for easy login
-            'password' => Hash::make('password'),
-            'phone' => $faker->phoneNumber(),
-            'address' => $faker->address(),
-        ]);
+        $adminUser = User::updateOrCreate(
+            ['email' => 'admin@savedfeast.com'],
+            [
+                'first_name' => 'Admin',
+                'last_name' => 'User',
+                'email' => 'admin@savedfeast.com',
+                'password' => Hash::make('admin123'),
+                'phone' => '+1234567890',
+                'address' => 'Admin Address',
+            ]
+        );
         // Assign Admin Role
-        $adminUser->roles()->attach($adminRole->id);
+        $adminUser->roles()->sync([$adminRole->id]);
 
         // --- Create Provider User ---
-        $providerUser = User::create([
-            'first_name' => 'Restaurant',
-            'last_name' => 'Provider',
-            'email' => 'provider@savedfeast.com', // Fixed email for easy login
-            'password' => Hash::make('password'),
-            'phone' => $faker->phoneNumber(),
-            'address' => $faker->address(),
-        ]);
+        $providerUser = User::updateOrCreate(
+            ['email' => 'provider@savedfeast.com'],
+            [
+                'first_name' => 'Restaurant',
+                'last_name' => 'Provider',
+                'email' => 'provider@savedfeast.com',
+                'password' => Hash::make('provider123'),
+                'phone' => '+1234567891',
+                'address' => 'Provider Address',
+            ]
+        );
         // Assign Provider Role
-        $providerUser->roles()->attach($providerRole->id);
+        $providerUser->roles()->sync([$providerRole->id]);
+
+        // Output login credentials
+        $this->command->info('Admin user created successfully!');
+        $this->command->info('Email: admin@savedfeast.com');
+        $this->command->info('Password: admin123');
+        $this->command->info('');
+        $this->command->info('Provider user created successfully!');
+        $this->command->info('Email: provider@savedfeast.com');
+        $this->command->info('Password: provider123');
 
         // --- Create Regular Customer Users ---
         for ($i = 0; $i < 10; $i++) {

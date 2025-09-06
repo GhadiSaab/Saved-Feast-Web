@@ -12,7 +12,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Generate weekly invoices every Monday at 00:05
+        $schedule->command('invoices:generate-weekly --period=previous')
+            ->weeklyOn(1, '00:05')
+            ->timezone(config('savedfeast.invoicing.timezone', 'Asia/Beirut'))
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     /**

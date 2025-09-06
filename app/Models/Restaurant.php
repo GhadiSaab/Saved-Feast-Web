@@ -22,12 +22,14 @@ class Restaurant extends Model
         'delivery_radius',
         'is_active',
         'average_rating',
+        'commission_rate',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'delivery_radius' => 'decimal:2',
         'average_rating' => 'decimal:2',
+        'commission_rate' => 'decimal:2',
     ];
 
     public function user()
@@ -42,11 +44,23 @@ class Restaurant extends Model
 
     public function orders()
     {
-        return $this->hasManyThrough(Order::class, Meal::class, 'restaurant_id', 'id', 'id', 'id');
+        return $this->hasManyThrough(
+            Order::class,
+            Meal::class,
+            'restaurant_id', // Foreign key on meals table
+            'id', // Foreign key on orders table
+            'id', // Local key on restaurants table
+            'id' // Local key on meals table
+        );
     }
 
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(RestaurantInvoice::class);
     }
 }

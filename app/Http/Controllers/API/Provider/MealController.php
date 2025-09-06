@@ -76,8 +76,8 @@ class MealController extends Controller
             ],
             // 'image_url' => 'nullable|url|max:2048', // Optional image URL - REMOVED
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Optional image file upload
-            'available_from' => 'required|date|after_or_equal:now', // Must be a date, now or in the future
-            'available_until' => 'required|date|after:available_from', // Must be a date after available_from
+            'available_from' => 'nullable|date|after_or_equal:now', // Optional date, now or in the future
+            'available_until' => 'nullable|date|after:available_from', // Optional date after available_from
         ]);
 
         if ($validator->fails()) {
@@ -105,8 +105,17 @@ class MealController extends Controller
             unset($mealDataToFill['image']);
         }
 
+        // Set default availability if not provided
+        if (!isset($mealDataToFill['available_from'])) {
+            $mealDataToFill['available_from'] = now();
+        }
+        if (!isset($mealDataToFill['available_until'])) {
+            $mealDataToFill['available_until'] = now()->addDays(7); // Default to 7 days from now
+        }
+
         $meal->fill($mealDataToFill);
         $meal->restaurant_id = $restaurant->id; // Associate with the provider's restaurant
+        $meal->status = 'available'; // Set status to available for new meals
         $meal->save();
 
         // Optionally load the category relationship for the response

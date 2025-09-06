@@ -5,18 +5,22 @@ namespace App\Http\Controllers\API; // Corrected namespace
 use App\Http\Controllers\Controller;
 use App\Models\Meal;
 use App\Models\Order;
+use App\Services\CommissionService;
 use Illuminate\Http\Request; // Import Meal model
 use Illuminate\Support\Facades\Log; // Import Log facade
 
 class OrderController extends Controller
 {
+    protected CommissionService $commissionService;
+
     /**
      * Create a new controller instance.
      */
-    public function __construct()
+    public function __construct(CommissionService $commissionService)
     {
         $this->middleware('auth:sanctum');
         $this->authorizeResource(Order::class, 'order');
+        $this->commissionService = $commissionService;
     }
 
     public function index(Request $request)
@@ -79,6 +83,7 @@ class OrderController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'pickup_time' => 'nullable|date|after:now',
             'notes' => 'nullable|string|max:500',
+            'payment_method' => 'nullable|in:CASH_ON_PICKUP,ONLINE',
         ]);
 
         // Start database transaction
@@ -129,6 +134,19 @@ class OrderController extends Controller
                 }
             }
 
+            // Determine payment method (default to CASH_ON_PICKUP)
+            $paymentMethod = $request->payment_method ?? 'CASH_ON_PICKUP';
+
+            // Get the primary restaurant for commission calculation
+            // For now, we'll use the first restaurant from the order items
+            $primaryRestaurant = null;
+            if (!empty($restaurantNotifications)) {
+                $primaryRestaurant = reset($restaurantNotifications)['restaurant'];
+            }
+
+            // Calculate commission
+            $commission = $this->commissionService->calculateOrderCommission($totalAmount, $primaryRestaurant);
+
             // Create the order
             $order = Order::create([
                 'user_id' => $user->id,
@@ -136,6 +154,9 @@ class OrderController extends Controller
                 'status' => 'pending',
                 'pickup_time' => $request->pickup_time ?? now()->addMinutes(30),
                 'notes' => $request->notes,
+                'payment_method' => $paymentMethod,
+                'commission_rate' => $commission['rate'],
+                'commission_amount' => $commission['amount'],
             ]);
 
             // Create order items and update meal quantities
@@ -283,7 +304,10 @@ class OrderController extends Controller
 
         // Complete the order
         $order = Order::where('user_id', $user->id)->findOrFail($id);
-        $order->update(['status' => 'completed']);
+        $order->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+        ]);
 
         return response()->json([
             'status' => true,

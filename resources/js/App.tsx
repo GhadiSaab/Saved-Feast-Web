@@ -15,7 +15,9 @@ import OrdersPage from './routes/OrdersPage';
 import ProfilePage from './routes/ProfilePage';
 import RestaurantApplicationPage from './routes/RestaurantApplicationPage';
 import RestaurantDashboardPage from './routes/RestaurantDashboardPage';
+import ProviderSettlementsPage from './routes/ProviderSettlementsPage';
 import AdminDashboardPage from './routes/AdminDashboardPage';
+import AdminSettlementsPage from './routes/AdminSettlementsPage';
 
 // 404 Page
 const NotFoundPage = () => (
@@ -99,6 +101,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/provider/settlements"
+                element={
+                  <ProtectedRoute requireRole="provider">
+                    <ProviderSettlementsPage />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Admin routes */}
               <Route
@@ -106,6 +116,14 @@ function App() {
                 element={
                   <ProtectedRoute requireRole="admin">
                     <AdminDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/settlements"
+                element={
+                  <ProtectedRoute requireRole="admin">
+                    <AdminSettlementsPage />
                   </ProtectedRoute>
                 }
               />

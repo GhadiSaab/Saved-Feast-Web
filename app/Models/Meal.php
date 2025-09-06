@@ -29,6 +29,7 @@ class Meal extends Model
         'image', // Assuming 'image' is the correct DB column for the URL/path
         'available_from', // Add available_from
         'available_until', // Add available_until
+        'status', // Add status to fillable
     ];
 
     /**
@@ -75,7 +76,7 @@ class Meal extends Model
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn ($value, $attributes) => $attributes['image']
+            get: fn ($value, $attributes) => isset($attributes['image']) && $attributes['image']
                 ? Storage::url($attributes['image'])
                 : null, // Or return a default image URL
         );
