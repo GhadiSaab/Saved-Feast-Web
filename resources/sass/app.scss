@@ -1,5 +1,6 @@
 // Import our custom variables first
 @use './variables' as vars;
+@use 'sass:color';
 
 // Bootstrap - Import and override primary color with our custom values
 @use 'bootstrap/scss/bootstrap' as * with (
@@ -391,7 +392,7 @@ main {
       transition: all 0.3s ease;
 
       &:hover {
-        background: darken(vars.$primary, 10%);
+        background: color.adjust(vars.$primary, $lightness: -10%);
         transform: translateY(-2px);
         box-shadow: vars.$box-shadow;
       }
@@ -546,7 +547,149 @@ main {
   }
 }
 
-// Image Modal
+// Meal Detail Modal
+.meal-detail-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease-out;
+
+  .meal-detail-modal-content {
+    background: white;
+    border-radius: vars.$border-radius-lg;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: vars.$box-shadow-lg;
+    border: 1px solid rgba(vars.$primary, 0.2);
+    animation: slideIn 0.3s ease-out;
+
+    .meal-detail-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      background: linear-gradient(135deg, vars.$primary, vars.$secondary);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+      h4 {
+        font-weight: 600;
+        margin: 0;
+        color: white;
+      }
+
+      .btn-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.2);
+          transform: scale(1.1);
+        }
+      }
+    }
+
+    .meal-detail-modal-body {
+      padding: 2rem;
+
+      .meal-image-container {
+        text-align: center;
+
+        img {
+          max-width: 100%;
+          max-height: 300px;
+          object-fit: cover;
+          border-radius: vars.$border-radius;
+          box-shadow: vars.$box-shadow;
+        }
+      }
+
+      .meal-details {
+        .meal-info {
+          .info-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(vars.$primary, 0.1);
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            i {
+              width: 20px;
+              text-align: center;
+            }
+          }
+        }
+
+        .price-section {
+          background: rgba(vars.$warm-beige, 0.3);
+          padding: 1.5rem;
+          border-radius: vars.$border-radius;
+          border: 1px solid rgba(vars.$primary, 0.1);
+
+          .discounted-price {
+            .current-price {
+              font-size: 2rem;
+              font-weight: 700;
+            }
+
+            .original-price {
+              font-size: 1.1rem;
+            }
+
+            .savings {
+              font-size: 0.9rem;
+            }
+          }
+
+          .regular-price {
+            font-size: 2rem;
+            font-weight: 700;
+          }
+        }
+
+        .action-section {
+          .btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: vars.$border-radius;
+            transition: all 0.3s ease;
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: vars.$box-shadow;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Image Modal (Legacy - keeping for backward compatibility)
 .image-modal-overlay {
   position: fixed;
   top: 0;
@@ -666,7 +809,7 @@ main {
     color: white;
 
     &:hover {
-      background: darken(vars.$primary, 10%);
+      background: color.adjust(vars.$primary, $lightness: -10%);
       transform: translateY(-2px);
       box-shadow: vars.$box-shadow;
     }
@@ -689,7 +832,7 @@ main {
     color: white;
 
     &:hover {
-      background: darken(vars.$success, 10%);
+      background: color.adjust(vars.$success, $lightness: -10%);
       transform: translateY(-2px);
       box-shadow: vars.$box-shadow;
     }

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Category;
 use App\Models\Restaurant;
 use App\Models\Role;
 use App\Models\User;
@@ -39,7 +38,7 @@ class AdminProviderCreationTest extends TestCase
             'address' => '123 Main St, City, State',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            
+
             // Restaurant data
             'restaurant_name' => 'John\'s Restaurant',
             'restaurant_description' => 'A great restaurant',
@@ -148,7 +147,7 @@ class AdminProviderCreationTest extends TestCase
 
         $roles = $response->json('data');
         $roleNames = collect($roles)->pluck('name')->toArray();
-        
+
         $this->assertContains('admin', $roleNames);
         $this->assertContains('provider', $roleNames);
         $this->assertContains('customer', $roleNames);
@@ -284,7 +283,7 @@ class AdminProviderCreationTest extends TestCase
 
         $user = User::where('email', 'john@example.com')->first();
         $restaurant = Restaurant::where('user_id', $user->id)->first();
-        
+
         $this->assertEquals(5.0, $restaurant->delivery_radius);
     }
 

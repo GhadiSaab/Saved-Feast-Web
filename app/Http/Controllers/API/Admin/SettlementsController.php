@@ -52,7 +52,7 @@ class SettlementsController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Failed to generate invoices: ' . $e->getMessage(),
+                'message' => 'Failed to generate invoices: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -184,13 +184,13 @@ class SettlementsController extends Controller
 
         $invoice = RestaurantInvoice::findOrFail($id);
 
-        if (!$invoice->pdf_path || !file_exists(storage_path('app/' . $invoice->pdf_path))) {
+        if (! $invoice->pdf_path || ! file_exists(storage_path('app/'.$invoice->pdf_path))) {
             return response()->json([
                 'status' => false,
                 'message' => 'PDF not available for this invoice',
             ], 404);
         }
 
-        return response()->download(storage_path('app/' . $invoice->pdf_path));
+        return response()->download(storage_path('app/'.$invoice->pdf_path));
     }
 }

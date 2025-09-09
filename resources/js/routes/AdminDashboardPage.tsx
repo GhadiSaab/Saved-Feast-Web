@@ -829,26 +829,46 @@ const AdminDashboardPage: React.FC = () => {
   );
 
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Admin Dashboard</h1>
-        <div className="text-muted">
-          <i className="fas fa-shield-alt me-2"></i>
-          Administrator Panel
-        </div>
-      </div>
+    <div className="container-fluid py-4">
+      <div className="row">
+        <div className="col-12">
+          {/* Header Section */}
+          <div className="bg-gradient-primary text-white rounded-3 p-4 mb-4 shadow">
+            <div className="row align-items-center">
+              <div className="col-md-8">
+                <h1 className="h2 mb-2 fw-bold">
+                  <i className="fas fa-shield-alt me-3"></i>
+                  Admin Dashboard
+                </h1>
+                <p className="mb-0 opacity-75">Administrator Panel - Manage the platform</p>
+              </div>
+              <div className="col-md-4 text-md-end">
+                <div className="d-flex justify-content-md-end gap-2">
+                  <button 
+                    className="btn btn-light btn-sm" 
+                    onClick={() => window.location.reload()}
+                  >
+                    <i className="fas fa-sync-alt me-1"></i>
+                    Refresh
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      {/* Navigation Tabs */}
-      <ul className="nav nav-tabs mb-4">
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            <i className="fas fa-chart-pie me-2"></i>
-            Overview
-          </button>
-        </li>
+          {/* Navigation Tabs */}
+          <div className="card border-0 shadow-sm mb-4">
+            <div className="card-header bg-transparent border-0">
+              <ul className="nav nav-tabs card-header-tabs">
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('overview')}
+                  >
+                    <i className="fas fa-chart-pie me-2"></i>
+                    Overview
+                  </button>
+                </li>
         <li className="nav-item">
           <button
             className={`nav-link ${activeTab === 'users' ? 'active' : ''}`}
@@ -895,105 +915,109 @@ const AdminDashboardPage: React.FC = () => {
           </button>
         </li>
       </ul>
+            </div>
+          </div>
 
-      {/* Content */}
-      {activeTab === 'overview' && renderOverview()}
-      {activeTab === 'users' && renderUsers()}
-      {activeTab === 'restaurants' && renderRestaurants()}
-      {activeTab === 'orders' && renderOrders()}
-      {activeTab === 'meals' && renderMeals()}
-      {activeTab === 'analytics' && renderAnalytics()}
+          {/* Content */}
+          {activeTab === 'overview' && renderOverview()}
+          {activeTab === 'users' && renderUsers()}
+          {activeTab === 'restaurants' && renderRestaurants()}
+          {activeTab === 'orders' && renderOrders()}
+          {activeTab === 'meals' && renderMeals()}
+          {activeTab === 'analytics' && renderAnalytics()}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <nav className="mt-4">
-          <ul className="pagination justify-content-center">
-            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-              <button
-                className="page-link"
-                onClick={() => {
-                  const newPage = currentPage - 1;
-                  if (newPage >= 1) {
-                    setCurrentPage(newPage);
-                    if (activeTab === 'users')
-                      fetchUsers(newPage, searchTerm, roleFilter);
-                    else if (activeTab === 'restaurants')
-                      fetchRestaurants(newPage, searchTerm);
-                    else if (activeTab === 'orders')
-                      fetchOrders(newPage, statusFilter);
-                    else if (activeTab === 'meals')
-                      fetchMeals(newPage, searchTerm);
-                  }
-                }}
-              >
-                Previous
-              </button>
-            </li>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <li
-                key={page}
-                className={`page-item ${currentPage === page ? 'active' : ''}`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => {
-                    setCurrentPage(page);
-                    if (activeTab === 'users')
-                      fetchUsers(page, searchTerm, roleFilter);
-                    else if (activeTab === 'restaurants')
-                      fetchRestaurants(page, searchTerm);
-                    else if (activeTab === 'orders')
-                      fetchOrders(page, statusFilter);
-                    else if (activeTab === 'meals')
-                      fetchMeals(page, searchTerm);
-                  }}
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <nav className="mt-4">
+              <ul className="pagination justify-content-center">
+                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                  <button
+                    className="page-link"
+                    onClick={() => {
+                      const newPage = currentPage - 1;
+                      if (newPage >= 1) {
+                        setCurrentPage(newPage);
+                        if (activeTab === 'users')
+                          fetchUsers(newPage, searchTerm, roleFilter);
+                        else if (activeTab === 'restaurants')
+                          fetchRestaurants(newPage, searchTerm);
+                        else if (activeTab === 'orders')
+                          fetchOrders(newPage, statusFilter);
+                        else if (activeTab === 'meals')
+                          fetchMeals(newPage, searchTerm);
+                      }
+                    }}
+                  >
+                    Previous
+                  </button>
+                </li>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <li
+                    key={page}
+                    className={`page-item ${currentPage === page ? 'active' : ''}`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => {
+                        setCurrentPage(page);
+                        if (activeTab === 'users')
+                          fetchUsers(page, searchTerm, roleFilter);
+                        else if (activeTab === 'restaurants')
+                          fetchRestaurants(page, searchTerm);
+                        else if (activeTab === 'orders')
+                          fetchOrders(page, statusFilter);
+                        else if (activeTab === 'meals')
+                          fetchMeals(page, searchTerm);
+                      }}
+                    >
+                      {page}
+                    </button>
+                  </li>
+                ))}
+                <li
+                  className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}
                 >
-                  {page}
-                </button>
-              </li>
-            ))}
-            <li
-              className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}
-            >
-              <button
-                className="page-link"
-                onClick={() => {
-                  const newPage = currentPage + 1;
-                  if (newPage <= totalPages) {
-                    setCurrentPage(newPage);
-                    if (activeTab === 'users')
-                      fetchUsers(newPage, searchTerm, roleFilter);
-                    else if (activeTab === 'restaurants')
-                      fetchRestaurants(newPage, searchTerm);
-                    else if (activeTab === 'orders')
-                      fetchOrders(newPage, statusFilter);
-                    else if (activeTab === 'meals')
-                      fetchMeals(newPage, searchTerm);
-                  }
-                }}
-              >
-                Next
-              </button>
-            </li>
-          </ul>
-        </nav>
-      )}
+                  <button
+                    className="page-link"
+                    onClick={() => {
+                      const newPage = currentPage + 1;
+                      if (newPage <= totalPages) {
+                        setCurrentPage(newPage);
+                        if (activeTab === 'users')
+                          fetchUsers(newPage, searchTerm, roleFilter);
+                        else if (activeTab === 'restaurants')
+                          fetchRestaurants(newPage, searchTerm);
+                        else if (activeTab === 'orders')
+                          fetchOrders(newPage, statusFilter);
+                        else if (activeTab === 'meals')
+                          fetchMeals(newPage, searchTerm);
+                      }
+                    }}
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          )}
 
-      {/* Create Provider Modal */}
-      <CreateProviderModal
-        isOpen={showCreateProviderModal}
-        onClose={() => setShowCreateProviderModal(false)}
-        onSuccess={() => {
-          // Refresh users list when a new provider is created
-          if (activeTab === 'users') {
-            fetchUsers(1, searchTerm, roleFilter);
-          }
-          // Also refresh restaurants list
-          if (activeTab === 'restaurants') {
-            fetchRestaurants(1, searchTerm);
-          }
-        }}
-      />
+          {/* Create Provider Modal */}
+          <CreateProviderModal
+            isOpen={showCreateProviderModal}
+            onClose={() => setShowCreateProviderModal(false)}
+            onSuccess={() => {
+              // Refresh users list when a new provider is created
+              if (activeTab === 'users') {
+                fetchUsers(1, searchTerm, roleFilter);
+              }
+              // Also refresh restaurants list
+              if (activeTab === 'restaurants') {
+                fetchRestaurants(1, searchTerm);
+              }
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

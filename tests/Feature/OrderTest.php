@@ -127,11 +127,13 @@ class OrderTest extends TestCase
     {
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => 'pending',
+            'status' => 'PENDING',
         ]);
 
         $response = $this->actingAs($this->user)
-            ->patchJson("/api/orders/{$order->id}/cancel");
+            ->patchJson("/api/orders/{$order->id}/cancel", [
+                'reason' => 'Changed my mind',
+            ]);
 
         $response->assertStatus(200)
             ->assertJson([
@@ -141,7 +143,7 @@ class OrderTest extends TestCase
 
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
-            'status' => 'cancelled',
+            'status' => 'CANCELLED_BY_CUSTOMER',
         ]);
     }
 
@@ -149,11 +151,13 @@ class OrderTest extends TestCase
     {
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => 'completed',
+            'status' => 'COMPLETED',
         ]);
 
         $response = $this->actingAs($this->user)
-            ->patchJson("/api/orders/{$order->id}/cancel");
+            ->patchJson("/api/orders/{$order->id}/cancel", [
+                'reason' => 'Changed my mind',
+            ]);
 
         $response->assertStatus(422);
     }

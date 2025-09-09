@@ -362,27 +362,101 @@ const ProfilePage: React.FC = () => {
 
   // Otherwise, render the standard user profile
   return (
-    <div>
-      <h1>My Profile</h1>
-
-      {/* General Error Display */}
-      {error && <div className="alert alert-danger">{error}</div>}
-
+    <div className="container-fluid py-4">
       <div className="row">
-        {/* Column 1: Profile Info & Password Change */}
-        <div className="col-md-6">
-          {/* Profile Info Card */}
-          <div className="card mb-4">
-            <div className="card-header d-flex justify-content-between align-items-center">
-              Profile Information
-              <button
-                className={`btn btn-sm ${isEditingInfo ? 'btn-secondary' : 'btn-outline-secondary'}`}
-                onClick={handleEditInfoToggle}
-                disabled={isSaving}
-              >
-                {isEditingInfo ? 'Cancel' : 'Edit Info'}
-              </button>
+        <div className="col-12">
+          {/* Header Section */}
+          <div className="bg-gradient-primary text-white rounded-3 p-4 mb-4 shadow">
+            <div className="row align-items-center">
+              <div className="col-md-8">
+                <h1 className="h2 mb-2 fw-bold">
+                  <i className="fas fa-user me-3"></i>
+                  My Profile
+                </h1>
+                <p className="mb-0 opacity-75">Manage your account settings and view your impact</p>
+              </div>
+              <div className="col-md-4 text-md-end">
+                <div className="d-flex justify-content-md-end gap-2">
+                  <button 
+                    className="btn btn-light btn-sm" 
+                    onClick={() => window.location.reload()}
+                  >
+                    <i className="fas fa-sync-alt me-1"></i>
+                    Refresh
+                  </button>
+                </div>
+              </div>
             </div>
+          </div>
+
+          {/* Error State */}
+          {error && (
+            <div className="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+              <div className="d-flex align-items-center">
+                <i className="fas fa-exclamation-triangle fa-2x me-3"></i>
+                <div>
+                  <h6 className="alert-heading mb-1">Error Loading Profile</h6>
+                  <p className="mb-0">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Stats Cards */}
+          <div className="row mb-4">
+            <div className="col-md-4 mb-3">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body text-center">
+                  <div className="text-primary mb-2">
+                    <i className="fas fa-shopping-bag fa-2x"></i>
+                  </div>
+                  <h4 className="fw-bold text-primary">{completedOrders.length}</h4>
+                  <p className="text-muted mb-0">Orders Completed</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4 mb-3">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body text-center">
+                  <div className="text-success mb-2">
+                    <i className="fas fa-leaf fa-2x"></i>
+                  </div>
+                  <h4 className="fw-bold text-success">{totalFoodSaved}</h4>
+                  <p className="text-muted mb-0">Food Items Saved</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4 mb-3">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body text-center">
+                  <div className="text-warning mb-2">
+                    <i className="fas fa-euro-sign fa-2x"></i>
+                  </div>
+                  <h4 className="fw-bold text-warning">€{totalMoneySaved.toFixed(2)}</h4>
+                  <p className="text-muted mb-0">Money Saved</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="row">
+            {/* Column 1: Profile Info & Password Change */}
+            <div className="col-md-6">
+              {/* Profile Info Card */}
+              <div className="card border-0 shadow-sm mb-4">
+                <div className="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                  <h5 className="mb-0 fw-bold">
+                    <i className="fas fa-user me-2 text-primary"></i>
+                    Profile Information
+                  </h5>
+                  <button
+                    className={`btn btn-sm ${isEditingInfo ? 'btn-secondary' : 'btn-outline-primary'}`}
+                    onClick={handleEditInfoToggle}
+                    disabled={isSaving}
+                  >
+                    {isEditingInfo ? 'Cancel' : 'Edit Info'}
+                  </button>
+                </div>
             <div className="card-body">
               {isEditingInfo ? (
                 <form onSubmit={handleInfoSave}>
@@ -435,9 +509,14 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Change Password Card */}
-          <div className="card">
-            <div className="card-header">Change Password</div>
+              {/* Change Password Card */}
+              <div className="card border-0 shadow-sm">
+                <div className="card-header bg-transparent border-0">
+                  <h5 className="mb-0 fw-bold">
+                    <i className="fas fa-lock me-2 text-primary"></i>
+                    Change Password
+                  </h5>
+                </div>
             <div className="card-body">
               <form onSubmit={handlePasswordChange}>
                 <div className="mb-3">
@@ -498,23 +577,17 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Column 2: Statistics & Graphs */}
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-header">Your Impact</div>
-            <div className="card-body">
-              <div className="row text-center mb-3">
-                <div className="col-6">
-                  <h5>{totalFoodSaved}</h5>
-                  <p className="text-muted">Food Items Saved</p>
+            {/* Column 2: Statistics & Graphs */}
+            <div className="col-md-6">
+              <div className="card border-0 shadow-sm">
+                <div className="card-header bg-transparent border-0">
+                  <h5 className="mb-0 fw-bold">
+                    <i className="fas fa-chart-bar me-2 text-primary"></i>
+                    Your Impact
+                  </h5>
                 </div>
-                <div className="col-6">
-                  <h5>€{totalMoneySaved.toFixed(2)}</h5>
-                  <p className="text-muted">Money Saved</p>
-                </div>
-              </div>
-              <hr />
-              <h6>Visualizations</h6>
+                <div className="card-body">
+                  <h6 className="text-muted mb-3">Visualizations</h6>
               {/* Add Charts Here */}
               {completedOrders.length > 0 ? (
                 <Bar
@@ -549,7 +622,9 @@ const ProfilePage: React.FC = () => {
                 <p className="text-center text-muted">
                   No completed orders to display statistics.
                 </p>
-              )}
+                )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

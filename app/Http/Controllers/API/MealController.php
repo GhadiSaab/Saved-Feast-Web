@@ -83,7 +83,7 @@ class MealController extends Controller
                         $q->whereNull('available_until')
                             ->orWhere('available_until', '>=', $now);
                     })->where('quantity', '>', 0)
-                    ->where('status', '!=', 'expired'); // Exclude explicitly expired meals
+                        ->where('status', '!=', 'expired'); // Exclude explicitly expired meals
                 } else {
                     // Show unavailable meals
                     $query->where(function ($q) use ($now) {

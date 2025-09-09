@@ -11,7 +11,9 @@ import LoginPage from './routes/LoginPage';
 import SignupPage from './routes/SignupPage';
 import FeedPage from './routes/FeedPage';
 import CheckoutPage from './routes/CheckoutPage';
-import OrdersPage from './routes/OrdersPage';
+import MyOrders from './pages/orders/MyOrders';
+import OrderDetail from './pages/orders/OrderDetail';
+import ProviderOrders from './pages/provider/ProviderOrders';
 import ProfilePage from './routes/ProfilePage';
 import RestaurantApplicationPage from './routes/RestaurantApplicationPage';
 import RestaurantDashboardPage from './routes/RestaurantDashboardPage';
@@ -79,7 +81,15 @@ function App() {
                 path="/orders"
                 element={
                   <ProtectedRoute>
-                    <OrdersPage />
+                    <MyOrders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders/:id"
+                element={
+                  <ProtectedRoute>
+                    <OrderDetail />
                   </ProtectedRoute>
                 }
               />
@@ -98,6 +108,14 @@ function App() {
                 element={
                   <ProtectedRoute requireRole="provider">
                     <RestaurantDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/provider/orders"
+                element={
+                  <ProtectedRoute requireRole="provider">
+                    <ProviderOrders />
                   </ProtectedRoute>
                 }
               />

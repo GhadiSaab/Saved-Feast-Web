@@ -20,7 +20,7 @@ class RestaurantInvoiceFactory extends Factory
     {
         $periodStart = Carbon::now()->subWeek()->startOfWeek();
         $periodEnd = $periodStart->copy()->endOfWeek();
-        
+
         return [
             'restaurant_id' => Restaurant::factory(),
             'period_start' => $periodStart,

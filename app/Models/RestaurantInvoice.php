@@ -80,6 +80,6 @@ class RestaurantInvoice extends Model
     public function scopeForPeriod($query, $startDate, $endDate)
     {
         return $query->where('period_start', '>=', $startDate)
-                    ->where('period_end', '<=', $endDate);
+            ->where('period_end', '<=', $endDate);
     }
 }

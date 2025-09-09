@@ -3,8 +3,7 @@ import axios from 'axios';
 import auth from '../auth';
 import { 
   RestaurantInvoice, 
-  PaginatedResponse,
-  ApiResponse 
+  PaginatedResponse
 } from '../types/settlements';
 
 const AdminSettlementsPage: React.FC = () => {

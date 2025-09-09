@@ -4,8 +4,7 @@ import auth from '../auth';
 import { 
   SettlementsSummary, 
   RestaurantInvoice, 
-  PaginatedResponse,
-  ApiResponse 
+  PaginatedResponse
 } from '../types/settlements';
 
 const ProviderSettlementsPage: React.FC = () => {

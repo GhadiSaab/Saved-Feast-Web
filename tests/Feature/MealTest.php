@@ -9,7 +9,6 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class MealTest extends TestCase
@@ -23,7 +22,7 @@ class MealTest extends TestCase
         // Create necessary data for tests
         $this->category = Category::factory()->create();
         $this->restaurant = Restaurant::factory()->create();
-        
+
         // Create roles
         $this->providerRole = Role::firstOrCreate(['name' => 'provider']);
         $this->adminRole = Role::firstOrCreate(['name' => 'admin']);
@@ -114,7 +113,7 @@ class MealTest extends TestCase
     public function test_can_search_meals_by_restaurant_name()
     {
         $restaurant = Restaurant::factory()->create(['name' => 'Mario\'s Pizza']);
-        
+
         Meal::factory()->create([
             'title' => 'Margherita Pizza',
             'restaurant_id' => $restaurant->id,
@@ -130,7 +129,7 @@ class MealTest extends TestCase
     public function test_can_search_meals_by_category_name()
     {
         $category = Category::factory()->create(['name' => 'Italian Cuisine']);
-        
+
         Meal::factory()->create([
             'title' => 'Pasta Carbonara',
             'category_id' => $category->id,
@@ -207,7 +206,7 @@ class MealTest extends TestCase
         // Create a provider user
         $provider = User::factory()->create();
         $provider->roles()->attach($this->providerRole->id);
-        
+
         $restaurant = Restaurant::factory()->create(['user_id' => $provider->id]);
 
         $mealData = [
@@ -225,12 +224,12 @@ class MealTest extends TestCase
 
         // Debug the response if it fails
         if ($response->status() !== 201) {
-            dump('Response status: ' . $response->status());
-            dump('Response content: ' . $response->getContent());
+            dump('Response status: '.$response->status());
+            dump('Response content: '.$response->getContent());
         }
 
         $response->assertStatus(201);
-        
+
         $meal = Meal::where('title', 'Test Meal')->first();
         $this->assertNotNull($meal);
         $this->assertEquals('available', $meal->status);
@@ -242,7 +241,7 @@ class MealTest extends TestCase
         // Create a provider user
         $provider = User::factory()->create();
         $provider->roles()->attach($this->providerRole->id);
-        
+
         $restaurant = Restaurant::factory()->create(['user_id' => $provider->id]);
 
         $mealData = [
@@ -259,23 +258,23 @@ class MealTest extends TestCase
 
         // Debug the response if it fails
         if ($response->status() !== 201) {
-            dump('Response status: ' . $response->status());
-            dump('Response content: ' . $response->getContent());
+            dump('Response status: '.$response->status());
+            dump('Response content: '.$response->getContent());
         }
 
         $response->assertStatus(201);
-        
+
         $meal = Meal::where('title', 'Test Meal with Default Times')->first();
         $this->assertNotNull($meal);
         $this->assertEquals('available', $meal->status);
-        
+
         // Check that default times are set
         $this->assertNotNull($meal->available_from);
         $this->assertNotNull($meal->available_until);
-        
+
         // available_from should be now or in the past
         $this->assertTrue($meal->available_from <= now());
-        
+
         // available_until should be 7 days from now
         $this->assertTrue($meal->available_until >= now()->addDays(6));
         $this->assertTrue($meal->available_until <= now()->addDays(8));

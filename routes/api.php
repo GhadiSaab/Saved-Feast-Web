@@ -1,13 +1,13 @@
 <?php
 
+use App\Http\Controllers\API\Admin\SettlementsController as AdminSettlementsController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\MealController;
 use App\Http\Controllers\API\OrderController;
-use App\Http\Controllers\API\Provider\MealController as ProviderMealController;
-use App\Http\Controllers\API\Provider\ProfileController as ProviderProfileController; // Import RestaurantApplicationController
+use App\Http\Controllers\API\Provider\MealController as ProviderMealController; // Import RestaurantApplicationController
+use App\Http\Controllers\API\Provider\ProfileController as ProviderProfileController;
 use App\Http\Controllers\API\Provider\SettlementsController as ProviderSettlementsController;
-use App\Http\Controllers\API\Admin\SettlementsController as AdminSettlementsController;
 use App\Http\Controllers\API\RestaurantApplicationController; // Import Provider Meal Controller
 use Illuminate\Http\Request; // Import Provider Profile Controller
 use Illuminate\Support\Facades\Gate; // Import Category Controller
@@ -77,6 +77,14 @@ Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function () {
     Route::patch('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('api.orders.cancel');
     Route::post('/orders/{order}/complete', [OrderController::class, 'complete'])->name('api.orders.complete');
 
+    // Customer order management routes
+    Route::get('/me/orders', [OrderController::class, 'getMyOrders'])->name('api.orders.my-orders');
+    Route::get('/orders/{order}/details', [OrderController::class, 'getOrder'])->name('api.orders.details');
+    Route::post('/orders/{order}/cancel-my-order', [OrderController::class, 'cancelMyOrder'])->name('api.orders.cancel-my-order');
+    Route::post('/orders/{order}/resend-code', [OrderController::class, 'resendCode'])->name('api.orders.resend-code');
+    Route::get('/orders/{order}/show-code', [OrderController::class, 'showPickupCode'])->name('api.orders.show-code');
+    Route::post('/orders/{order}/claim', [OrderController::class, 'claimOrder'])->name('api.orders.claim');
+
     // User Profile Update (protected by UserPolicy)
     Route::post('/user/profile', [AuthController::class, 'updateProfile'])->name('api.user.updateProfile');
 
@@ -119,6 +127,20 @@ Route::middleware(['auth:sanctum', 'throttle:300,1'])->prefix('provider')->name(
     Route::get('/settlements/invoices/{id}', [ProviderSettlementsController::class, 'showInvoice'])->name('settlements.invoices.show');
     Route::get('/settlements/invoices/{id}/download', [ProviderSettlementsController::class, 'downloadInvoice'])->name('settlements.invoices.download');
     Route::get('/settlements/orders', [ProviderSettlementsController::class, 'recentOrders'])->name('settlements.orders');
+
+    // Provider Order Management Routes
+    // Define specific routes BEFORE apiResource to avoid route conflicts
+    Route::get('/orders/stats', [\App\Http\Controllers\API\Provider\OrderController::class, 'stats'])->name('orders.stats');
+    Route::post('/orders/{order}/accept', [\App\Http\Controllers\API\Provider\OrderController::class, 'accept'])->name('provider.orders.accept');
+    Route::post('/orders/{order}/mark-ready', [\App\Http\Controllers\API\Provider\OrderController::class, 'markReady'])->name('provider.orders.mark-ready');
+    Route::post('/orders/{order}/complete', [\App\Http\Controllers\API\Provider\OrderController::class, 'complete'])->name('provider.orders.complete');
+    Route::post('/orders/{order}/cancel', [\App\Http\Controllers\API\Provider\OrderController::class, 'cancel'])->name('provider.orders.cancel');
+
+    // Define apiResource routes AFTER specific routes
+    Route::apiResource('orders', \App\Http\Controllers\API\Provider\OrderController::class)->names([
+        'index' => 'provider.orders.index',
+        'show' => 'provider.orders.show',
+    ]);
 });
 
 // Admin routes (Protected by admin-access gate) with rate limiting

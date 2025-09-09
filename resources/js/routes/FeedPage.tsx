@@ -169,16 +169,16 @@ const FeedPage: React.FC = () => {
             </p>
             <div className="hero-stats">
               <div className="stat">
-                <div className="stat-number">500+</div>
+                <div className="stat-number">2.5M</div>
                 <div className="stat-label">Meals Saved</div>
               </div>
               <div className="stat">
-                <div className="stat-number">€2,500+</div>
+                <div className="stat-number">€15M</div>
                 <div className="stat-label">Money Saved</div>
               </div>
               <div className="stat">
-                <div className="stat-number">25+</div>
-                <div className="stat-label">Restaurant Partners</div>
+                <div className="stat-number">500+</div>
+                <div className="stat-label">Local Partners</div>
               </div>
             </div>
           </div>

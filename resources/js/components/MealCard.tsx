@@ -1,5 +1,5 @@
 // resources/js/components/MealCard.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useCart } from '../context/CartContext'; // Import the useCart hook
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import auth from '../auth'; // Import the auth helper
@@ -29,8 +29,25 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
   const { addToCart } = useCart(); // Get addToCart function from context
   const navigate = useNavigate(); // Get navigate function
   const [showImageModal, setShowImageModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [buttonScale, setButtonScale] = useState(1);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const animateButton = () => {
+    setButtonScale(0.95);
+    setTimeout(() => setButtonScale(1), 150);
+  };
+
+  const showSuccessFeedback = () => {
+    setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+  };
 
   const handleAddToCart = () => {
+    animateButton();
+
     if (auth.isAuthenticated()) {
       // Ensure current_price is a valid number before adding
       const currentPrice =
@@ -41,7 +58,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
         // Pass title and current_price to addToCart
         addToCart({ id: meal.id, name: meal.title, price: currentPrice });
         console.log(`Added ${meal.title} to cart (ID: ${meal.id})`);
-        // Optionally: Add user feedback (e.g., toast notification)
+        showSuccessFeedback();
       } else {
         console.error(`Invalid price for meal: ${meal.title}`);
         // Optionally: Show an error to the user
@@ -80,14 +97,14 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
   };
 
   // Construct the full image URL if the path is relative
-  const imageUrl = meal.image ? `${meal.image}` : null;
+  const imageUrl = meal.image ? 
+    (meal.image.startsWith('http') ? meal.image : `${window.location.origin}${meal.image}`) : 
+    null;
 
   const savingsPercentage = calculateSavings();
 
   const handleCardClick = () => {
-    if (imageUrl) {
-      setShowImageModal(true);
-    }
+    setShowImageModal(true);
   };
 
   const handleModalClose = () => {
@@ -99,21 +116,45 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
       <div
         className="card h-100 meal-card"
         onClick={handleCardClick}
-        style={{ cursor: imageUrl ? 'pointer' : 'default' }}
+        style={{ cursor: 'pointer' }}
       >
-        {/* Image Placeholder Section */}
+        {/* Image Section */}
         <div className="card-image-placeholder position-relative">
-          <div className="image-placeholder bg-gradient-primary d-flex align-items-center justify-content-center">
-            <div className="text-center">
-              <i className="fas fa-utensils fa-2x text-white opacity-75 mb-2"></i>
-              {imageUrl && (
+          {imageUrl ? (
+            <div className="meal-image-container">
+              <img
+                src={imageUrl}
+                alt={meal.title}
+                className="card-img-top"
+                style={{ height: '150px', objectFit: 'cover' }}
+                onError={(e) => {
+                  // Fallback to placeholder if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.nextElementSibling?.classList.remove('d-none');
+                }}
+              />
+              <div className="image-placeholder bg-gradient-primary d-flex align-items-center justify-content-center d-none">
+                <div className="text-center">
+                  <i className="fas fa-utensils fa-2x text-white opacity-75 mb-2"></i>
+                  <div className="text-white opacity-75 small">
+                    <i className="fas fa-eye me-1"></i>
+                    Click to view
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="image-placeholder bg-gradient-primary d-flex align-items-center justify-content-center">
+              <div className="text-center">
+                <i className="fas fa-utensils fa-2x text-white opacity-75 mb-2"></i>
                 <div className="text-white opacity-75 small">
                   <i className="fas fa-eye me-1"></i>
                   Click to view
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Savings Badge */}
           {savingsPercentage > 0 && (
@@ -180,19 +221,24 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
           {/* Price and Action Section */}
           <div className="mt-auto">
             <div className="d-flex justify-content-between align-items-center">
-              <div className="price-display">
+              <div className="price-display flex-grow-1 me-3">
                 {meal.original_price &&
                 meal.original_price > meal.current_price ? (
-                  <div className="d-flex align-items-baseline">
-                    <span className="current-price me-2 fw-bold">
-                      €{meal.current_price.toFixed(2)}
-                    </span>
-                    <span className="original-price text-muted">
-                      <del>€{meal.original_price.toFixed(2)}</del>
-                    </span>
+                  <div className="d-flex flex-column">
+                    <div className="d-flex align-items-baseline">
+                      <span className="current-price fw-bold text-success me-2">
+                        €{meal.current_price.toFixed(2)}
+                      </span>
+                      <span className="original-price text-muted small">
+                        <del>€{meal.original_price.toFixed(2)}</del>
+                      </span>
+                    </div>
+                    <small className="text-success fw-bold">
+                      Save €{(meal.original_price - meal.current_price).toFixed(2)}
+                    </small>
                   </div>
                 ) : (
-                  <span className="current-price fw-bold">
+                  <span className="current-price fw-bold text-primary">
                     {typeof meal.current_price === 'number' ||
                     !isNaN(parseFloat(String(meal.current_price)))
                       ? `€${parseFloat(String(meal.current_price)).toFixed(2)}`
@@ -201,16 +247,30 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                 )}
               </div>
 
-              <button
-                className="btn btn-primary btn-sm fw-bold"
-                onClick={e => {
-                  e.stopPropagation();
-                  handleAddToCart();
-                }}
-              >
-                <i className="fas fa-cart-plus me-1"></i>
-                Add to Cart
-              </button>
+              <div className="d-flex align-items-center">
+                <button
+                  ref={buttonRef}
+                  className="btn btn-primary btn-sm fw-bold position-relative"
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleAddToCart();
+                  }}
+                  style={{
+                    transform: `scale(${buttonScale})`,
+                    transition: 'transform 0.15s ease',
+                    backgroundColor: showSuccess ? '#27AE60' : undefined,
+                    borderColor: showSuccess ? '#27AE60' : undefined,
+                  }}
+                >
+                  <i className="fas fa-cart-plus me-1"></i>
+                  {showSuccess ? 'Added!' : 'Add to Cart'}
+                </button>
+                {showSuccess && (
+                  <div className="ms-2 text-success">
+                    <i className="fas fa-check-circle"></i>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -230,33 +290,99 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
         </div>
       </div>
 
-      {/* Image Modal */}
-      {showImageModal && imageUrl && (
-        <div className="image-modal-overlay" onClick={handleModalClose}>
+      {/* Meal Detail Modal */}
+      {showImageModal && (
+        <div className="meal-detail-modal-overlay" onClick={handleModalClose}>
           <div
-            className="image-modal-content"
+            className="meal-detail-modal-content"
             onClick={e => e.stopPropagation()}
           >
-            <div className="image-modal-header">
-              <h5 className="text-white mb-0">{meal.title}</h5>
+            <div className="meal-detail-modal-header">
+              <h4 className="text-white mb-0">{meal.title}</h4>
               <button
                 className="btn-close btn-close-white"
                 onClick={handleModalClose}
                 aria-label="Close"
               ></button>
             </div>
-            <div className="image-modal-body">
-              <img
-                src={imageUrl}
-                alt={meal.title}
-                className="img-fluid rounded"
-              />
-            </div>
-            <div className="image-modal-footer">
-              <p className="text-white mb-0 small">
-                <i className="fas fa-store me-1"></i>
-                {meal.restaurant?.name}
-              </p>
+            <div className="meal-detail-modal-body">
+              {imageUrl && (
+                <div className="meal-image-container mb-3">
+                  <img
+                    src={imageUrl}
+                    alt={meal.title}
+                    className="img-fluid rounded"
+                  />
+                </div>
+              )}
+              
+              <div className="meal-details">
+                <div className="row">
+                  <div className="col-md-8">
+                    <h5 className="text-primary mb-3">{meal.title}</h5>
+                    <p className="text-muted mb-3">{meal.description}</p>
+                    
+                    <div className="meal-info mb-3">
+                      <div className="info-item mb-2">
+                        <i className="fas fa-store text-primary me-2"></i>
+                        <strong>Restaurant:</strong> {meal.restaurant?.name || 'N/A'}
+                      </div>
+                      <div className="info-item mb-2">
+                        <i className="fas fa-clock text-primary me-2"></i>
+                        <strong>Pickup Time:</strong> {formatPickupTime()}
+                      </div>
+                      {meal.category && (
+                        <div className="info-item mb-2">
+                          <i className="fas fa-tag text-primary me-2"></i>
+                          <strong>Category:</strong> {meal.category.name}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="col-md-4">
+                    <div className="price-section">
+                      <h6 className="text-primary mb-3">Price</h6>
+                      {meal.original_price && meal.original_price > meal.current_price ? (
+                        <div className="discounted-price">
+                          <div className="current-price text-success h4 mb-1">
+                            €{meal.current_price.toFixed(2)}
+                          </div>
+                          <div className="original-price text-muted mb-2">
+                            <del>€{meal.original_price.toFixed(2)}</del>
+                          </div>
+                          <div className="savings text-success fw-bold">
+                            Save €{(meal.original_price - meal.current_price).toFixed(2)} ({savingsPercentage}% OFF)
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="regular-price text-primary h4">
+                          €{meal.current_price.toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="action-section mt-4">
+                      <button
+                        className="btn btn-primary btn-lg w-100"
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleAddToCart();
+                        }}
+                        style={{
+                          transform: `scale(${buttonScale})`,
+                          transition: 'transform 0.15s ease',
+                          backgroundColor: showSuccess ? '#27AE60' : undefined,
+                          borderColor: showSuccess ? '#27AE60' : undefined,
+                        }}
+                      >
+                        <i className="fas fa-cart-plus me-2"></i>
+                        {showSuccess ? 'Added to Cart!' : 'Add to Cart'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

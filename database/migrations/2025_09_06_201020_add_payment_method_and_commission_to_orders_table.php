@@ -31,7 +31,7 @@ return new class extends Migration
                 'commission_rate',
                 'commission_amount',
                 'completed_at',
-                'invoiced_at'
+                'invoiced_at',
             ]);
         });
     }

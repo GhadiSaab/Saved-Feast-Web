@@ -70,11 +70,11 @@ class MealAvailabilityExtensionTest extends TestCase
         $this->artisan('meals:extend-availability', ['--days' => 30])
             ->expectsOutput('Extending meal availability by 30 days...')
             ->expectsOutput('Found 2 expired meals to extend.')
-            ->expectsOutput('Extended availability for: Expired Meal 1 (ID: ' . $expiredMeal1->id . ')')
-            ->expectsOutput('Extended availability for: Expired Meal 2 (ID: ' . $expiredMeal2->id . ')')
+            ->expectsOutput('Extended availability for: Expired Meal 1 (ID: '.$expiredMeal1->id.')')
+            ->expectsOutput('Extended availability for: Expired Meal 2 (ID: '.$expiredMeal2->id.')')
             ->expectsOutput('Successfully extended availability for 2 meals.')
             ->expectsOutput('Found 1 meals with null availability dates.')
-            ->expectsOutput('Set availability dates for: Null Availability Meal (ID: ' . $nullAvailabilityMeal->id . ')')
+            ->expectsOutput('Set availability dates for: Null Availability Meal (ID: '.$nullAvailabilityMeal->id.')')
             ->assertExitCode(0);
 
         // Refresh models from database
@@ -86,11 +86,11 @@ class MealAvailabilityExtensionTest extends TestCase
         // Check that expired meals were extended
         $this->assertEquals('available', $expiredMeal1->status);
         $this->assertEquals('available', $expiredMeal2->status);
-        
+
         // Check that available_until was extended by 30 days
         $this->assertTrue($expiredMeal1->available_until >= now()->addDays(29));
         $this->assertTrue($expiredMeal1->available_until <= now()->addDays(31));
-        
+
         $this->assertTrue($expiredMeal2->available_until >= now()->addDays(29));
         $this->assertTrue($expiredMeal2->available_until <= now()->addDays(31));
 

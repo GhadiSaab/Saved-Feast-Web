@@ -20,9 +20,13 @@ class CashOnPickupOrderTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     protected User $user;
+
     protected Restaurant $restaurant;
+
     protected Meal $meal;
+
     protected CommissionService $commissionService;
+
     protected InvoiceService $invoiceService;
 
     protected function setUp(): void
@@ -34,7 +38,7 @@ class CashOnPickupOrderTest extends TestCase
         $this->restaurant = Restaurant::factory()->create([
             'commission_rate' => 7.0,
         ]);
-        
+
         $category = Category::factory()->create();
         $this->meal = Meal::factory()->create([
             'restaurant_id' => $this->restaurant->id,
@@ -118,7 +122,7 @@ class CashOnPickupOrderTest extends TestCase
     {
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => 'pending',
+            'status' => 'PENDING',
             'payment_method' => 'CASH_ON_PICKUP',
         ]);
 
@@ -128,7 +132,7 @@ class CashOnPickupOrderTest extends TestCase
         $response->assertStatus(200);
 
         $order->refresh();
-        $this->assertEquals('completed', $order->status);
+        $this->assertEquals('COMPLETED', $order->status);
         $this->assertNotNull($order->completed_at);
     }
 
@@ -146,7 +150,7 @@ class CashOnPickupOrderTest extends TestCase
     {
         $restaurant = Restaurant::factory()->create(['commission_rate' => 5.0]);
         $rate = $this->commissionService->getCommissionRate($restaurant);
-        
+
         $this->assertEquals(5.0, $rate);
     }
 
@@ -154,7 +158,7 @@ class CashOnPickupOrderTest extends TestCase
     {
         $rate = $this->commissionService->getCommissionRate(null);
         $defaultRate = config('savedfeast.commission.default_rate', 7.0);
-        
+
         $this->assertEquals($defaultRate, $rate);
     }
 
@@ -164,7 +168,7 @@ class CashOnPickupOrderTest extends TestCase
         $lastWeek = Carbon::now()->subWeek();
         $periodStart = $lastWeek->copy()->startOfWeek();
         $periodEnd = $lastWeek->copy()->endOfWeek();
-        
+
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
             'status' => 'completed',
@@ -205,7 +209,7 @@ class CashOnPickupOrderTest extends TestCase
         $lastWeek = Carbon::now()->subWeek();
         $periodStart = $lastWeek->copy()->startOfWeek();
         $periodEnd = $lastWeek->copy()->endOfWeek();
-        
+
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
             'status' => 'completed',
@@ -263,7 +267,7 @@ class CashOnPickupOrderTest extends TestCase
         $providerRole = \App\Models\Role::firstOrCreate(['name' => 'provider']);
         $provider = User::factory()->create();
         $provider->roles()->attach($providerRole->id);
-        
+
         $restaurant = Restaurant::factory()->create([
             'user_id' => $provider->id,
         ]);
@@ -297,7 +301,7 @@ class CashOnPickupOrderTest extends TestCase
         $providerRole = \App\Models\Role::firstOrCreate(['name' => 'provider']);
         $provider = User::factory()->create();
         $provider->roles()->attach($providerRole->id);
-        
+
         $otherRestaurant = Restaurant::factory()->create();
         $invoice = RestaurantInvoice::factory()->create([
             'restaurant_id' => $otherRestaurant->id,
@@ -337,7 +341,7 @@ class CashOnPickupOrderTest extends TestCase
         $adminRole = \App\Models\Role::firstOrCreate(['name' => 'admin']);
         $admin = User::factory()->create();
         $admin->roles()->attach($adminRole->id);
-        
+
         $invoice = RestaurantInvoice::factory()->create([
             'restaurant_id' => $this->restaurant->id,
             'status' => 'sent',

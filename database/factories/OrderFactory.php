@@ -27,7 +27,7 @@ class OrderFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'status' => $this->faker->randomElement(['pending', 'completed', 'cancelled']),
+            'status' => $this->faker->randomElement(['PENDING', 'COMPLETED', 'CANCELLED_BY_CUSTOMER']),
             'total_amount' => $this->faker->randomFloat(2, 15, 120),
         ];
     }
@@ -38,17 +38,27 @@ class OrderFactory extends Factory
     public function pending(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'pending',
+            'status' => 'PENDING',
         ]);
     }
 
     /**
-     * Indicate that the order is confirmed.
+     * Indicate that the order is accepted.
      */
-    public function confirmed(): static
+    public function accepted(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'confirmed',
+            'status' => 'ACCEPTED',
+        ]);
+    }
+
+    /**
+     * Indicate that the order is ready for pickup.
+     */
+    public function readyForPickup(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'READY_FOR_PICKUP',
         ]);
     }
 
@@ -58,17 +68,37 @@ class OrderFactory extends Factory
     public function completed(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'completed',
+            'status' => 'COMPLETED',
         ]);
     }
 
     /**
-     * Indicate that the order is cancelled.
+     * Indicate that the order is cancelled by customer.
      */
-    public function cancelled(): static
+    public function cancelledByCustomer(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'cancelled',
+            'status' => 'CANCELLED_BY_CUSTOMER',
+        ]);
+    }
+
+    /**
+     * Indicate that the order is cancelled by restaurant.
+     */
+    public function cancelledByRestaurant(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'CANCELLED_BY_RESTAURANT',
+        ]);
+    }
+
+    /**
+     * Indicate that the order is expired.
+     */
+    public function expired(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'EXPIRED',
         ]);
     }
 }

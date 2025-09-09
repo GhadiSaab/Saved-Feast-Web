@@ -62,20 +62,65 @@ const RestaurantApplicationPage: React.FC = () => {
   };
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-md-8 col-lg-7">
-        <div className="card shadow-sm">
-          <div className="card-header text-center fs-4">
-            Partner with SavedFeast
+    <div className="container-fluid py-4">
+      <div className="row">
+        <div className="col-12">
+          {/* Header Section */}
+          <div className="bg-gradient-primary text-white rounded-3 p-4 mb-4 shadow">
+            <div className="row align-items-center">
+              <div className="col-md-8">
+                <h1 className="h2 mb-2 fw-bold">
+                  <i className="fas fa-handshake me-3"></i>
+                  Partner with SavedFeast
+                </h1>
+                <p className="mb-0 opacity-75">Join our mission to reduce food waste and help customers save money</p>
+              </div>
+              <div className="col-md-4 text-md-end">
+                <div className="d-flex justify-content-md-end gap-2">
+                  <a href="/" className="btn btn-light btn-sm">
+                    <i className="fas fa-home me-1"></i>
+                    Back to Home
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="card-body p-4">
-            <p className="text-muted text-center mb-4">
-              Interested in selling your surplus meals on SavedFeast? Fill out
-              the form below to apply.
-            </p>
 
-            {success && <div className="alert alert-success">{success}</div>}
-            {error && <div className="alert alert-danger">{error}</div>}
+          <div className="row justify-content-center">
+            <div className="col-md-8 col-lg-7">
+              <div className="card border-0 shadow-sm">
+                <div className="card-header bg-transparent border-0 text-center">
+                  <h5 className="mb-0 fw-bold">
+                    <i className="fas fa-store me-2 text-primary"></i>
+                    Restaurant Application
+                  </h5>
+                  <p className="text-muted mt-2 mb-0">
+                    Interested in selling your surplus meals on SavedFeast? Fill out the form below to apply.
+                  </p>
+                </div>
+                <div className="card-body p-4">
+                  {success && (
+                    <div className="alert alert-success border-0 shadow-sm" role="alert">
+                      <div className="d-flex align-items-center">
+                        <i className="fas fa-check-circle fa-2x me-3"></i>
+                        <div>
+                          <h6 className="alert-heading mb-1">Application Submitted!</h6>
+                          <p className="mb-0">{success}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {error && (
+                    <div className="alert alert-danger border-0 shadow-sm" role="alert">
+                      <div className="d-flex align-items-center">
+                        <i className="fas fa-exclamation-triangle fa-2x me-3"></i>
+                        <div>
+                          <h6 className="alert-heading mb-1">Error</h6>
+                          <p className="mb-0">{error}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
             {!success && ( // Hide form on success
               <form onSubmit={handleSubmit}>
@@ -198,7 +243,10 @@ const RestaurantApplicationPage: React.FC = () => {
                   )}
                 </button>
               </form>
-            )}
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

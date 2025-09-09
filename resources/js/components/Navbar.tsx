@@ -123,12 +123,20 @@ const Navbar: React.FC = () => {
               <>
                 {/* Conditionally show Dashboard link for providers */}
                 {userHasRole('provider') && (
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/provider/dashboard">
-                      <i className="fas fa-chart-line me-1"></i>
-                      Restaurant Dashboard
-                    </Link>
-                  </li>
+                  <>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/provider/dashboard">
+                        <i className="fas fa-chart-line me-1"></i>
+                        Restaurant Dashboard
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/provider/orders">
+                        <i className="fas fa-list-alt me-1"></i>
+                        Manage Orders
+                      </Link>
+                    </li>
+                  </>
                 )}
                 {/* Conditionally show Admin Dashboard link for admins */}
                 {userHasRole('admin') && (

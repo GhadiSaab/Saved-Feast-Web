@@ -106,10 +106,10 @@ class MealController extends Controller
         }
 
         // Set default availability if not provided
-        if (!isset($mealDataToFill['available_from'])) {
+        if (! isset($mealDataToFill['available_from'])) {
             $mealDataToFill['available_from'] = now();
         }
-        if (!isset($mealDataToFill['available_until'])) {
+        if (! isset($mealDataToFill['available_until'])) {
             $mealDataToFill['available_until'] = now()->addDays(7); // Default to 7 days from now
         }
 

@@ -108,4 +108,117 @@ class OrderPolicy
         // Only admins can permanently delete orders
         return $user->roles()->where('name', 'admin')->exists();
     }
+
+    /**
+     * Determine whether the user can cancel the order.
+     */
+    public function cancel(User $user, Order $order): bool
+    {
+        // Users can cancel their own orders if allowed by business rules
+        if ($order->user_id === $user->id) {
+            return $order->canBeCancelledByCustomer();
+        }
+
+        // Providers can cancel orders for their restaurants if allowed by business rules
+        if ($user->roles()->where('name', 'provider')->exists()) {
+            $restaurantIds = $user->restaurants()->pluck('id');
+            $hasAccess = $order->orderItems()->whereHas('meal', function ($query) use ($restaurantIds) {
+                $query->whereIn('restaurant_id', $restaurantIds);
+            })->exists();
+
+            return $hasAccess && $order->canBeCancelledByRestaurant();
+        }
+
+        // Admins can cancel any order
+        if ($user->roles()->where('name', 'admin')->exists()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine whether the user can accept the order.
+     */
+    public function accept(User $user, Order $order): bool
+    {
+        // Only providers can accept orders
+        if (! $user->roles()->where('name', 'provider')->exists()) {
+            return false;
+        }
+
+        // Check if order belongs to provider's restaurant
+        $restaurantIds = $user->restaurants()->pluck('id');
+        $hasAccess = $order->orderItems()->whereHas('meal', function ($query) use ($restaurantIds) {
+            $query->whereIn('restaurant_id', $restaurantIds);
+        })->exists();
+
+        return $hasAccess && $order->status === Order::STATUS_PENDING;
+    }
+
+    /**
+     * Determine whether the user can mark the order as ready.
+     */
+    public function markReady(User $user, Order $order): bool
+    {
+        // Only providers can mark orders as ready
+        if (! $user->roles()->where('name', 'provider')->exists()) {
+            return false;
+        }
+
+        // Check if order belongs to provider's restaurant
+        $restaurantIds = $user->restaurants()->pluck('id');
+        $hasAccess = $order->orderItems()->whereHas('meal', function ($query) use ($restaurantIds) {
+            $query->whereIn('restaurant_id', $restaurantIds);
+        })->exists();
+
+        return $hasAccess && $order->status === Order::STATUS_ACCEPTED;
+    }
+
+    /**
+     * Determine whether the user can complete the order.
+     */
+    public function complete(User $user, Order $order): bool
+    {
+        // Only providers can complete orders
+        if (! $user->roles()->where('name', 'provider')->exists()) {
+            return false;
+        }
+
+        // Check if order belongs to provider's restaurant
+        $restaurantIds = $user->restaurants()->pluck('id');
+        $hasAccess = $order->orderItems()->whereHas('meal', function ($query) use ($restaurantIds) {
+            $query->whereIn('restaurant_id', $restaurantIds);
+        })->exists();
+
+        return $hasAccess && $order->status === Order::STATUS_READY_FOR_PICKUP;
+    }
+
+    /**
+     * Determine whether the user can view pickup code.
+     */
+    public function viewPickupCode(User $user, Order $order): bool
+    {
+        // Users can view pickup code for their own orders
+        if ($order->user_id === $user->id) {
+            return in_array($order->status, [Order::STATUS_ACCEPTED, Order::STATUS_READY_FOR_PICKUP]);
+        }
+
+        // Providers can view pickup code for orders in their restaurants
+        if ($user->roles()->where('name', 'provider')->exists()) {
+            $restaurantIds = $user->restaurants()->pluck('id');
+            $hasAccess = $order->orderItems()->whereHas('meal', function ($query) use ($restaurantIds) {
+                $query->whereIn('restaurant_id', $restaurantIds);
+            })->exists();
+
+            return $hasAccess && in_array($order->status, [Order::STATUS_ACCEPTED, Order::STATUS_READY_FOR_PICKUP]);
+        }
+
+        // Admins can view pickup code for any order
+        if ($user->roles()->where('name', 'admin')->exists()) {
+            return true;
+        }
+
+        return false;
+    }
 }

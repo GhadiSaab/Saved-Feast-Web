@@ -37,13 +37,13 @@ class GenerateWeeklyInvoices extends Command
     {
         $period = $this->option('period');
         $timezone = config('savedfeast.invoicing.timezone', 'Asia/Beirut');
-        
+
         $this->info("Generating weekly invoices for period: {$period}");
         $this->info("Using timezone: {$timezone}");
 
         // Calculate the period dates
         $now = Carbon::now($timezone);
-        
+
         if ($period === 'previous') {
             $periodStart = $now->copy()->subWeek()->startOfWeek();
             $periodEnd = $now->copy()->subWeek()->endOfWeek();
@@ -52,6 +52,7 @@ class GenerateWeeklyInvoices extends Command
             $periodEnd = $now->copy()->endOfWeek();
         } else {
             $this->error("Invalid period. Use 'previous' or 'current'");
+
             return 1;
         }
 
@@ -60,12 +61,12 @@ class GenerateWeeklyInvoices extends Command
         try {
             $results = $this->invoiceService->generateWeeklyInvoices($periodStart, $periodEnd);
 
-            $this->info("Invoice generation completed!");
+            $this->info('Invoice generation completed!');
             $this->info("Invoices created: {$results['invoices_created']}");
             $this->info("Orders processed: {$results['orders_processed']}");
 
-            if (!empty($results['errors'])) {
-                $this->warn("Errors encountered:");
+            if (! empty($results['errors'])) {
+                $this->warn('Errors encountered:');
                 foreach ($results['errors'] as $error) {
                     $this->error("  - {$error}");
                 }
@@ -73,7 +74,8 @@ class GenerateWeeklyInvoices extends Command
 
             return 0;
         } catch (\Exception $e) {
-            $this->error("Failed to generate invoices: " . $e->getMessage());
+            $this->error('Failed to generate invoices: '.$e->getMessage());
+
             return 1;
         }
     }

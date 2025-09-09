@@ -21,10 +21,6 @@ class InvoiceService
 
     /**
      * Generate weekly invoices for all restaurants
-     *
-     * @param Carbon $periodStart
-     * @param Carbon $periodEnd
-     * @return array
      */
     public function generateWeeklyInvoices(Carbon $periodStart, Carbon $periodEnd): array
     {
@@ -46,7 +42,7 @@ class InvoiceService
                         $results['orders_processed'] += $invoice->orders_count;
                     }
                 } catch (\Exception $e) {
-                    $results['errors'][] = "Failed to generate invoice for restaurant {$restaurant->id}: " . $e->getMessage();
+                    $results['errors'][] = "Failed to generate invoice for restaurant {$restaurant->id}: ".$e->getMessage();
                     Log::error("Invoice generation failed for restaurant {$restaurant->id}", [
                         'error' => $e->getMessage(),
                         'period_start' => $periodStart,
@@ -56,8 +52,8 @@ class InvoiceService
             }
 
         } catch (\Exception $e) {
-            $results['errors'][] = "Failed to generate invoices: " . $e->getMessage();
-            Log::error("Weekly invoice generation failed", [
+            $results['errors'][] = 'Failed to generate invoices: '.$e->getMessage();
+            Log::error('Weekly invoice generation failed', [
                 'error' => $e->getMessage(),
                 'period_start' => $periodStart,
                 'period_end' => $periodEnd,
@@ -69,11 +65,6 @@ class InvoiceService
 
     /**
      * Generate invoice for a specific restaurant
-     *
-     * @param Restaurant $restaurant
-     * @param Carbon $periodStart
-     * @param Carbon $periodEnd
-     * @return RestaurantInvoice|null
      */
     public function generateInvoiceForRestaurant(Restaurant $restaurant, Carbon $periodStart, Carbon $periodEnd): ?RestaurantInvoice
     {
@@ -81,12 +72,12 @@ class InvoiceService
         $orders = Order::whereHas('orderItems.meal', function ($query) use ($restaurant) {
             $query->where('restaurant_id', $restaurant->id);
         })
-        ->where('payment_method', 'CASH_ON_PICKUP')
-        ->where('orders.status', Order::STATUS_COMPLETED)
-        ->where('completed_at', '>=', $periodStart)
-        ->where('completed_at', '<=', $periodEnd)
-        ->whereNull('invoiced_at')
-        ->get();
+            ->where('payment_method', 'CASH_ON_PICKUP')
+            ->where('orders.status', Order::STATUS_COMPLETED)
+            ->where('completed_at', '>=', $periodStart)
+            ->where('completed_at', '<=', $periodEnd)
+            ->whereNull('invoiced_at')
+            ->get();
 
         if ($orders->isEmpty()) {
             return null;
@@ -137,16 +128,13 @@ class InvoiceService
 
     /**
      * Mark invoice as sent
-     *
-     * @param int $invoiceId
-     * @return bool
      */
     public function markInvoiceSent(int $invoiceId): bool
     {
         $invoice = RestaurantInvoice::findOrFail($invoiceId);
-        
-        if (!in_array($invoice->status, ['draft'])) {
-            throw new \Exception("Invoice can only be marked as sent from draft status");
+
+        if (! in_array($invoice->status, ['draft'])) {
+            throw new \Exception('Invoice can only be marked as sent from draft status');
         }
 
         return $invoice->update(['status' => 'sent']);
@@ -154,16 +142,13 @@ class InvoiceService
 
     /**
      * Mark invoice as paid
-     *
-     * @param int $invoiceId
-     * @return bool
      */
     public function markInvoicePaid(int $invoiceId): bool
     {
         $invoice = RestaurantInvoice::findOrFail($invoiceId);
-        
-        if (!in_array($invoice->status, ['sent', 'overdue'])) {
-            throw new \Exception("Invoice can only be marked as paid from sent or overdue status");
+
+        if (! in_array($invoice->status, ['sent', 'overdue'])) {
+            throw new \Exception('Invoice can only be marked as paid from sent or overdue status');
         }
 
         return $invoice->update(['status' => 'paid']);
@@ -171,16 +156,13 @@ class InvoiceService
 
     /**
      * Mark invoice as overdue
-     *
-     * @param int $invoiceId
-     * @return bool
      */
     public function markInvoiceOverdue(int $invoiceId): bool
     {
         $invoice = RestaurantInvoice::findOrFail($invoiceId);
-        
-        if (!in_array($invoice->status, ['sent'])) {
-            throw new \Exception("Invoice can only be marked as overdue from sent status");
+
+        if (! in_array($invoice->status, ['sent'])) {
+            throw new \Exception('Invoice can only be marked as overdue from sent status');
         }
 
         return $invoice->update(['status' => 'overdue']);
@@ -188,14 +170,11 @@ class InvoiceService
 
     /**
      * Regenerate PDF for an invoice
-     *
-     * @param int $invoiceId
-     * @return string|null
      */
     public function regeneratePdf(int $invoiceId): ?string
     {
         $invoice = RestaurantInvoice::with(['restaurant', 'items.order'])->findOrFail($invoiceId);
-        
+
         // This will be implemented when we add PDF generation
         // For now, just return null
         return null;

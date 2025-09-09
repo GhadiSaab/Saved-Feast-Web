@@ -87,10 +87,10 @@ class OrderCalculationTest extends TestCase
     {
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => 'pending',
+            'status' => 'PENDING',
         ]);
 
-        $this->assertTrue(in_array($order->status, ['pending', 'completed', 'cancelled']));
+        $this->assertTrue(in_array($order->status, ['PENDING', 'ACCEPTED', 'READY_FOR_PICKUP', 'COMPLETED', 'CANCELLED_BY_CUSTOMER', 'CANCELLED_BY_RESTAURANT', 'EXPIRED']));
     }
 
     public function test_order_belongs_to_user()
@@ -129,23 +129,23 @@ class OrderCalculationTest extends TestCase
     {
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => 'pending',
+            'status' => 'PENDING',
         ]);
 
-        $order->update(['status' => 'cancelled']);
+        $order->update(['status' => 'CANCELLED_BY_CUSTOMER']);
 
-        $this->assertEquals('cancelled', $order->fresh()->status);
+        $this->assertEquals('CANCELLED_BY_CUSTOMER', $order->fresh()->status);
     }
 
     public function test_order_can_be_completed()
     {
         $order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'status' => 'pending',
+            'status' => 'PENDING',
         ]);
 
-        $order->update(['status' => 'completed']);
+        $order->update(['status' => 'COMPLETED']);
 
-        $this->assertEquals('completed', $order->fresh()->status);
+        $this->assertEquals('COMPLETED', $order->fresh()->status);
     }
 }

@@ -10,7 +10,6 @@ use App\Models\Restaurant;
 use App\Models\User;
 use App\Services\CommissionService;
 use Carbon\Carbon;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DemoCashOnPickupOrdersSeeder extends Seeder
@@ -28,7 +27,7 @@ class DemoCashOnPickupOrdersSeeder extends Seeder
     public function run(): void
     {
         // Create demo data for testing cash-on-pickup orders and invoicing
-        
+
         // Create a demo user if not exists
         $user = User::firstOrCreate(
             ['email' => 'demo@example.com'],
@@ -82,21 +81,21 @@ class DemoCashOnPickupOrdersSeeder extends Seeder
 
         for ($day = 0; $day < 7; $day++) {
             $orderDate = $lastWeek->copy()->addDays($day);
-            
+
             // Create 1-3 orders per day
             $ordersPerDay = rand(1, 3);
-            
+
             for ($orderNum = 0; $orderNum < $ordersPerDay; $orderNum++) {
                 $orderTime = $orderDate->copy()->setTime(rand(10, 20), rand(0, 59));
-                
+
                 // Calculate order total
                 $meal = $meals[array_rand($meals)];
                 $quantity = rand(1, 3);
                 $totalAmount = $meal->current_price * $quantity;
-                
+
                 // Calculate commission
                 $commission = $this->commissionService->calculateOrderCommission($totalAmount, $restaurant);
-                
+
                 // Create the order
                 $order = Order::create([
                     'user_id' => $user->id,

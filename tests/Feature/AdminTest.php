@@ -152,7 +152,7 @@ class AdminTest extends TestCase
     public function test_admin_can_update_order_status()
     {
         $updateData = [
-            'status' => 'completed',
+            'status' => 'COMPLETED',
         ];
 
         $response = $this->actingAs($this->admin)
@@ -160,7 +160,7 @@ class AdminTest extends TestCase
 
         $response->assertStatus(200);
 
-        $this->assertEquals('completed', $this->order->fresh()->status);
+        $this->assertEquals('COMPLETED', $this->order->fresh()->status);
     }
 
     public function test_admin_can_view_analytics()

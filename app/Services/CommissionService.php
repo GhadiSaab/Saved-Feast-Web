@@ -6,10 +6,6 @@ class CommissionService
 {
     /**
      * Calculate commission amount from total and rate
-     *
-     * @param float $total
-     * @param float $rate
-     * @return float
      */
     public function calculateCommission(float $total, float $rate): float
     {
@@ -20,8 +16,7 @@ class CommissionService
      * Get the commission rate for a restaurant
      * Falls back to default rate if restaurant doesn't have one set
      *
-     * @param \App\Models\Restaurant|null $restaurant
-     * @return float
+     * @param  \App\Models\Restaurant|null  $restaurant
      */
     public function getCommissionRate($restaurant = null): float
     {
@@ -35,8 +30,7 @@ class CommissionService
     /**
      * Calculate commission for an order
      *
-     * @param float $orderTotal
-     * @param \App\Models\Restaurant|null $restaurant
+     * @param  \App\Models\Restaurant|null  $restaurant
      * @return array ['rate' => float, 'amount' => float]
      */
     public function calculateOrderCommission(float $orderTotal, $restaurant = null): array

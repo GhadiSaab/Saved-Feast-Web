@@ -357,7 +357,7 @@ class AdminController extends Controller
     public function updateOrder(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'required|in:pending,completed,cancelled',
+            'status' => 'required|in:PENDING,ACCEPTED,READY_FOR_PICKUP,COMPLETED,CANCELLED_BY_CUSTOMER,CANCELLED_BY_RESTAURANT,EXPIRED',
         ]);
 
         $order->update(['status' => $request->status]);
@@ -561,7 +561,7 @@ class AdminController extends Controller
             'phone' => 'required|string|max:20',
             'address' => 'required|string|max:500',
             'password' => 'required|string|min:8|confirmed',
-            
+
             // Restaurant data
             'restaurant_name' => 'required|string|max:255',
             'restaurant_description' => 'nullable|string',
@@ -627,7 +627,7 @@ class AdminController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to create provider profile',
@@ -642,7 +642,7 @@ class AdminController extends Controller
     public function getRoles()
     {
         $roles = Role::select('id', 'name', 'description')->get();
-        
+
         return response()->json([
             'status' => true,
             'data' => $roles,

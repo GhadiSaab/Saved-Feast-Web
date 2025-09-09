@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API\Provider;
 
 use App\Http\Controllers\Controller;
-use App\Models\RestaurantInvoice;
 use App\Models\Order;
+use App\Models\RestaurantInvoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -25,7 +25,7 @@ class SettlementsController extends Controller
         $user = $request->user();
         $restaurant = $user->restaurants()->first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json([
                 'status' => false,
                 'message' => 'No restaurant found for this provider',
@@ -68,7 +68,7 @@ class SettlementsController extends Controller
         $user = $request->user();
         $restaurant = $user->restaurants()->first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json([
                 'status' => false,
                 'message' => 'No restaurant found for this provider',
@@ -95,7 +95,7 @@ class SettlementsController extends Controller
         $user = $request->user();
         $restaurant = $user->restaurants()->first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json([
                 'status' => false,
                 'message' => 'No restaurant found for this provider',
@@ -122,7 +122,7 @@ class SettlementsController extends Controller
         $user = $request->user();
         $restaurant = $user->restaurants()->first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json([
                 'status' => false,
                 'message' => 'No restaurant found for this provider',
@@ -132,14 +132,14 @@ class SettlementsController extends Controller
         $invoice = RestaurantInvoice::where('restaurant_id', $restaurant->id)
             ->findOrFail($id);
 
-        if (!$invoice->pdf_path || !file_exists(storage_path('app/' . $invoice->pdf_path))) {
+        if (! $invoice->pdf_path || ! file_exists(storage_path('app/'.$invoice->pdf_path))) {
             return response()->json([
                 'status' => false,
                 'message' => 'PDF not available for this invoice',
             ], 404);
         }
 
-        return response()->download(storage_path('app/' . $invoice->pdf_path));
+        return response()->download(storage_path('app/'.$invoice->pdf_path));
     }
 
     /**
@@ -152,7 +152,7 @@ class SettlementsController extends Controller
         $user = $request->user();
         $restaurant = $user->restaurants()->first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json([
                 'status' => false,
                 'message' => 'No restaurant found for this provider',
@@ -164,9 +164,9 @@ class SettlementsController extends Controller
         $query = Order::whereHas('orderItems.meal', function ($q) use ($restaurant) {
             $q->where('restaurant_id', $restaurant->id);
         })
-        ->where('payment_method', 'CASH_ON_PICKUP')
-        ->where('status', Order::STATUS_COMPLETED)
-        ->whereNull('invoiced_at');
+            ->where('payment_method', 'CASH_ON_PICKUP')
+            ->where('status', Order::STATUS_COMPLETED)
+            ->whereNull('invoiced_at');
 
         if ($period === 'current') {
             // Current week

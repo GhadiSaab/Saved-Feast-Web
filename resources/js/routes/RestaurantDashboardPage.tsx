@@ -374,28 +374,59 @@ const RestaurantDashboardPage: React.FC = () => {
   }
 
   return (
-    <div>
-      <h1>Restaurant Dashboard</h1>
-      <p>{dashboardMessage}</p>
-      <hr />
+    <div className="container-fluid py-4">
+      <div className="row">
+        <div className="col-12">
+          {/* Header Section */}
+          <div className="bg-gradient-primary text-white rounded-3 p-4 mb-4 shadow">
+            <div className="row align-items-center">
+              <div className="col-md-8">
+                <h1 className="h2 mb-2 fw-bold">
+                  <i className="fas fa-store me-3"></i>
+                  Restaurant Dashboard
+                </h1>
+                <p className="mb-0 opacity-75">{dashboardMessage}</p>
+              </div>
+              <div className="col-md-4 text-md-end">
+                <button className="btn btn-light btn-lg" onClick={handleAddMealClick}>
+                  <i className="fas fa-plus me-2"></i>
+                  Add New Meal
+                </button>
+              </div>
+            </div>
+          </div>
 
-      {/* Meal Management Section */}
-      <div className="mb-4">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2>Manage Your Meals</h2>
-          <button className="btn btn-primary" onClick={handleAddMealClick}>
-            <i className="fas fa-plus me-2"></i>Add New Meal
-          </button>
-        </div>
+          {/* Error State */}
+          {error && (
+            <div className="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+              <div className="d-flex align-items-center">
+                <i className="fas fa-exclamation-triangle fa-2x me-3"></i>
+                <div>
+                  <h6 className="alert-heading mb-1">Error Loading Dashboard</h6>
+                  <p className="mb-0">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
-        {/* Add/Edit Meal Form (Conditionally Rendered) */}
-        {isFormVisible && (
-          <div className="card mb-4 shadow-sm">
-            <div className="card-header">
-              <h5 className="mb-0">
-                {formMode === 'add' ? 'Add New Meal' : 'Edit Meal'}
+          {/* Meal Management Section */}
+          <div className="card border-0 shadow-sm mb-4">
+            <div className="card-header bg-transparent border-0">
+              <h5 className="mb-0 fw-bold">
+                <i className="fas fa-utensils me-2 text-primary"></i>
+                Manage Your Meals
               </h5>
             </div>
+
+            {/* Add/Edit Meal Form (Conditionally Rendered) */}
+            {isFormVisible && (
+              <div className="card border-0 shadow-sm mb-4">
+                <div className="card-header bg-transparent border-0">
+                  <h5 className="mb-0 fw-bold">
+                    <i className="fas fa-edit me-2 text-primary"></i>
+                    {formMode === 'add' ? 'Add New Meal' : 'Edit Meal'}
+                  </h5>
+                </div>
             <div className="card-body">
               {formError && (
                 <div className="alert alert-danger">{formError}</div>
@@ -630,19 +661,31 @@ const RestaurantDashboardPage: React.FC = () => {
           </div>
         )}
 
-        {mealsError && <div className="alert alert-danger">{mealsError}</div>}
+            {mealsError && (
+              <div className="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+                <div className="d-flex align-items-center">
+                  <i className="fas fa-exclamation-triangle fa-2x me-3"></i>
+                  <div>
+                    <h6 className="alert-heading mb-1">Error Loading Meals</h6>
+                    <p className="mb-0">{mealsError}</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
-        {!mealsLoading && !mealsError && (
-          <table className="table table-striped table-hover">
-            <thead className="table-light">
-              <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+            {!mealsLoading && !mealsError && (
+              <div className="card-body">
+                <div className="table-responsive">
+                  <table className="table table-hover">
+                    <thead className="table-light">
+                      <tr>
+                        <th><i className="fas fa-utensils me-2 text-primary"></i>Title</th>
+                        <th><i className="fas fa-tag me-2 text-primary"></i>Category</th>
+                        <th><i className="fas fa-euro-sign me-2 text-primary"></i>Price</th>
+                        <th><i className="fas fa-box me-2 text-primary"></i>Quantity</th>
+                        <th><i className="fas fa-cogs me-2 text-primary"></i>Actions</th>
+                      </tr>
+                    </thead>
             <tbody>
               {meals.length > 0 ? (
                 meals.map(meal => (
@@ -694,11 +737,14 @@ const RestaurantDashboardPage: React.FC = () => {
                   </td>
                 </tr>
               )}
-            </tbody>
-          </table>
-        )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      {/* End Meal Management Section */}
     </div>
   );
 };
