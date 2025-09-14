@@ -66,7 +66,7 @@ describe('ProfilePage', () => {
     vi.clearAllMocks();
     
     // Mock successful API responses
-    mockedAxios.get.mockImplementation((url) => {
+    mockedAxios.get.mockImplementation((url: string) => {
       if (url === '/api/orders') {
         return Promise.resolve({
           data: {

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { orderApi } from '../../api/orders';
 import { orderUtils } from '../../utils/orderUtils';
-import { Order, OrderFilters } from '../../types/orders';
+import { Order, OrderFilters, OrderStatus } from '../../types/orders';
 import StatusChip from '../../components/orders/StatusChip';
 import Countdown from '../../components/orders/Countdown';
 import CancelDialog from '../../components/orders/CancelDialog';
@@ -41,7 +41,16 @@ const MyOrders: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const response = await orderApi.getMyOrders({ status });
+      const normalizedStatus: OrderFilters['status'] =
+        status === 'in_progress'
+          ? (['PENDING', 'ACCEPTED', 'READY_FOR_PICKUP'] as OrderStatus[])
+          : status === 'completed'
+          ? 'COMPLETED'
+          : status === 'cancelled'
+          ? (['CANCELLED_BY_CUSTOMER', 'CANCELLED_BY_RESTAURANT', 'EXPIRED'] as OrderStatus[])
+          : status;
+
+      const response = await orderApi.getMyOrders({ status: normalizedStatus });
       if (response.success) {
         setOrders(response.data.data);
       } else {
@@ -228,7 +237,7 @@ const MyOrders: React.FC = () => {
                           {order.order_items.map((item) => (
                             <div key={item.id} className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
                               <div>
-                                <span className="fw-medium text-dark">{item.quantity}x {item.meal.name}</span>
+                                <span className="fw-medium text-dark">{item.quantity}x {item.meal.title}</span>
                                 <br />
                                 <small className="text-muted">
                                   <i className="fas fa-store me-1"></i>

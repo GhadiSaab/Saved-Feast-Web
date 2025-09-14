@@ -17,6 +17,9 @@ interface Meal {
   restaurant?: {
     name: string;
   };
+  category?: {
+    name: string;
+  };
   // Add other relevant fields as needed
 }
 
@@ -290,96 +293,117 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
         </div>
       </div>
 
-      {/* Meal Detail Modal */}
+      {/* Professional Meal Detail Modal */}
       {showImageModal && (
         <div className="meal-detail-modal-overlay" onClick={handleModalClose}>
           <div
             className="meal-detail-modal-content"
             onClick={e => e.stopPropagation()}
           >
-            <div className="meal-detail-modal-header">
-              <h4 className="text-white mb-0">{meal.title}</h4>
-              <button
-                className="btn-close btn-close-white"
-                onClick={handleModalClose}
-                aria-label="Close"
-              ></button>
-            </div>
+            {/* Close Button */}
+            <button
+              className="modal-close-btn"
+              onClick={handleModalClose}
+              aria-label="Close"
+            >
+              <i className="fas fa-times close-icon"></i>
+            </button>
+
             <div className="meal-detail-modal-body">
-              {imageUrl && (
-                <div className="meal-image-container mb-3">
-                  <img
-                    src={imageUrl}
-                    alt={meal.title}
-                    className="img-fluid rounded"
-                  />
-                </div>
-              )}
-              
-              <div className="meal-details">
-                <div className="row">
-                  <div className="col-md-8">
-                    <h5 className="text-primary mb-3">{meal.title}</h5>
-                    <p className="text-muted mb-3">{meal.description}</p>
-                    
-                    <div className="meal-info mb-3">
-                      <div className="info-item mb-2">
-                        <i className="fas fa-store text-primary me-2"></i>
-                        <strong>Restaurant:</strong> {meal.restaurant?.name || 'N/A'}
+              {/* Left Side - Image */}
+              <div className="modal-image-section">
+                <div className="meal-image-container">
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={meal.title}
+                    />
+                  ) : (
+                    <div className="image-placeholder">
+                      <div className="placeholder-content">
+                        <i className="fas fa-utensils placeholder-icon"></i>
+                        <div className="placeholder-text">No image available</div>
                       </div>
-                      <div className="info-item mb-2">
-                        <i className="fas fa-clock text-primary me-2"></i>
-                        <strong>Pickup Time:</strong> {formatPickupTime()}
-                      </div>
-                      {meal.category && (
-                        <div className="info-item mb-2">
-                          <i className="fas fa-tag text-primary me-2"></i>
-                          <strong>Category:</strong> {meal.category.name}
-                        </div>
-                      )}
                     </div>
-                  </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Side - Content */}
+              <div className="modal-content-section">
+                <div className="meal-header">
+                  <h1 className="meal-title">{meal.title}</h1>
+                  <p className="meal-description">{meal.description}</p>
                   
-                  <div className="col-md-4">
-                    <div className="price-section">
-                      <h6 className="text-primary mb-3">Price</h6>
+                  <div className="meal-meta">
+                    {meal.restaurant && (
+                      <div className="meta-item">
+                        <i className="fas fa-store meta-icon"></i>
+                        <div className="meta-text">
+                          <span className="meta-label">Restaurant:</span>
+                          {meal.restaurant.name}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="meta-item">
+                      <i className="fas fa-clock meta-icon"></i>
+                      <div className="meta-text">
+                        <span className="meta-label">Pickup:</span>
+                        {formatPickupTime()}
+                      </div>
+                    </div>
+
+                    {meal.category && (
+                      <div className="meta-item">
+                        <i className="fas fa-tag meta-icon"></i>
+                        <div className="meta-text">
+                          <span className="meta-label">Category:</span>
+                          {meal.category.name}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="meal-footer">
+                  <div className="price-section">
+                    <div className="price-label">Price</div>
+                    <div className="price-display">
                       {meal.original_price && meal.original_price > meal.current_price ? (
-                        <div className="discounted-price">
-                          <div className="current-price text-success h4 mb-1">
+                        <>
+                          <div className="current-price">
                             €{meal.current_price.toFixed(2)}
                           </div>
-                          <div className="original-price text-muted mb-2">
-                            <del>€{meal.original_price.toFixed(2)}</del>
+                          <div className="original-price">
+                            €{meal.original_price.toFixed(2)}
                           </div>
-                          <div className="savings text-success fw-bold">
+                          <div className="savings">
                             Save €{(meal.original_price - meal.current_price).toFixed(2)} ({savingsPercentage}% OFF)
                           </div>
-                        </div>
+                        </>
                       ) : (
-                        <div className="regular-price text-primary h4">
+                        <div className="current-price">
                           €{meal.current_price.toFixed(2)}
                         </div>
                       )}
                     </div>
-                    
-                    <div className="action-section mt-4">
-                      <button
-                        className="btn btn-primary btn-lg w-100"
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleAddToCart();
-                        }}
-                        style={{
-                          transform: `scale(${buttonScale})`,
-                          transition: 'transform 0.15s ease',
-                          backgroundColor: showSuccess ? '#27AE60' : undefined,
-                          borderColor: showSuccess ? '#27AE60' : undefined,
-                        }}
-                      >
-                        <i className="fas fa-cart-plus me-2"></i>
-                        {showSuccess ? 'Added to Cart!' : 'Add to Cart'}
-                      </button>
-                    </div>
+                  </div>
+
+                  <div className="action-section">
+                    <button
+                      className="add-to-cart-btn"
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleAddToCart();
+                      }}
+                      style={{
+                        backgroundColor: showSuccess ? '#10b981' : undefined,
+                      }}
+                    >
+                      <i className="fas fa-cart-plus btn-icon"></i>
+                      {showSuccess ? 'Added to Cart!' : 'Add to Cart'}
+                    </button>
                   </div>
                 </div>
               </div>

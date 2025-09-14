@@ -98,14 +98,44 @@ class OrderStateService
     }
 
     /**
-     * Complete order with pickup code verification
+     * Complete order with pickup code or claim code verification
      */
-    public function completeWithCode(Order $order, string $code, User $provider): bool
+public function completeWithCode(Order $order, string $code, User $provider): bool
     {
         if ($order->status !== Order::STATUS_READY_FOR_PICKUP) {
             throw new \InvalidArgumentException('Order must be in READY_FOR_PICKUP status to be completed');
         }
 
+        // Check if this is a claim code (new system) or pickup code (old system)
+        $isClaimCode = $this->isClaimCode($order, $code);
+        
+        if ($isClaimCode) {
+            // For claim codes, the validation was already done in the controller
+            // Just complete the order without additional verification
+            return DB::transaction(function () use ($order, $provider) {
+                // Complete the order
+                $order->update([
+                    'status' => Order::STATUS_COMPLETED,
+                    'completed_at' => now(),
+                ]);
+
+                // Log successful verification and completion
+                $this->logEvent($order, OrderEvent::TYPE_CODE_VERIFIED, [
+                    'provider_id' => $provider->id,
+                    'code_type' => 'claim_code',
+                ]);
+
+                $this->logEvent($order, OrderEvent::TYPE_STATUS_CHANGED, [
+                    'from' => Order::STATUS_READY_FOR_PICKUP,
+                    'to' => Order::STATUS_COMPLETED,
+                    'provider_id' => $provider->id,
+                ]);
+
+                return true;
+            });
+        }
+
+        // Legacy pickup code system
         if (! $order->pickup_code_encrypted) {
             throw new \InvalidArgumentException('Order does not have a pickup code');
         }
@@ -140,6 +170,7 @@ class OrderStateService
             $this->logEvent($order, OrderEvent::TYPE_CODE_VERIFIED, [
                 'provider_id' => $provider->id,
                 'attempt_number' => $order->pickup_code_attempts,
+                'code_type' => 'pickup_code',
             ]);
 
             $this->logEvent($order, OrderEvent::TYPE_STATUS_CHANGED, [
@@ -150,6 +181,39 @@ class OrderStateService
 
             return true;
         });
+    }
+
+    /**
+     * Check if the provided code is a valid claim code for this order
+     */
+    private function isClaimCode(Order $order, string $code): bool
+    {
+        // Find the most recent claim code event for this order
+        $claimEvent = \App\Models\OrderEvent::where('order_id', $order->id)
+            ->where('type', 'claim_code_generated')
+            ->where('meta->code', $code)
+            ->latest()
+            ->first();
+
+        if (! $claimEvent) {
+            return false;
+        }
+
+        // Check if code has expired (5 minutes)
+        $expiresAt = $claimEvent->meta['expires_at'] ?? null;
+        if ($expiresAt && now()->gt($expiresAt)) {
+            return false;
+        }
+
+        // Mark claim code as used
+        $claimEvent->update([
+            'type' => 'claim_code_used',
+            'meta' => array_merge($claimEvent->meta ?? [], [
+                'used_at' => now()->toISOString(),
+            ]),
+        ]);
+
+        return true;
     }
 
     /**

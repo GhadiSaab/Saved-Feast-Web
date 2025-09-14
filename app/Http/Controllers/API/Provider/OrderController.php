@@ -98,13 +98,53 @@ class OrderController extends Controller
         $this->authorizeOrderAccess($order);
 
         $request->validate([
-            'pickup_window_start' => 'nullable|date|after:now',
-            'pickup_window_end' => 'nullable|date|after:pickup_window_start',
+            'pickup_window_start' => 'required|date|after:now',
+            'pickup_window_end' => 'required|date|after:pickup_window_start',
         ]);
 
         try {
-            $pickupStart = $request->pickup_window_start ? Carbon::parse($request->pickup_window_start) : null;
-            $pickupEnd = $request->pickup_window_end ? Carbon::parse($request->pickup_window_end) : null;
+            $pickupStart = Carbon::parse($request->pickup_window_start);
+            $pickupEnd = Carbon::parse($request->pickup_window_end);
+
+            // Validate pickup window duration (30 minutes to 24 hours)
+            $durationInMinutes = $pickupEnd->diffInMinutes($pickupStart);
+            if ($durationInMinutes < 30) {
+                // Allow shorter windows when constrained by meal availability
+                $order->loadMissing('orderItems.meal');
+                $availableUntilTimes = $order->orderItems
+                    ->filter(fn ($item) => ! is_null($item->meal?->available_until))
+                    ->map(fn ($item) => Carbon::parse($item->meal->available_until));
+
+                $allowShortWindow = false;
+                if ($availableUntilTimes->isNotEmpty()) {
+                    $minAvailableUntil = $availableUntilTimes->min();
+                    // If the requested end is before the earliest meal availability end,
+                    // and still after the start time, permit the shorter window
+                    if ($pickupEnd->lessThanOrEqualTo($minAvailableUntil) && $pickupEnd->greaterThan($pickupStart)) {
+                        $allowShortWindow = true;
+                    }
+                }
+
+                if (! $allowShortWindow) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Pickup window must be at least 30 minutes',
+                        'errors' => [
+                            'pickup_window_end' => ['Pickup window must be at least 30 minutes']
+                        ]
+                    ], 422);
+                }
+            }
+
+            if ($durationInMinutes > 1440) { // 24 hours = 1440 minutes
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pickup window cannot exceed 24 hours',
+                    'errors' => [
+                        'pickup_window_end' => ['Pickup window cannot exceed 24 hours']
+                    ]
+                ], 422);
+            }
 
             $this->orderStateService->accept($order, auth()->user(), $pickupStart, $pickupEnd);
 
@@ -160,28 +200,11 @@ class OrderController extends Controller
         $this->authorizeOrderAccess($order);
 
         $request->validate([
-            'code' => 'required|string|size:6',
+            'code' => 'required|string|size:6|regex:/^[0-9]{6}$/',
         ]);
 
         try {
-            // First try to validate as claim code (new system)
-            $claimCodeValid = $this->validateClaimCode($order, $request->code);
-
-            if ($claimCodeValid) {
-                // Complete order using claim code
-                $this->orderStateService->completeWithCode($order, $request->code, auth()->user());
-
-                $order->refresh();
-                $order->load(['user', 'orderItems.meal', 'events']);
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Order completed successfully with claim code',
-                    'data' => $order,
-                ]);
-            }
-
-            // Fallback to old pickup code system for backward compatibility
+            // Complete order with code (handles both claim codes and pickup codes)
             $success = $this->orderStateService->completeWithCode($order, $request->code, auth()->user());
 
             if (! $success) {
@@ -208,38 +231,6 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * Validate claim code for order
-     */
-    private function validateClaimCode(Order $order, string $code): bool
-    {
-        // Find the most recent claim code event for this order
-        $claimEvent = \App\Models\OrderEvent::where('order_id', $order->id)
-            ->where('type', 'claim_code_generated')
-            ->where('meta->code', $code)
-            ->latest()
-            ->first();
-
-        if (! $claimEvent) {
-            return false;
-        }
-
-        // Check if code has expired (5 minutes)
-        $expiresAt = $claimEvent->meta['expires_at'] ?? null;
-        if ($expiresAt && now()->gt($expiresAt)) {
-            return false;
-        }
-
-        // Mark claim code as used
-        $claimEvent->update([
-            'type' => 'claim_code_used',
-            'meta' => array_merge($claimEvent->meta ?? [], [
-                'used_at' => now()->toISOString(),
-            ]),
-        ]);
-
-        return true;
-    }
 
     /**
      * Cancel order
@@ -290,6 +281,7 @@ class OrderController extends Controller
                     'accepted' => 0,
                     'ready' => 0,
                     'completed_today' => 0,
+                    'cancelled' => 0,
                 ],
             ]);
         }
@@ -311,6 +303,14 @@ class OrderController extends Controller
                 $q->whereIn('restaurant_id', $restaurantIds);
             })->where('status', Order::STATUS_COMPLETED)
                 ->whereDate('completed_at', today())->count(),
+
+            'cancelled' => Order::whereHas('orderItems.meal', function ($q) use ($restaurantIds) {
+                $q->whereIn('restaurant_id', $restaurantIds);
+            })->whereIn('status', [
+                Order::STATUS_CANCELLED_BY_CUSTOMER,
+                Order::STATUS_CANCELLED_BY_RESTAURANT,
+                Order::STATUS_EXPIRED,
+            ])->count(),
         ];
 
         return response()->json([

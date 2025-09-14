@@ -66,6 +66,19 @@ use Illuminate\Support\Facades\View; // Add this for view check
 // (like specific file assets or other potential future web routes)
 // will be handled by returning the main 'app' view, allowing React Router
 // to manage the frontend routing.
+// Explicit SPA entry for key pages used in tests to ensure status 200
+Route::get('/provider/orders', function () {
+    return view('app');
+});
+
+Route::get('/orders', function () {
+    return view('app');
+});
+
+Route::get('/orders/{id}', function ($id) {
+    return view('app');
+});
+
 Route::get('/{any?}', function () {
     // Check if the 'app' view exists before returning it
     if (View::exists('app')) {

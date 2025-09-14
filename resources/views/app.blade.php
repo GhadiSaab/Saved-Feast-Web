@@ -41,8 +41,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Scripts and CSS -->
-    @viteReactRefresh {{-- Added for React Fast Refresh in dev mode --}}
-    @vite(['resources/sass/app.scss', 'resources/js/app.jsx'])
+    @if(app()->environment('production'))
+        {{-- Use built assets in production to avoid Vite dependency on dyn host --}}
+        @php
+            $manifestPath = public_path('build/manifest.json');
+            $manifest = file_exists($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
+            $cssFile = $manifest['resources/sass/app.scss']['file'] ?? null;
+            $jsFile = $manifest['resources/js/app.jsx']['file'] ?? null;
+        @endphp
+        @if($cssFile)
+            <link rel="stylesheet" href="{{ asset('build/'.$cssFile) }}" />
+        @endif
+        @if($jsFile)
+            <script type="module" src="{{ asset('build/'.$jsFile) }}"></script>
+        @endif
+    @else
+        @viteReactRefresh {{-- Added for React Fast Refresh in dev mode --}}
+        @vite(['resources/sass/app.scss', 'resources/js/app.jsx'])
+    @endif
 </head>
 <body class="antialiased">
     <div id="app">

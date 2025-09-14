@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed in modern JSX with vite plugin-react
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi, afterEach } from 'vitest';
@@ -49,7 +49,7 @@ describe('RestaurantDashboardPage', () => {
     vi.clearAllMocks();
     
     // Mock successful API responses
-    mockedAxios.get.mockImplementation((url) => {
+    mockedAxios.get.mockImplementation((url: string) => {
       if (url === '/api/provider/dashboard-data') {
         return Promise.resolve({ data: { message: 'Welcome to your dashboard!' } });
       } else if (url === '/api/provider/meals') {
@@ -192,7 +192,7 @@ describe('RestaurantDashboardPage', () => {
 
   it('handles API errors gracefully', async () => {
     // Mock the dashboard data API to fail
-    mockedAxios.get.mockImplementation((url) => {
+    mockedAxios.get.mockImplementation((url: string) => {
       if (url === '/api/provider/dashboard-data') {
         return Promise.reject(new Error('API Error'));
       } else if (url === '/api/provider/meals') {

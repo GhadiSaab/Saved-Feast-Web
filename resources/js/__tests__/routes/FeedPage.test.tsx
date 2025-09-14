@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed in modern JSX with vite plugin-react
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
@@ -61,7 +61,7 @@ describe('FeedPage', () => {
     vi.clearAllMocks();
     
     // Mock successful API responses
-    mockedAxios.get.mockImplementation((url) => {
+    mockedAxios.get.mockImplementation((url: string) => {
       if (url === '/api/meals/filters') {
         return Promise.resolve({ data: { data: mockFilters } });
       } else if (url.startsWith('/api/meals')) {
@@ -115,7 +115,7 @@ describe('FeedPage', () => {
 
   it('handles API errors gracefully', async () => {
     // Mock the meals API to fail while keeping filters working
-    mockedAxios.get.mockImplementation((url) => {
+    mockedAxios.get.mockImplementation((url: string) => {
       if (url === '/api/meals/filters') {
         return Promise.resolve({ data: { data: mockFilters } });
       } else if (url.startsWith('/api/meals')) {
@@ -132,7 +132,7 @@ describe('FeedPage', () => {
   });
 
   it('shows empty state when no meals', async () => {
-    mockedAxios.get.mockImplementation((url) => {
+    mockedAxios.get.mockImplementation((url: string) => {
       if (url === '/api/meals/filters') {
         return Promise.resolve({ data: { data: mockFilters } });
       } else if (url === '/api/meals') {

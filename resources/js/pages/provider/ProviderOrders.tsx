@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { providerOrderApi } from '../../api/orders';
 import { orderUtils } from '../../utils/orderUtils';
-import { Order, OrderFilters } from '../../types/orders';
+import { Order, OrderFilters, OrderStatus, OrderStats } from '../../types/orders';
 import StatusChip from '../../components/orders/StatusChip';
 import Countdown from '../../components/orders/Countdown';
 import CancelDialog from '../../components/orders/CancelDialog';
 import EnterCodeDialog from '../../components/orders/EnterCodeDialog';
+import AcceptOrderDialog from '../../components/orders/AcceptOrderDialog';
 
 const ProviderOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'PENDING' | 'ACCEPTED' | 'READY_FOR_PICKUP' | 'COMPLETED'>('PENDING');
-  const [stats, setStats] = useState({
+  const [activeTab, setActiveTab] = useState<'PENDING' | 'ACCEPTED' | 'READY_FOR_PICKUP' | 'COMPLETED' | 'CANCELLED'>('PENDING');
+  const [stats, setStats] = useState<OrderStats>({
     pending: 0,
     accepted: 0,
     ready: 0,
@@ -45,6 +46,16 @@ const ProviderOrders: React.FC = () => {
     isLoading: false,
   });
 
+  const [acceptDialog, setAcceptDialog] = useState<{
+    isOpen: boolean;
+    order: Order | null;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    order: null,
+    isLoading: false,
+  });
+
   const fetchOrders = useCallback(async (status?: OrderFilters['status'], force: boolean = false) => {
     const now = Date.now();
     
@@ -59,7 +70,12 @@ const ProviderOrders: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const response = await providerOrderApi.getOrders({ status });
+      // Normalize status filter types
+      const statusFilter: OrderFilters['status'] = status === 'cancelled'
+        ? (['CANCELLED_BY_CUSTOMER', 'CANCELLED_BY_RESTAURANT', 'EXPIRED'] as OrderStatus[])
+        : status;
+      
+      const response = await providerOrderApi.getOrders({ status: statusFilter });
       if (response.success) {
         setOrders(response.data.data);
       } else {
@@ -97,47 +113,40 @@ const ProviderOrders: React.FC = () => {
   }, [FETCH_COOLDOWN]);
 
   useEffect(() => {
-    fetchOrders(activeTab, true); // Force initial load
+    // Map tab to filter value acceptable by API types
+    const mappedStatus: OrderFilters['status'] = activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus);
+    fetchOrders(mappedStatus, true); // Force initial load
     fetchStats(true); // Force initial load
   }, [activeTab, fetchOrders, fetchStats]);
 
-  const handleAcceptOrder = async (order: Order) => {
-    try {
-      // Calculate pickup window based on meal availability
-      const now = new Date();
-      const pickupStart = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutes from now
-      
-      // Find the earliest meal expiry time
-      let pickupEnd = new Date(now.getTime() + 2 * 60 * 60 * 1000); // Default 2 hours
-      
-      for (const item of order.order_items) {
-        if (item.meal.available_until) {
-          const mealExpiry = new Date(item.meal.available_until);
-          if (mealExpiry < pickupEnd) {
-            pickupEnd = mealExpiry;
-          }
-        }
-      }
-      
-      // Ensure pickup window is at least 1 hour
-      const minPickupEnd = new Date(pickupStart.getTime() + 60 * 60 * 1000);
-      if (pickupEnd < minPickupEnd) {
-        pickupEnd = minPickupEnd;
-      }
+  const handleAcceptOrder = (order: Order) => {
+    setAcceptDialog({
+      isOpen: true,
+      order,
+      isLoading: false,
+    });
+  };
 
+  const handleConfirmAcceptOrder = async (order: Order, pickupWindowStart: string, pickupWindowEnd: string) => {
+    setAcceptDialog(prev => ({ ...prev, isLoading: true }));
+
+    try {
       const response = await providerOrderApi.acceptOrder(order.id, {
-        pickup_window_start: pickupStart.toISOString(),
-        pickup_window_end: pickupEnd.toISOString(),
+        pickup_window_start: pickupWindowStart,
+        pickup_window_end: pickupWindowEnd,
       });
 
       if (response.success) {
-        await fetchOrders(activeTab, true);
+        setAcceptDialog({ isOpen: false, order: null, isLoading: false });
+        await fetchOrders(activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus), true);
         await fetchStats(true);
       } else {
         setError('Failed to accept order');
+        setAcceptDialog(prev => ({ ...prev, isLoading: false }));
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to accept order');
+      setAcceptDialog(prev => ({ ...prev, isLoading: false }));
     }
   };
 
@@ -145,7 +154,7 @@ const ProviderOrders: React.FC = () => {
     try {
       const response = await providerOrderApi.markReady(order.id);
       if (response.success) {
-        await fetchOrders(activeTab, true);
+        await fetchOrders(activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus), true);
         await fetchStats(true);
       } else {
         setError('Failed to mark order as ready');
@@ -162,7 +171,7 @@ const ProviderOrders: React.FC = () => {
       const response = await providerOrderApi.completeOrder(order.id, { code });
       if (response.success) {
         setCodeDialog({ isOpen: false, order: null, isLoading: false });
-        await fetchOrders(activeTab, true);
+        await fetchOrders(activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus), true);
         await fetchStats(true);
       } else {
         setCodeDialog(prev => ({ 
@@ -180,15 +189,15 @@ const ProviderOrders: React.FC = () => {
     }
   };
 
-  const handleCancelOrder = async (order: Order, reason: string) => {
+  const handleCancelOrder = async (order: Order, reason?: string) => {
     if (!order) return;
 
     setCancelDialog(prev => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await providerOrderApi.cancelOrder(order.id, { reason });
+      const response = await providerOrderApi.cancelOrder(order.id, { reason: reason ?? 'Cancelled by restaurant' });
       if (response.success) {
-        await fetchOrders(activeTab, true);
+        await fetchOrders(activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus), true);
         await fetchStats(true);
         setCancelDialog({ isOpen: false, order: null, isLoading: false });
       } else {
@@ -251,6 +260,10 @@ const ProviderOrders: React.FC = () => {
             Complete Order
           </button>
         );
+      case 'CANCELLED_BY_CUSTOMER':
+      case 'CANCELLED_BY_RESTAURANT':
+      case 'EXPIRED':
+      case 'COMPLETED':
       default:
         return null;
     }
@@ -289,7 +302,7 @@ const ProviderOrders: React.FC = () => {
               </div>
               <div className="col-md-4 text-md-end">
                 <div className="d-flex justify-content-md-end gap-2">
-                  <button className="btn btn-light btn-sm" onClick={fetchStats}>
+                  <button className="btn btn-light btn-sm" onClick={() => fetchStats(true)}>
                     <i className="fas fa-sync-alt me-1"></i>
                     Refresh
                   </button>
@@ -383,6 +396,13 @@ const ProviderOrders: React.FC = () => {
                   <i className="fas fa-trophy me-2"></i>
                   Completed
                 </button>
+                <button
+                  className={`nav-link rounded-0 py-3 ${activeTab === 'CANCELLED' ? 'active bg-danger' : 'text-muted'}`}
+                  onClick={() => setActiveTab('CANCELLED')}
+                >
+                  <i className="fas fa-times-circle me-2"></i>
+                  Cancelled
+                </button>
               </div>
             </div>
           </div>
@@ -397,6 +417,8 @@ const ProviderOrders: React.FC = () => {
               <p className="text-muted mb-4">
                 {activeTab === 'PENDING' 
                   ? "You don't have any pending orders."
+                  : activeTab === 'CANCELLED'
+                  ? "You don't have any cancelled or expired orders."
                   : `You don't have any ${activeTab.toLowerCase().replace('_', ' ')} orders.`
                 }
               </p>
@@ -434,7 +456,7 @@ const ProviderOrders: React.FC = () => {
                           {order.order_items.map((item) => (
                             <div key={item.id} className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
                               <div>
-                                <span className="fw-medium text-dark">{item.quantity}x {item.meal.name}</span>
+                                <span className="fw-medium text-dark">{item.quantity}x {item.meal.title}</span>
                                 <br />
                                 <small className="text-muted">
                                   <i className="fas fa-user me-1"></i>
@@ -463,7 +485,7 @@ const ProviderOrders: React.FC = () => {
                                 </h6>
                                 <Countdown 
                                   targetDate={order.pickup_window_end}
-                                  onExpire={() => fetchOrders(activeTab, false)}
+                                  onExpire={() => fetchOrders(activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus), false)}
                                 />
                               </div>
                             )}
@@ -520,6 +542,18 @@ const ProviderOrders: React.FC = () => {
           isLoading: false
         })}
         onConfirm={handleCompleteOrder}
+      />
+
+      <AcceptOrderDialog
+        isOpen={acceptDialog.isOpen}
+        order={acceptDialog.order}
+        isLoading={acceptDialog.isLoading}
+        onClose={() => setAcceptDialog({
+          isOpen: false,
+          order: null,
+          isLoading: false
+        })}
+        onConfirm={handleConfirmAcceptOrder}
       />
     </div>
   );

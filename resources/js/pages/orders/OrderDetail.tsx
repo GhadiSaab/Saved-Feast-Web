@@ -56,7 +56,7 @@ const OrderDetail: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const response = await orderApi.getOrder(parseInt(id));
+      const response = await orderApi.getOrder(id);
       if (response.success) {
         setOrder(response.data);
       } else {
@@ -273,7 +273,7 @@ const OrderDetail: React.FC = () => {
                     {order.order_items.map((item) => (
                       <div key={item.id} className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
                         <div>
-                          <span className="fw-medium text-dark">{item.quantity}x {item.meal.name}</span>
+                          <span className="fw-medium text-dark">{item.quantity}x {item.meal.title}</span>
                           <br />
                           <small className="text-muted">
                             <i className="fas fa-store me-1"></i>

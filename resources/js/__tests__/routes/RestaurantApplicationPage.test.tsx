@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed in modern JSX with vite plugin-react
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';

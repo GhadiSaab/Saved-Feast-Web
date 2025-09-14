@@ -547,140 +547,375 @@ main {
   }
 }
 
-// Meal Detail Modal
+// Meal Detail Modal - Professional Design
 .meal-detail-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  padding: 1rem;
-  backdrop-filter: blur(5px);
-  animation: fadeIn 0.3s ease-out;
+  padding: 2rem;
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  // Ensure it stays centered on viewport regardless of scroll
+  transform: translateZ(0);
+  will-change: transform;
 
   .meal-detail-modal-content {
-    background: white;
-    border-radius: vars.$border-radius-lg;
-    max-width: 90vw;
+    background: #ffffff;
+    border-radius: 20px;
+    max-width: 900px;
+    width: 100%;
     max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: vars.$box-shadow-lg;
-    border: 1px solid rgba(vars.$primary, 0.2);
-    animation: slideIn 0.3s ease-out;
+    overflow: hidden;
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(226, 232, 240, 0.5);
+    border: 1px solid rgba(226, 232, 240, 0.3);
+    animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    margin: 0;
+    transform: translate(0, 0);
 
-    .meal-detail-modal-header {
+    // Close button positioned absolutely
+    .modal-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(248, 250, 252, 0.8);
+      border: 1px solid rgba(226, 232, 240, 0.5);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 1.5rem 2rem;
-      background: linear-gradient(135deg, vars.$primary, vars.$secondary);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
-      h4 {
-        font-weight: 600;
-        margin: 0;
-        color: white;
+      &:hover {
+        background: rgba(248, 250, 252, 1);
+        border-color: rgba(203, 213, 225, 0.8);
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
       }
 
-      .btn-close {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 1.5rem;
-        cursor: pointer;
-        padding: 0;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: all 0.3s ease;
-
-        &:hover {
-          background: rgba(255, 255, 255, 0.2);
-          transform: scale(1.1);
-        }
+      .close-icon {
+        width: 16px;
+        height: 16px;
+        color: #64748b;
+        font-weight: 500;
       }
     }
 
     .meal-detail-modal-body {
-      padding: 2rem;
+      padding: 0;
+      display: flex;
+      min-height: 500px;
 
-      .meal-image-container {
-        text-align: center;
+      // Left side - Image
+      .modal-image-section {
+        flex: 1;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+        position: relative;
+        overflow: hidden;
 
-        img {
-          max-width: 100%;
-          max-height: 300px;
-          object-fit: cover;
-          border-radius: vars.$border-radius;
-          box-shadow: vars.$box-shadow;
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+          opacity: 0.2;
+        }
+
+        .meal-image-container {
+          position: relative;
+          z-index: 2;
+          text-align: center;
+
+          img {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 
+              0 8px 25px rgba(0, 0, 0, 0.08),
+              0 0 0 1px rgba(226, 232, 240, 0.3);
+            transition: transform 0.3s ease;
+
+            &:hover {
+              transform: scale(1.01);
+            }
+          }
+
+          .image-placeholder {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+
+            .placeholder-content {
+              text-align: center;
+              color: #64748b;
+
+              .placeholder-icon {
+                font-size: 4rem;
+                margin-bottom: 1rem;
+                opacity: 0.5;
+              }
+
+              .placeholder-text {
+                font-size: 1.1rem;
+                font-weight: 500;
+              }
+            }
+          }
         }
       }
 
-      .meal-details {
-        .meal-info {
-          .info-item {
-            display: flex;
-            align-items: center;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(vars.$primary, 0.1);
+      // Right side - Content
+      .modal-content-section {
+        flex: 1;
+        padding: 3rem 2.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background: #ffffff;
 
-            &:last-child {
-              border-bottom: none;
-            }
+        .meal-header {
+          margin-bottom: 2rem;
 
-            i {
-              width: 20px;
-              text-align: center;
-            }
-          }
-        }
-
-        .price-section {
-          background: rgba(vars.$warm-beige, 0.3);
-          padding: 1.5rem;
-          border-radius: vars.$border-radius;
-          border: 1px solid rgba(vars.$primary, 0.1);
-
-          .discounted-price {
-            .current-price {
-              font-size: 2rem;
-              font-weight: 700;
-            }
-
-            .original-price {
-              font-size: 1.1rem;
-            }
-
-            .savings {
-              font-size: 0.9rem;
-            }
-          }
-
-          .regular-price {
+          .meal-title {
             font-size: 2rem;
             font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 0.5rem 0;
+            line-height: 1.2;
+          }
+
+          .meal-description {
+            font-size: 1.1rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin: 0 0 1.5rem 0;
+          }
+
+          .meal-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+
+            .meta-item {
+              display: flex;
+              align-items: center;
+              background: #f8fafc;
+              padding: 0.75rem 1rem;
+              border-radius: 12px;
+              border: 1px solid #e2e8f0;
+
+              .meta-icon {
+                width: 20px;
+                height: 20px;
+                margin-right: 0.5rem;
+                color: #3b82f6;
+              }
+
+              .meta-text {
+                font-size: 0.9rem;
+                font-weight: 500;
+                color: #374151;
+
+                .meta-label {
+                  color: #6b7280;
+                  margin-right: 0.25rem;
+                }
+              }
+            }
           }
         }
 
-        .action-section {
-          .btn {
-            padding: 0.75rem 1.5rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: vars.$border-radius;
-            transition: all 0.3s ease;
+        .meal-footer {
+          .price-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 2rem;
+            text-align: center;
 
-            &:hover {
-              transform: translateY(-2px);
-              box-shadow: vars.$box-shadow;
+            .price-label {
+              font-size: 0.9rem;
+              font-weight: 600;
+              color: #64748b;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 0.5rem;
+            }
+
+            .price-display {
+              .current-price {
+                font-size: 2.5rem;
+                font-weight: 800;
+                color: #1e293b;
+                margin: 0;
+                line-height: 1;
+              }
+
+              .original-price {
+                font-size: 1.2rem;
+                color: #94a3b8;
+                text-decoration: line-through;
+                margin-left: 0.5rem;
+              }
+
+              .savings {
+                display: inline-block;
+                background: #10b981;
+                color: white;
+                padding: 0.25rem 0.75rem;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                margin-top: 0.5rem;
+              }
+            }
+          }
+
+          .action-section {
+            .add-to-cart-btn {
+              width: 100%;
+              background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+              border: none;
+              color: white;
+              padding: 1rem 2rem;
+              border-radius: 12px;
+              font-size: 1.1rem;
+              font-weight: 600;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 0.5rem;
+
+              &:hover {
+                background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+              }
+
+              &:active {
+                transform: translateY(0);
+              }
+
+              .btn-icon {
+                font-size: 1.2rem;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .meal-detail-modal-overlay {
+    padding: 1rem;
+
+    .meal-detail-modal-content {
+      border-radius: 16px;
+      max-height: 95vh;
+
+      .meal-detail-modal-body {
+        flex-direction: column;
+
+        .modal-image-section {
+          flex: none;
+          padding: 2rem 1.5rem;
+          min-height: 250px;
+
+          .meal-image-container {
+            img {
+              max-height: 200px;
+            }
+
+            .image-placeholder {
+              width: 200px;
+              height: 200px;
+            }
+          }
+        }
+
+        .modal-content-section {
+          padding: 2rem 1.5rem;
+
+          .meal-header {
+            .meal-title {
+              font-size: 1.5rem;
+            }
+
+            .meal-meta {
+              flex-direction: column;
+              gap: 0.5rem;
+
+              .meta-item {
+                justify-content: flex-start;
+              }
+            }
+          }
+
+          .meal-footer {
+            .price-section {
+              padding: 1.5rem;
+
+              .price-display .current-price {
+                font-size: 2rem;
+              }
             }
           }
         }
