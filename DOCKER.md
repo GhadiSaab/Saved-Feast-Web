@@ -81,9 +81,9 @@ docker-compose exec app chown -R www-data:www-data storage bootstrap/cache
 
 ### 5. Access the Application
 
-- **Web Application**: https://savedfeast.app
-- **API Endpoints**: https://savedfeast.app/api
-- **Health Check**: https://savedfeast.app/health
+- **Web Application**: http://localhost:8000
+- **API Endpoints**: http://localhost:8000/api
+- **Health Check**: http://localhost:8000/health
 
 ## 🔧 Service Configuration
 
@@ -215,7 +215,7 @@ docker-compose exec app php artisan test --filter TestName
 # Production settings
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://savedfeast.app
+APP_URL=http://localhost:8000
 
 # Database security
 DB_HOST=mysql
@@ -266,7 +266,7 @@ docker-compose exec app tail -f storage/logs/laravel.log
 
 ```bash
 # Application health
-curl https://savedfeast.app/health
+curl http://localhost:8000/health
 
 # Database connectivity
 docker-compose exec app php artisan tinker --execute="DB::connection()->getPdo();"

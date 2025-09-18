@@ -245,7 +245,6 @@ const AdminDashboardPage: React.FC = () => {
     } else if (activeTab === 'meals') {
       fetchMeals(1, searchTerm);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const handleSearch = () => {

@@ -33,10 +33,10 @@ info:
     email: api@savedfeast.com
 
 servers:
-  - url: https://savedfeast.app/api
-    description: Production
   - url: http://localhost:8000/api
     description: Local Development
+  - url: https://api.savedfeast.com/api
+    description: Production
 
 security:
   - bearerAuth: []
