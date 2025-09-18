@@ -9,7 +9,7 @@ import '../sass/app.scss'; // Import global styles
 import axios from 'axios';
 
 axios.defaults.baseURL =
-  import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+  import.meta.env.VITE_API_URL || 'https://savedfeast.app';
 axios.defaults.headers.common['Accept'] = 'application/json';
 
 const rootElement = document.getElementById('app');
@@ -28,3 +28,4 @@ if (rootElement) {
 } else {
   console.error("Could not find the 'app' element to mount React.");
 }
+

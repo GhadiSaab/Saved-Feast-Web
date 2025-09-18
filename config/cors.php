@@ -25,12 +25,11 @@ return [
         'http://127.0.0.1:3000',
         'http://127.0.0.1:5173',
         'http://localhost:8000',
-        'http://127.0.0.1:8000',
+        'https://savedfeast.app', // Production web app
+        'https://www.savedfeast.app',
         'http://192.168.1.116:8000', // Mobile app IP
         'http://192.168.1.116:*', // Allow any port from this IP
-        // Add your production domains here
-        // 'https://yourdomain.com',
-        // 'https://app.yourdomain.com',
+        // Additional production domains can be added below
     ],
 
     'allowed_origins_patterns' => [
@@ -68,3 +67,4 @@ return [
     'supports_credentials' => true, // Enable for mobile apps and SPAs
 
 ];
+
