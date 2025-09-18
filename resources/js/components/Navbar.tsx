@@ -68,6 +68,7 @@ const Navbar: React.FC = () => {
       window.removeEventListener('authChange', handleAuthChange);
     };
     // Run only once on mount, rely on event listeners for updates
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array ensures this runs only once on mount
 
   // Helper function to check user role

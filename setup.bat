@@ -174,8 +174,8 @@ echo    Terminal 1: php artisan serve
 echo    Terminal 2: npm run dev
 echo.
 echo 3. Access the application:
-echo    Backend API: http://localhost:8000/api
-echo    Frontend: http://localhost:5173
+echo    Backend API: https://savedfeast.app/api
+echo    Frontend: https://savedfeast.app
 echo.
 echo Demo users:
 echo    Admin: admin@savedfeast.com / password

@@ -60,7 +60,6 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
       if (!isNaN(currentPrice)) {
         // Pass title and current_price to addToCart
         addToCart({ id: meal.id, name: meal.title, price: currentPrice });
-        console.log(`Added ${meal.title} to cart (ID: ${meal.id})`);
         showSuccessFeedback();
       } else {
         console.error(`Invalid price for meal: ${meal.title}`);

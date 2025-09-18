@@ -138,6 +138,7 @@ const FeedPage: React.FC = () => {
   // Initial fetch
   useEffect(() => {
     fetchMeals(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
 
   // Handle filter changes

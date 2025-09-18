@@ -974,7 +974,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:8000/api",
+			"value": "https://savedfeast.app/api",
 			"type": "string"
 		},
 		{

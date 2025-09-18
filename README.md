@@ -133,8 +133,8 @@ docker-compose exec app php artisan db:seed
 docker-compose exec app php artisan storage:link
 
 # Access the application
-# Web Application: http://localhost:8000
-# API Endpoints: http://localhost:8000/api
+# Web Application: https://savedfeast.app
+# API Endpoints: https://savedfeast.app/api
 ```
 
 ### **Option 2: Local Development Setup**
@@ -196,9 +196,9 @@ docker-compose exec app php artisan storage:link
    ```
 
 6. **Access the application**
-   - **Backend API**: http://localhost:8000/api
-   - **Frontend**: http://localhost:5173
-   - **Admin Panel**: http://localhost:8000/admin
+   - **Backend API**: https://savedfeast.app/api
+   - **Frontend**: https://savedfeast.app
+   - **Admin Panel**: https://savedfeast.app/admin
 
 ## 📁 Project Structure
 

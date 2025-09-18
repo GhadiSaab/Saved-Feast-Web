@@ -236,7 +236,7 @@ npm run build
 #### **Using Postman**
 1. Import the collection: `docs/api/SavedFeast_API.postman_collection.json`
 2. Set environment variables:
-   - `base_url`: `http://localhost:8000/api`
+   - `base_url`: `https://savedfeast.app/api`
    - `access_token`: (will be set after login)
 3. Start with authentication requests
 4. Use the returned token for authenticated requests

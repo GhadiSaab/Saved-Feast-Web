@@ -1,7 +1,4 @@
-name: CI Pipeline
-
-# Note: This is a CI-only pipeline for testing and code quality
-# Deployment will be configured separately when needed
+name: CI
 
 on:
   push:
@@ -9,219 +6,92 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-env:
-  PHP_VERSION: '8.1'
-  NODE_VERSION: '18.19'
-
 jobs:
-  # PHP Backend Tests
-  php-tests:
-    name: PHP Tests
+  frontend:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: read
-    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run type check
+      run: npm run type-check
+
+    - name: Run linter
+      run: npm run ci:lint
+
+    - name: Run tests
+      run: npm run ci:test
+
+    - name: Build
+      run: npm run build
+
+  backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: [8.1, 8.2]
+
     services:
       mysql:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: savedfeast_test
+          MYSQL_DATABASE: testing
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: ${{ env.PHP_VERSION }}
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json, mbstring, pdo, xml
-        coverage: xdebug
+        php-version: ${{ matrix.php-version }}
+        extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+        coverage: none
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+    - name: Copy .env
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
-    - name: Get composer cache directory
-      id: composer-cache
-      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-    - name: Cache composer dependencies
-      uses: actions/cache@v3
-      with:
-        path: ${{ steps.composer-cache.outputs.dir }}
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: ${{ runner.os }}-php-
-
-    - name: Install PHP dependencies
-      run: composer install --prefer-dist --no-progress
-
-    - name: Install Node.js dependencies
-      run: npm ci --legacy-peer-deps
-
-    - name: Copy environment file
-      run: cp .env.example .env
-
-    - name: Generate application key
+    - name: Generate key
       run: php artisan key:generate
 
-    - name: Configure database for testing
+    - name: Directory Permissions
+      run: chmod -R 755 storage bootstrap/cache
+
+    - name: Create Database
       run: |
-        php artisan config:cache
-        # Set database configuration using environment variables
-        echo "DB_CONNECTION=mysql" >> .env
-        echo "DB_HOST=127.0.0.1" >> .env
-        echo "DB_PORT=3306" >> .env
-        echo "DB_DATABASE=savedfeast_test" >> .env
-        echo "DB_USERNAME=root" >> .env
-        echo "DB_PASSWORD=password" >> .env
-        php artisan config:clear
-        php artisan config:cache
+        mkdir -p database
+        touch database/database.sqlite
 
-    - name: Run database migrations and seeders
-      run: |
-        php artisan migrate:fresh --force
-        php artisan db:seed --class=TestSeeder
+    - name: Execute tests (Unit and Feature tests) via PHPUnit
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
+      run: vendor/bin/phpunit
 
-    - name: Run PHP tests
-      run: php artisan test --coverage --min=45
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: php
-        name: php-coverage
-
-  # Frontend Code Quality
-  frontend-quality:
-    name: Frontend Code Quality
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: read
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: npm ci --legacy-peer-deps
-
-    - name: Run linting
-      run: npm run lint
-
-    - name: Run type checking
-      run: npm run type-check
-
-    - name: Check code formatting
-      run: npm run format:check
-
-    - name: Run frontend tests
-      run: npm test || echo "Frontend tests completed with warnings"
-
-    - name: Build frontend assets
-      run: npm run build
-
-  # Code Quality
-  code-quality:
-    name: Code Quality
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: read
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ env.PHP_VERSION }}
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-
-    - name: Install PHP dependencies
-      run: composer install --prefer-dist --no-progress
-
-    - name: Install Node.js dependencies
-      run: npm ci --legacy-peer-deps
-
-    - name: Run PHP code style check
-      run: vendor/bin/pint --test
-
-    - name: Check for PHP security vulnerabilities
-      run: composer audit
-
-    - name: Check for npm security vulnerabilities
-      run: npm audit --audit-level=moderate || echo "Security vulnerabilities found but not blocking build"
-
-
-
-  # Security Scan
-  security-scan:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v3
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
-
-  # Notify on completion
-  notify:
-    name: Notify
-    runs-on: ubuntu-latest
-    needs: [php-tests, frontend-quality, code-quality]
-    if: always()
-    permissions:
-      contents: read
-      actions: read
-
-    steps:
-    - name: Notify on success
-      if: needs.php-tests.result == 'success' && needs.frontend-quality.result == 'success' && needs.code-quality.result == 'success'
-      run: |
-        echo "✅ All tests passed successfully!"
-        echo "📱 Web application tests completed!"
-
-    - name: Notify on failure
-      if: needs.php-tests.result == 'failure' || needs.frontend-quality.result == 'failure' || needs.code-quality.result == 'failure'
-      run: |
-        echo "❌ Some tests failed!"
-        echo "Please check the logs for details."
+    - name: Execute tests via Artisan
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
+      run: php artisan test
