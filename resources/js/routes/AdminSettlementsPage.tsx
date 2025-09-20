@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import auth from '../auth';
-import { 
-  RestaurantInvoice, 
-  PaginatedResponse
-} from '../types/settlements';
+import { RestaurantInvoice, PaginatedResponse } from '../types/settlements';
 
 const AdminSettlementsPage: React.FC = () => {
   const [invoices, setInvoices] = useState<RestaurantInvoice[]>([]);
@@ -20,11 +17,14 @@ const AdminSettlementsPage: React.FC = () => {
 
   const fetchInvoices = async (page = 1) => {
     try {
-      const response = await axios.get(`/api/admin/settlements/invoices?page=${page}`, {
-        headers: {
-          Authorization: `Bearer ${auth.getToken()}`,
-        },
-      });
+      const response = await axios.get(
+        `/api/admin/settlements/invoices?page=${page}`,
+        {
+          headers: {
+            Authorization: `Bearer ${auth.getToken()}`,
+          },
+        }
+      );
       const data = response.data.data as PaginatedResponse<RestaurantInvoice>;
       setInvoices(data.data);
       setCurrentPage(data.current_page);
@@ -40,36 +40,55 @@ const AdminSettlementsPage: React.FC = () => {
   const handleGenerateInvoices = async () => {
     setGenerating(true);
     try {
-      const response = await axios.post('/api/admin/settlements/generate?period=weekly', {}, {
-        headers: {
-          Authorization: `Bearer ${auth.getToken()}`,
-        },
-      });
-      
+      const response = await axios.post(
+        '/api/admin/settlements/generate?period=weekly',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${auth.getToken()}`,
+          },
+        }
+      );
+
       if (response.data.status) {
-        alert(`Invoice generation completed! Created ${response.data.data.invoices_created} invoices for ${response.data.data.orders_processed} orders.`);
+        alert(
+          `Invoice generation completed! Created ${response.data.data.invoices_created} invoices for ${response.data.data.orders_processed} orders.`
+        );
         fetchInvoices(); // Refresh the list
       }
     } catch (err: any) {
-      alert('Failed to generate invoices: ' + (err.response?.data?.message || err.message));
+      alert(
+        'Failed to generate invoices: ' +
+          (err.response?.data?.message || err.message)
+      );
     } finally {
       setGenerating(false);
     }
   };
 
-  const handleStatusChange = async (invoiceId: number, action: 'sent' | 'paid' | 'overdue') => {
+  const handleStatusChange = async (
+    invoiceId: number,
+    action: 'sent' | 'paid' | 'overdue'
+  ) => {
     try {
-      const response = await axios.post(`/api/admin/settlements/invoices/${invoiceId}/mark-${action}`, {}, {
-        headers: {
-          Authorization: `Bearer ${auth.getToken()}`,
-        },
-      });
-      
+      const response = await axios.post(
+        `/api/admin/settlements/invoices/${invoiceId}/mark-${action}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${auth.getToken()}`,
+          },
+        }
+      );
+
       if (response.data.status) {
         fetchInvoices(); // Refresh the list
       }
     } catch (err: any) {
-      alert('Failed to update invoice status: ' + (err.response?.data?.message || err.message));
+      alert(
+        'Failed to update invoice status: ' +
+          (err.response?.data?.message || err.message)
+      );
     }
   };
 
@@ -124,7 +143,11 @@ const AdminSettlementsPage: React.FC = () => {
             >
               {generating ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   Generating...
                 </>
               ) : (
@@ -177,20 +200,28 @@ const AdminSettlementsPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {invoices.map((invoice) => (
+                        {invoices.map(invoice => (
                           <tr key={invoice.id}>
                             <td>
                               <div>
-                                <strong>{invoice.restaurant?.name || 'Unknown'}</strong>
+                                <strong>
+                                  {invoice.restaurant?.name || 'Unknown'}
+                                </strong>
                                 <br />
-                                <small className="text-muted">{invoice.restaurant?.email}</small>
+                                <small className="text-muted">
+                                  {invoice.restaurant?.email}
+                                </small>
                               </div>
                             </td>
                             <td>
                               <div>
-                                <strong>{formatDate(invoice.period_start)}</strong>
+                                <strong>
+                                  {formatDate(invoice.period_start)}
+                                </strong>
                                 <br />
-                                <small className="text-muted">to {formatDate(invoice.period_end)}</small>
+                                <small className="text-muted">
+                                  to {formatDate(invoice.period_end)}
+                                </small>
                               </div>
                             </td>
                             <td>
@@ -209,7 +240,9 @@ const AdminSettlementsPage: React.FC = () => {
                               </div>
                             </td>
                             <td>
-                              <span className={`badge ${getStatusBadge(invoice.status)}`}>
+                              <span
+                                className={`badge ${getStatusBadge(invoice.status)}`}
+                              >
                                 {invoice.status.toUpperCase()}
                               </span>
                             </td>
@@ -218,7 +251,12 @@ const AdminSettlementsPage: React.FC = () => {
                               <div className="btn-group" role="group">
                                 <button
                                   className="btn btn-outline-primary btn-sm"
-                                  onClick={() => window.open(`/api/admin/settlements/invoices/${invoice.id}`, '_blank')}
+                                  onClick={() =>
+                                    window.open(
+                                      `/api/admin/settlements/invoices/${invoice.id}`,
+                                      '_blank'
+                                    )
+                                  }
                                   title="View Details"
                                 >
                                   <i className="fas fa-eye"></i>
@@ -226,7 +264,12 @@ const AdminSettlementsPage: React.FC = () => {
                                 {invoice.pdf_path && (
                                   <button
                                     className="btn btn-outline-success btn-sm"
-                                    onClick={() => window.open(`/api/admin/settlements/invoices/${invoice.id}/download`, '_blank')}
+                                    onClick={() =>
+                                      window.open(
+                                        `/api/admin/settlements/invoices/${invoice.id}/download`,
+                                        '_blank'
+                                      )
+                                    }
                                     title="Download PDF"
                                   >
                                     <i className="fas fa-download"></i>
@@ -235,16 +278,22 @@ const AdminSettlementsPage: React.FC = () => {
                                 {invoice.status === 'draft' && (
                                   <button
                                     className="btn btn-outline-info btn-sm"
-                                    onClick={() => handleStatusChange(invoice.id, 'sent')}
+                                    onClick={() =>
+                                      handleStatusChange(invoice.id, 'sent')
+                                    }
                                     title="Mark as Sent"
                                   >
                                     <i className="fas fa-paper-plane"></i>
                                   </button>
                                 )}
-                                {['sent', 'overdue'].includes(invoice.status) && (
+                                {['sent', 'overdue'].includes(
+                                  invoice.status
+                                ) && (
                                   <button
                                     className="btn btn-outline-success btn-sm"
-                                    onClick={() => handleStatusChange(invoice.id, 'paid')}
+                                    onClick={() =>
+                                      handleStatusChange(invoice.id, 'paid')
+                                    }
                                     title="Mark as Paid"
                                   >
                                     <i className="fas fa-check"></i>
@@ -253,7 +302,9 @@ const AdminSettlementsPage: React.FC = () => {
                                 {invoice.status === 'sent' && (
                                   <button
                                     className="btn btn-outline-warning btn-sm"
-                                    onClick={() => handleStatusChange(invoice.id, 'overdue')}
+                                    onClick={() =>
+                                      handleStatusChange(invoice.id, 'overdue')
+                                    }
                                     title="Mark as Overdue"
                                   >
                                     <i className="fas fa-exclamation-triangle"></i>
@@ -271,7 +322,9 @@ const AdminSettlementsPage: React.FC = () => {
                   {totalPages > 1 && (
                     <nav aria-label="Invoice pagination">
                       <ul className="pagination justify-content-center">
-                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                        <li
+                          className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}
+                        >
                           <button
                             className="page-link"
                             onClick={() => handlePageChange(currentPage - 1)}
@@ -280,8 +333,14 @@ const AdminSettlementsPage: React.FC = () => {
                             Previous
                           </button>
                         </li>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
+                        {Array.from(
+                          { length: totalPages },
+                          (_, i) => i + 1
+                        ).map(page => (
+                          <li
+                            key={page}
+                            className={`page-item ${currentPage === page ? 'active' : ''}`}
+                          >
                             <button
                               className="page-link"
                               onClick={() => handlePageChange(page)}
@@ -290,7 +349,9 @@ const AdminSettlementsPage: React.FC = () => {
                             </button>
                           </li>
                         ))}
-                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                        <li
+                          className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}
+                        >
                           <button
                             className="page-link"
                             onClick={() => handlePageChange(currentPage + 1)}

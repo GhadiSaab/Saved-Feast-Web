@@ -76,15 +76,18 @@ const RestaurantDashboardPage: React.FC = () => {
 
     try {
       // Fetch meals and categories concurrently
-      // Assuming a general '/api/categories' endpoint exists and is accessible
-      // If categories are provider-specific, adjust the endpoint
+      // Categories endpoint is public, so no auth headers needed
       const [mealsRes, categoriesRes] = await Promise.all([
         axios.get('/api/provider/meals', { headers }),
-        axios.get('/api/categories', { headers }), // Adjust if needed
+        axios.get('/api/categories'), // No auth headers needed for public endpoint
       ]);
 
       setMeals(mealsRes.data || []);
       setCategories(categoriesRes.data || []); // Ensure categories are fetched
+
+      // Debug logging
+      console.log('Categories loaded:', categoriesRes.data);
+      console.log('Categories count:', categoriesRes.data?.length || 0);
     } catch (err: any) {
       console.error('Error fetching meals/categories:', err);
       if (
@@ -93,7 +96,12 @@ const RestaurantDashboardPage: React.FC = () => {
       ) {
         setMealsError('Authorization error fetching meals/categories.');
       } else {
-        setMealsError('Failed to load meals or categories.');
+        // More specific error message
+        const errorMsg =
+          err.response?.data?.message ||
+          err.message ||
+          'Failed to load meals or categories.';
+        setMealsError(`Error: ${errorMsg}`);
       }
     } finally {
       setMealsLoading(false);
@@ -388,7 +396,10 @@ const RestaurantDashboardPage: React.FC = () => {
                 <p className="mb-0 opacity-75">{dashboardMessage}</p>
               </div>
               <div className="col-md-4 text-md-end">
-                <button className="btn btn-light btn-lg" onClick={handleAddMealClick}>
+                <button
+                  className="btn btn-light btn-lg"
+                  onClick={handleAddMealClick}
+                >
                   <i className="fas fa-plus me-2"></i>
                   Add New Meal
                 </button>
@@ -398,11 +409,16 @@ const RestaurantDashboardPage: React.FC = () => {
 
           {/* Error State */}
           {error && (
-            <div className="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+            <div
+              className="alert alert-danger border-0 shadow-sm mb-4"
+              role="alert"
+            >
               <div className="d-flex align-items-center">
                 <i className="fas fa-exclamation-triangle fa-2x me-3"></i>
                 <div>
-                  <h6 className="alert-heading mb-1">Error Loading Dashboard</h6>
+                  <h6 className="alert-heading mb-1">
+                    Error Loading Dashboard
+                  </h6>
                   <p className="mb-0">{error}</p>
                 </div>
               </div>
@@ -427,242 +443,253 @@ const RestaurantDashboardPage: React.FC = () => {
                     {formMode === 'add' ? 'Add New Meal' : 'Edit Meal'}
                   </h5>
                 </div>
-            <div className="card-body">
-              {formError && (
-                <div className="alert alert-danger">{formError}</div>
-              )}
-              <form onSubmit={handleFormSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="title" className="form-label">
-                    Meal Title
-                  </label>{' '}
-                  {/* Changed label and htmlFor */}
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="title" // Changed id
-                    name="title" // Changed name
-                    value={formData.title} // Changed value binding
-                    onChange={handleFormChange}
-                    required
-                    disabled={formSubmitting}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="description" className="form-label">
-                    Description
-                  </label>
-                  <textarea
-                    className="form-control"
-                    id="description"
-                    name="description"
-                    rows={3}
-                    value={formData.description}
-                    onChange={handleFormChange}
-                    required
-                    disabled={formSubmitting}
-                  ></textarea>
-                </div>
-                <div className="row mb-3">
-                  {/* Original Price (Optional) */}
-                  <div className="col-md-4">
-                    <label htmlFor="original_price" className="form-label">
-                      Original Price (€){' '}
-                      <small className="text-muted">(Optional)</small>
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      className="form-control"
-                      id="original_price"
-                      name="original_price"
-                      value={formData.original_price}
-                      onChange={handleFormChange}
-                      placeholder="e.g., 15.00"
-                      disabled={formSubmitting}
-                    />
-                  </div>
-                  {/* Current Selling Price */}
-                  <div className="col-md-4">
-                    <label htmlFor="current_price" className="form-label">
-                      Current Selling Price (€)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      className="form-control"
-                      id="current_price"
-                      name="current_price"
-                      value={formData.current_price}
-                      onChange={handleFormChange}
-                      required
-                      placeholder="e.g., 9.99"
-                      disabled={formSubmitting}
-                    />
-                  </div>
-                  {/* Quantity */}
-                  <div className="col-md-4">
-                    <label htmlFor="quantity" className="form-label">
-                      Quantity Available
-                    </label>
-                    <input
-                      type="number"
-                      step="1"
-                      min="0"
-                      className="form-control"
-                      id="quantity"
-                      name="quantity"
-                      value={formData.quantity}
-                      onChange={handleFormChange}
-                      required
-                      disabled={formSubmitting}
-                    />
-                  </div>
-                </div>
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label htmlFor="category_id" className="form-label">
-                      Category
-                    </label>
-                    <select
-                      className="form-select"
-                      id="category_id"
-                      name="category_id"
-                      value={formData.category_id}
-                      onChange={handleFormChange}
-                      required
-                      disabled={formSubmitting || categories.length === 0}
-                    >
-                      <option value="" disabled>
-                        Select a category
-                      </option>
-                      {categories.map(cat => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-                    {categories.length === 0 && !mealsLoading && (
-                      <div className="form-text text-warning">
-                        No categories found. Please add categories first.
-                      </div>
-                    )}
-                  </div>
-                  {/* Removed category column div end */}
-                </div>{' '}
-                {/* End row mb-3 for category */}
-                {/* Pickup Time Window */}
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label htmlFor="available_from" className="form-label">
-                      Available From (Pickup Start)
-                    </label>
-                    <input
-                      type="datetime-local"
-                      className="form-control"
-                      id="available_from"
-                      name="available_from"
-                      value={formData.available_from}
-                      onChange={handleFormChange}
-                      required
-                      disabled={formSubmitting}
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label htmlFor="available_until" className="form-label">
-                      Available Until (Pickup End)
-                    </label>
-                    <input
-                      type="datetime-local"
-                      className="form-control"
-                      id="available_until"
-                      name="available_until"
-                      value={formData.available_until}
-                      onChange={handleFormChange}
-                      required
-                      disabled={formSubmitting}
-                    />
-                  </div>
-                </div>
-                {/* End Pickup Time Window */}
-                <div className="mb-3">
-                  <label htmlFor="image" className="form-label">
-                    Meal Image (Optional)
-                  </label>
-                  <input
-                    type="file"
-                    className="form-control"
-                    id="image"
-                    name="image" // Name matches the key used in FormData
-                    accept="image/png, image/jpeg, image/gif" // Accept common image types
-                    onChange={handleFormChange} // Use the updated handler
-                    disabled={formSubmitting}
-                  />
-                  {imageFile && (
-                    <div className="mt-2 text-muted">
-                      Selected: {imageFile.name}
-                    </div>
+                <div className="card-body">
+                  {formError && (
+                    <div className="alert alert-danger">{formError}</div>
                   )}
-                  {/* Display existing image preview if editing and image exists? Needs image_url from meal data */}
-                  {formMode === 'edit' &&
-                    formData.id /* && mealBeingEdited?.image_url */ && (
-                      <div className="mt-2">
-                        {/* Placeholder for showing current image - requires fetching meal data with image_url */}
-                        {/* <img src={mealBeingEdited.image_url} alt="Current meal image" style={{ maxWidth: '100px', maxHeight: '100px' }} /> */}
-                        <small className="d-block text-muted">
-                          Uploading a new image will replace the current one.
-                        </small>
+                  <form onSubmit={handleFormSubmit}>
+                    <div className="mb-3">
+                      <label htmlFor="title" className="form-label">
+                        Meal Title
+                      </label>{' '}
+                      {/* Changed label and htmlFor */}
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="title" // Changed id
+                        name="title" // Changed name
+                        value={formData.title} // Changed value binding
+                        onChange={handleFormChange}
+                        required
+                        disabled={formSubmitting}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="description" className="form-label">
+                        Description
+                      </label>
+                      <textarea
+                        className="form-control"
+                        id="description"
+                        name="description"
+                        rows={3}
+                        value={formData.description}
+                        onChange={handleFormChange}
+                        required
+                        disabled={formSubmitting}
+                      ></textarea>
+                    </div>
+                    <div className="row mb-3">
+                      {/* Original Price (Optional) */}
+                      <div className="col-md-4">
+                        <label htmlFor="original_price" className="form-label">
+                          Original Price (€){' '}
+                          <small className="text-muted">(Optional)</small>
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="form-control"
+                          id="original_price"
+                          name="original_price"
+                          value={formData.original_price}
+                          onChange={handleFormChange}
+                          placeholder="e.g., 15.00"
+                          disabled={formSubmitting}
+                        />
                       </div>
-                    )}
+                      {/* Current Selling Price */}
+                      <div className="col-md-4">
+                        <label htmlFor="current_price" className="form-label">
+                          Current Selling Price (€)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="form-control"
+                          id="current_price"
+                          name="current_price"
+                          value={formData.current_price}
+                          onChange={handleFormChange}
+                          required
+                          placeholder="e.g., 9.99"
+                          disabled={formSubmitting}
+                        />
+                      </div>
+                      {/* Quantity */}
+                      <div className="col-md-4">
+                        <label htmlFor="quantity" className="form-label">
+                          Quantity Available
+                        </label>
+                        <input
+                          type="number"
+                          step="1"
+                          min="0"
+                          className="form-control"
+                          id="quantity"
+                          name="quantity"
+                          value={formData.quantity}
+                          onChange={handleFormChange}
+                          required
+                          disabled={formSubmitting}
+                        />
+                      </div>
+                    </div>
+                    <div className="row mb-3">
+                      <div className="col-md-6">
+                        <label htmlFor="category_id" className="form-label">
+                          Category
+                        </label>
+                        <select
+                          className="form-select"
+                          id="category_id"
+                          name="category_id"
+                          value={formData.category_id}
+                          onChange={handleFormChange}
+                          required
+                          disabled={formSubmitting || categories.length === 0}
+                        >
+                          <option value="" disabled>
+                            Select a category
+                          </option>
+                          {categories.map(cat => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </option>
+                          ))}
+                        </select>
+                        {categories.length === 0 && !mealsLoading && (
+                          <div className="form-text text-warning">
+                            No categories found. Please add categories first.
+                          </div>
+                        )}
+                        {/* Debug info */}
+                        {process.env.NODE_ENV === 'development' && (
+                          <div className="form-text text-info">
+                            Debug: Categories loaded: {categories.length} |
+                            Loading: {mealsLoading ? 'Yes' : 'No'}
+                          </div>
+                        )}
+                      </div>
+                      {/* Removed category column div end */}
+                    </div>{' '}
+                    {/* End row mb-3 for category */}
+                    {/* Pickup Time Window */}
+                    <div className="row mb-3">
+                      <div className="col-md-6">
+                        <label htmlFor="available_from" className="form-label">
+                          Available From (Pickup Start)
+                        </label>
+                        <input
+                          type="datetime-local"
+                          className="form-control"
+                          id="available_from"
+                          name="available_from"
+                          value={formData.available_from}
+                          onChange={handleFormChange}
+                          required
+                          disabled={formSubmitting}
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <label htmlFor="available_until" className="form-label">
+                          Available Until (Pickup End)
+                        </label>
+                        <input
+                          type="datetime-local"
+                          className="form-control"
+                          id="available_until"
+                          name="available_until"
+                          value={formData.available_until}
+                          onChange={handleFormChange}
+                          required
+                          disabled={formSubmitting}
+                        />
+                      </div>
+                    </div>
+                    {/* End Pickup Time Window */}
+                    <div className="mb-3">
+                      <label htmlFor="image" className="form-label">
+                        Meal Image (Optional)
+                      </label>
+                      <input
+                        type="file"
+                        className="form-control"
+                        id="image"
+                        name="image" // Name matches the key used in FormData
+                        accept="image/png, image/jpeg, image/gif" // Accept common image types
+                        onChange={handleFormChange} // Use the updated handler
+                        disabled={formSubmitting}
+                      />
+                      {imageFile && (
+                        <div className="mt-2 text-muted">
+                          Selected: {imageFile.name}
+                        </div>
+                      )}
+                      {/* Display existing image preview if editing and image exists? Needs image_url from meal data */}
+                      {formMode === 'edit' &&
+                        formData.id /* && mealBeingEdited?.image_url */ && (
+                          <div className="mt-2">
+                            {/* Placeholder for showing current image - requires fetching meal data with image_url */}
+                            {/* <img src={mealBeingEdited.image_url} alt="Current meal image" style={{ maxWidth: '100px', maxHeight: '100px' }} /> */}
+                            <small className="d-block text-muted">
+                              Uploading a new image will replace the current
+                              one.
+                            </small>
+                          </div>
+                        )}
+                    </div>
+                    <div className="d-flex justify-content-end">
+                      <button
+                        type="button"
+                        className="btn btn-secondary me-2"
+                        onClick={closeForm}
+                        disabled={formSubmitting}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn btn-success"
+                        disabled={formSubmitting}
+                      >
+                        {formSubmitting ? (
+                          <>
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              role="status"
+                              aria-hidden="true"
+                            ></span>
+                            {formMode === 'add' ? 'Adding...' : 'Updating...'}
+                          </>
+                        ) : formMode === 'add' ? (
+                          'Add Meal'
+                        ) : (
+                          'Update Meal'
+                        )}
+                      </button>
+                    </div>
+                  </form>
                 </div>
-                <div className="d-flex justify-content-end">
-                  <button
-                    type="button"
-                    className="btn btn-secondary me-2"
-                    onClick={closeForm}
-                    disabled={formSubmitting}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-success"
-                    disabled={formSubmitting}
-                  >
-                    {formSubmitting ? (
-                      <>
-                        <span
-                          className="spinner-border spinner-border-sm me-2"
-                          role="status"
-                          aria-hidden="true"
-                        ></span>
-                        {formMode === 'add' ? 'Adding...' : 'Updating...'}
-                      </>
-                    ) : formMode === 'add' ? (
-                      'Add Meal'
-                    ) : (
-                      'Update Meal'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-        {/* End Add/Edit Meal Form */}
+              </div>
+            )}
+            {/* End Add/Edit Meal Form */}
 
-        {mealsLoading && (
-          <div className="d-flex justify-content-center mt-3">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading meals...</span>
-            </div>
-          </div>
-        )}
+            {mealsLoading && (
+              <div className="d-flex justify-content-center mt-3">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading meals...</span>
+                </div>
+              </div>
+            )}
 
             {mealsError && (
-              <div className="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+              <div
+                className="alert alert-danger border-0 shadow-sm mb-4"
+                role="alert"
+              >
                 <div className="d-flex align-items-center">
                   <i className="fas fa-exclamation-triangle fa-2x me-3"></i>
                   <div>
@@ -679,64 +706,81 @@ const RestaurantDashboardPage: React.FC = () => {
                   <table className="table table-hover">
                     <thead className="table-light">
                       <tr>
-                        <th><i className="fas fa-utensils me-2 text-primary"></i>Title</th>
-                        <th><i className="fas fa-tag me-2 text-primary"></i>Category</th>
-                        <th><i className="fas fa-euro-sign me-2 text-primary"></i>Price</th>
-                        <th><i className="fas fa-box me-2 text-primary"></i>Quantity</th>
-                        <th><i className="fas fa-cogs me-2 text-primary"></i>Actions</th>
+                        <th>
+                          <i className="fas fa-utensils me-2 text-primary"></i>
+                          Title
+                        </th>
+                        <th>
+                          <i className="fas fa-tag me-2 text-primary"></i>
+                          Category
+                        </th>
+                        <th>
+                          <i className="fas fa-euro-sign me-2 text-primary"></i>
+                          Price
+                        </th>
+                        <th>
+                          <i className="fas fa-box me-2 text-primary"></i>
+                          Quantity
+                        </th>
+                        <th>
+                          <i className="fas fa-cogs me-2 text-primary"></i>
+                          Actions
+                        </th>
                       </tr>
                     </thead>
-            <tbody>
-              {meals.length > 0 ? (
-                meals.map(meal => (
-                  <tr key={meal.id}>
-                    <td>{meal.title}</td>
-                    <td>{meal.category?.name || 'N/A'}</td>
-                    <td>
-                      {meal.original_price &&
-                      meal.original_price > meal.current_price ? (
-                        <>
-                          <strong className="text-danger me-1">
-                            €{meal.current_price.toFixed(2)}
-                          </strong>
-                          <small className="text-muted">
-                            <del>€{meal.original_price.toFixed(2)}</del>
-                          </small>
-                        </>
+                    <tbody>
+                      {meals.length > 0 ? (
+                        meals.map(meal => (
+                          <tr key={meal.id}>
+                            <td>{meal.title}</td>
+                            <td>{meal.category?.name || 'N/A'}</td>
+                            <td>
+                              {meal.original_price &&
+                              meal.original_price > meal.current_price ? (
+                                <>
+                                  <strong className="text-danger me-1">
+                                    €{meal.current_price.toFixed(2)}
+                                  </strong>
+                                  <small className="text-muted">
+                                    <del>€{meal.original_price.toFixed(2)}</del>
+                                  </small>
+                                </>
+                              ) : (
+                                <strong>
+                                  €{meal.current_price.toFixed(2)}
+                                </strong>
+                              )}
+                            </td>
+                            <td>
+                              {typeof meal.quantity === 'number'
+                                ? meal.quantity
+                                : 'N/A'}
+                            </td>
+                            <td>
+                              <button
+                                className="btn btn-sm btn-outline-secondary me-2"
+                                onClick={() => handleEditMealClick(meal)}
+                                title="Edit Meal"
+                              >
+                                <i className="fas fa-edit"></i>
+                              </button>
+                              <button
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => handleDeleteMeal(meal.id)}
+                                title="Delete Meal"
+                              >
+                                <i className="fas fa-trash-alt"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        ))
                       ) : (
-                        <strong>€{meal.current_price.toFixed(2)}</strong>
+                        <tr>
+                          <td colSpan={5} className="text-center text-muted">
+                            No meals found. Add your first meal!
+                          </td>
+                        </tr>
                       )}
-                    </td>
-                    <td>
-                      {typeof meal.quantity === 'number'
-                        ? meal.quantity
-                        : 'N/A'}
-                    </td>
-                    <td>
-                      <button
-                        className="btn btn-sm btn-outline-secondary me-2"
-                        onClick={() => handleEditMealClick(meal)}
-                        title="Edit Meal"
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => handleDeleteMeal(meal.id)}
-                        title="Delete Meal"
-                      >
-                        <i className="fas fa-trash-alt"></i>
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="text-center text-muted">
-                    No meals found. Add your first meal!
-                  </td>
-                </tr>
-              )}
                     </tbody>
                   </table>
                 </div>

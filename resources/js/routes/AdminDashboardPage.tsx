@@ -840,12 +840,14 @@ const AdminDashboardPage: React.FC = () => {
                   <i className="fas fa-shield-alt me-3"></i>
                   Admin Dashboard
                 </h1>
-                <p className="mb-0 opacity-75">Administrator Panel - Manage the platform</p>
+                <p className="mb-0 opacity-75">
+                  Administrator Panel - Manage the platform
+                </p>
               </div>
               <div className="col-md-4 text-md-end">
                 <div className="d-flex justify-content-md-end gap-2">
-                  <button 
-                    className="btn btn-light btn-sm" 
+                  <button
+                    className="btn btn-light btn-sm"
                     onClick={() => window.location.reload()}
                   >
                     <i className="fas fa-sync-alt me-1"></i>
@@ -869,52 +871,52 @@ const AdminDashboardPage: React.FC = () => {
                     Overview
                   </button>
                 </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
-          >
-            <i className="fas fa-users me-2"></i>
-            Users
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === 'restaurants' ? 'active' : ''}`}
-            onClick={() => setActiveTab('restaurants')}
-          >
-            <i className="fas fa-store me-2"></i>
-            Restaurants
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === 'orders' ? 'active' : ''}`}
-            onClick={() => setActiveTab('orders')}
-          >
-            <i className="fas fa-shopping-cart me-2"></i>
-            Orders
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === 'meals' ? 'active' : ''}`}
-            onClick={() => setActiveTab('meals')}
-          >
-            <i className="fas fa-utensils me-2"></i>
-            Meals
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === 'analytics' ? 'active' : ''}`}
-            onClick={() => setActiveTab('analytics')}
-          >
-            <i className="fas fa-chart-line me-2"></i>
-            Analytics
-          </button>
-        </li>
-      </ul>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'users' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('users')}
+                  >
+                    <i className="fas fa-users me-2"></i>
+                    Users
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'restaurants' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('restaurants')}
+                  >
+                    <i className="fas fa-store me-2"></i>
+                    Restaurants
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'orders' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('orders')}
+                  >
+                    <i className="fas fa-shopping-cart me-2"></i>
+                    Orders
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'meals' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('meals')}
+                  >
+                    <i className="fas fa-utensils me-2"></i>
+                    Meals
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === 'analytics' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('analytics')}
+                  >
+                    <i className="fas fa-chart-line me-2"></i>
+                    Analytics
+                  </button>
+                </li>
+              </ul>
             </div>
           </div>
 
@@ -930,7 +932,9 @@ const AdminDashboardPage: React.FC = () => {
           {totalPages > 1 && (
             <nav className="mt-4">
               <ul className="pagination justify-content-center">
-                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                <li
+                  className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}
+                >
                   <button
                     className="page-link"
                     onClick={() => {
@@ -951,29 +955,31 @@ const AdminDashboardPage: React.FC = () => {
                     Previous
                   </button>
                 </li>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <li
-                    key={page}
-                    className={`page-item ${currentPage === page ? 'active' : ''}`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => {
-                        setCurrentPage(page);
-                        if (activeTab === 'users')
-                          fetchUsers(page, searchTerm, roleFilter);
-                        else if (activeTab === 'restaurants')
-                          fetchRestaurants(page, searchTerm);
-                        else if (activeTab === 'orders')
-                          fetchOrders(page, statusFilter);
-                        else if (activeTab === 'meals')
-                          fetchMeals(page, searchTerm);
-                      }}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  page => (
+                    <li
+                      key={page}
+                      className={`page-item ${currentPage === page ? 'active' : ''}`}
                     >
-                      {page}
-                    </button>
-                  </li>
-                ))}
+                      <button
+                        className="page-link"
+                        onClick={() => {
+                          setCurrentPage(page);
+                          if (activeTab === 'users')
+                            fetchUsers(page, searchTerm, roleFilter);
+                          else if (activeTab === 'restaurants')
+                            fetchRestaurants(page, searchTerm);
+                          else if (activeTab === 'orders')
+                            fetchOrders(page, statusFilter);
+                          else if (activeTab === 'meals')
+                            fetchMeals(page, searchTerm);
+                        }}
+                      >
+                        {page}
+                      </button>
+                    </li>
+                  )
+                )}
                 <li
                   className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}
                 >

@@ -6,7 +6,11 @@ interface AcceptOrderDialogProps {
   order: Order | null;
   isLoading: boolean;
   onClose: () => void;
-  onConfirm: (order: Order, pickupWindowStart: string, pickupWindowEnd: string) => void;
+  onConfirm: (
+    order: Order,
+    pickupWindowStart: string,
+    pickupWindowEnd: string
+  ) => void;
 }
 
 const AcceptOrderDialog: React.FC<AcceptOrderDialogProps> = ({
@@ -26,7 +30,7 @@ const AcceptOrderDialog: React.FC<AcceptOrderDialogProps> = ({
       const now = new Date();
       const defaultStart = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutes from now
       const defaultEnd = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours from now
-      
+
       // Format for datetime-local input (YYYY-MM-DDTHH:MM)
       setPickupStart(defaultStart.toISOString().slice(0, 16));
       setPickupEnd(defaultEnd.toISOString().slice(0, 16));
@@ -36,7 +40,7 @@ const AcceptOrderDialog: React.FC<AcceptOrderDialogProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!order || !pickupStart || !pickupEnd) {
       setError('Please select both pickup start and end times');
       return;
@@ -84,7 +88,10 @@ const AcceptOrderDialog: React.FC<AcceptOrderDialogProps> = ({
   if (!isOpen || !order) return null;
 
   return (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div
+      className="modal show d-block"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+    >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content border-0 shadow-lg">
           <div className="modal-header bg-success text-white border-0">
@@ -99,7 +106,7 @@ const AcceptOrderDialog: React.FC<AcceptOrderDialogProps> = ({
               disabled={isLoading}
             ></button>
           </div>
-          
+
           <div className="modal-body p-4">
             <div className="text-center mb-4">
               <h6 className="text-muted">Order #{order.id}</h6>
@@ -109,7 +116,10 @@ const AcceptOrderDialog: React.FC<AcceptOrderDialogProps> = ({
             <form onSubmit={handleSubmit}>
               <div className="row">
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="pickupStart" className="form-label fw-semibold">
+                  <label
+                    htmlFor="pickupStart"
+                    className="form-label fw-semibold"
+                  >
                     <i className="fas fa-clock me-2"></i>
                     Pickup Window Start
                   </label>
@@ -118,11 +128,13 @@ const AcceptOrderDialog: React.FC<AcceptOrderDialogProps> = ({
                     className="form-control"
                     id="pickupStart"
                     value={pickupStart}
-                    onChange={(e) => setPickupStart(e.target.value)}
+                    onChange={e => setPickupStart(e.target.value)}
                     disabled={isLoading}
                     required
                   />
-                  <small className="text-muted">When customers can start picking up</small>
+                  <small className="text-muted">
+                    When customers can start picking up
+                  </small>
                 </div>
 
                 <div className="col-md-6 mb-3">
@@ -135,11 +147,13 @@ const AcceptOrderDialog: React.FC<AcceptOrderDialogProps> = ({
                     className="form-control"
                     id="pickupEnd"
                     value={pickupEnd}
-                    onChange={(e) => setPickupEnd(e.target.value)}
+                    onChange={e => setPickupEnd(e.target.value)}
                     disabled={isLoading}
                     required
                   />
-                  <small className="text-muted">When pickup window closes</small>
+                  <small className="text-muted">
+                    When pickup window closes
+                  </small>
                 </div>
               </div>
 
@@ -164,7 +178,7 @@ const AcceptOrderDialog: React.FC<AcceptOrderDialogProps> = ({
               </div>
             </form>
           </div>
-          
+
           <div className="modal-footer border-0">
             <button
               type="button"
@@ -182,7 +196,11 @@ const AcceptOrderDialog: React.FC<AcceptOrderDialogProps> = ({
             >
               {isLoading ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   Accepting...
                 </>
               ) : (

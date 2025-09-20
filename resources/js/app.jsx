@@ -28,4 +28,3 @@ if (rootElement) {
 } else {
   console.error("Could not find the 'app' element to mount React.");
 }
-

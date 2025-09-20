@@ -109,7 +109,7 @@ class OrderController extends Controller
             // Validate pickup window duration (30 minutes to 24 hours)
             $durationInMinutes = $pickupEnd->diffInMinutes($pickupStart);
             if ($durationInMinutes < 30) {
-                // Allow shorter windows when constrained by meal availability
+                // Check if meal availability is actually constraining the pickup window
                 $order->loadMissing('orderItems.meal');
                 $availableUntilTimes = $order->orderItems
                     ->filter(fn ($item) => ! is_null($item->meal?->available_until))
@@ -118,9 +118,10 @@ class OrderController extends Controller
                 $allowShortWindow = false;
                 if ($availableUntilTimes->isNotEmpty()) {
                     $minAvailableUntil = $availableUntilTimes->min();
-                    // If the requested end is before the earliest meal availability end,
-                    // and still after the start time, permit the shorter window
-                    if ($pickupEnd->lessThanOrEqualTo($minAvailableUntil) && $pickupEnd->greaterThan($pickupStart)) {
+                    // Only allow short window if the meal expires within 2 hours
+                    // and the pickup window end is before the meal expires
+                    $mealExpiresSoon = $minAvailableUntil->diffInMinutes(now()) <= 120; // 2 hours or less
+                    if ($mealExpiresSoon && $pickupEnd->lessThanOrEqualTo($minAvailableUntil) && $pickupEnd->greaterThan($pickupStart)) {
                         $allowShortWindow = true;
                     }
                 }

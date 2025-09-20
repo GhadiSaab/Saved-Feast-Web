@@ -123,8 +123,12 @@ const Timeline: React.FC<TimelineProps> = ({ order, className = '' }) => {
                   </div>
                   <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                     <div>
-                      <p className="text-sm text-gray-900 font-medium">{item.title}</p>
-                      <p className="text-sm text-gray-500">{item.description}</p>
+                      <p className="text-sm text-gray-900 font-medium">
+                        {item.title}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {item.description}
+                      </p>
                     </div>
                     <div className="text-right text-sm whitespace-nowrap text-gray-500">
                       {formatTimestamp(item.timestamp)}

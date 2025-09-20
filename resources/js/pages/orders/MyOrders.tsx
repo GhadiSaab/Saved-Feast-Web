@@ -11,7 +11,9 @@ const MyOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'in_progress' | 'completed' | 'cancelled'>('in_progress');
+  const [activeTab, setActiveTab] = useState<
+    'in_progress' | 'completed' | 'cancelled'
+  >('in_progress');
 
   // Rate limiting refs
   const lastFetchTime = useRef<number>(0);
@@ -27,42 +29,54 @@ const MyOrders: React.FC = () => {
     isLoading: false,
   });
 
-  const fetchOrders = useCallback(async (status?: OrderFilters['status'], force: boolean = false) => {
-    const now = Date.now();
-    
-    // Rate limiting: prevent calls if we're already fetching or within cooldown period
-    if (!force && (isFetching.current || (now - lastFetchTime.current < FETCH_COOLDOWN))) {
-      return;
-    }
+  const fetchOrders = useCallback(
+    async (status?: OrderFilters['status'], force: boolean = false) => {
+      const now = Date.now();
 
-    try {
-      isFetching.current = true;
-      lastFetchTime.current = now;
-      setLoading(true);
-      setError(null);
-      
-      const normalizedStatus: OrderFilters['status'] =
-        status === 'in_progress'
-          ? (['PENDING', 'ACCEPTED', 'READY_FOR_PICKUP'] as OrderStatus[])
-          : status === 'completed'
-          ? 'COMPLETED'
-          : status === 'cancelled'
-          ? (['CANCELLED_BY_CUSTOMER', 'CANCELLED_BY_RESTAURANT', 'EXPIRED'] as OrderStatus[])
-          : status;
-
-      const response = await orderApi.getMyOrders({ status: normalizedStatus });
-      if (response.success) {
-        setOrders(response.data.data);
-      } else {
-        setError('Failed to fetch orders');
+      // Rate limiting: prevent calls if we're already fetching or within cooldown period
+      if (
+        !force &&
+        (isFetching.current || now - lastFetchTime.current < FETCH_COOLDOWN)
+      ) {
+        return;
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch orders');
-    } finally {
-      setLoading(false);
-      isFetching.current = false;
-    }
-  }, [FETCH_COOLDOWN]);
+
+      try {
+        isFetching.current = true;
+        lastFetchTime.current = now;
+        setLoading(true);
+        setError(null);
+
+        const normalizedStatus: OrderFilters['status'] =
+          status === 'in_progress'
+            ? (['PENDING', 'ACCEPTED', 'READY_FOR_PICKUP'] as OrderStatus[])
+            : status === 'completed'
+              ? 'COMPLETED'
+              : status === 'cancelled'
+                ? ([
+                    'CANCELLED_BY_CUSTOMER',
+                    'CANCELLED_BY_RESTAURANT',
+                    'EXPIRED',
+                  ] as OrderStatus[])
+                : status;
+
+        const response = await orderApi.getMyOrders({
+          status: normalizedStatus,
+        });
+        if (response.success) {
+          setOrders(response.data.data);
+        } else {
+          setError('Failed to fetch orders');
+        }
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Failed to fetch orders');
+      } finally {
+        setLoading(false);
+        isFetching.current = false;
+      }
+    },
+    [FETCH_COOLDOWN]
+  );
 
   useEffect(() => {
     fetchOrders(activeTab, true); // Force initial load
@@ -94,7 +108,7 @@ const MyOrders: React.FC = () => {
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -108,7 +122,11 @@ const MyOrders: React.FC = () => {
         <div className="row">
           <div className="col-12">
             <div className="text-center py-5">
-              <div className="spinner-border text-primary mb-3" style={{width: '3rem', height: '3rem'}} role="status">
+              <div
+                className="spinner-border text-primary mb-3"
+                style={{ width: '3rem', height: '3rem' }}
+                role="status"
+              >
                 <span className="visually-hidden">Loading...</span>
               </div>
               <h5 className="text-muted">Loading your orders...</h5>
@@ -131,7 +149,9 @@ const MyOrders: React.FC = () => {
                   <i className="fas fa-shopping-bag me-3"></i>
                   My Orders
                 </h1>
-                <p className="mb-0 opacity-75">Track and manage your food orders</p>
+                <p className="mb-0 opacity-75">
+                  Track and manage your food orders
+                </p>
               </div>
               <div className="col-md-4 text-md-end">
                 <Link to="/" className="btn btn-light btn-lg">
@@ -144,7 +164,10 @@ const MyOrders: React.FC = () => {
 
           {/* Error State */}
           {error && (
-            <div className="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+            <div
+              className="alert alert-danger border-0 shadow-sm mb-4"
+              role="alert"
+            >
               <div className="d-flex align-items-center">
                 <i className="fas fa-exclamation-triangle fa-2x me-3"></i>
                 <div>
@@ -187,15 +210,17 @@ const MyOrders: React.FC = () => {
           {/* Empty State */}
           {orders.length === 0 && (
             <div className="text-center py-5">
-              <div className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style={{width: '120px', height: '120px'}}>
+              <div
+                className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
+                style={{ width: '120px', height: '120px' }}
+              >
                 <i className="fas fa-shopping-bag fa-3x text-muted"></i>
               </div>
               <h3 className="text-muted mb-3">No orders found</h3>
               <p className="text-muted mb-4">
-                {activeTab === 'in_progress' 
+                {activeTab === 'in_progress'
                   ? "You don't have any orders in progress."
-                  : `You don't have any ${activeTab} orders.`
-                }
+                  : `You don't have any ${activeTab} orders.`}
               </p>
               {activeTab === 'in_progress' && (
                 <Link to="/" className="btn btn-primary btn-lg">
@@ -209,7 +234,7 @@ const MyOrders: React.FC = () => {
           {/* Orders List */}
           {orders.length > 0 && (
             <div className="row">
-              {orders.map((order) => (
+              {orders.map(order => (
                 <div key={order.id} className="col-12 mb-4">
                   <div className="card border-0 shadow-sm h-100">
                     <div className="card-header bg-white border-0 pb-0">
@@ -234,10 +259,15 @@ const MyOrders: React.FC = () => {
                             <i className="fas fa-list me-2"></i>
                             Order Items
                           </h6>
-                          {order.order_items.map((item) => (
-                            <div key={item.id} className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                          {order.order_items.map(item => (
+                            <div
+                              key={item.id}
+                              className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded"
+                            >
                               <div>
-                                <span className="fw-medium text-dark">{item.quantity}x {item.meal.title}</span>
+                                <span className="fw-medium text-dark">
+                                  {item.quantity}x {item.meal.title}
+                                </span>
                                 <br />
                                 <small className="text-muted">
                                   <i className="fas fa-store me-1"></i>
@@ -245,7 +275,12 @@ const MyOrders: React.FC = () => {
                                 </small>
                               </div>
                               <span className="text-end">
-                                <strong className="text-primary">${(item.quantity * parseFloat(item.price)).toFixed(2)}</strong>
+                                <strong className="text-primary">
+                                  $
+                                  {(
+                                    item.quantity * parseFloat(item.price)
+                                  ).toFixed(2)}
+                                </strong>
                               </span>
                             </div>
                           ))}
@@ -256,38 +291,45 @@ const MyOrders: React.FC = () => {
                               <i className="fas fa-receipt me-2"></i>
                               Order Summary
                             </h6>
-                            <h4 className="text-primary mb-3 fw-bold">{formatCurrency(order.total_amount)}</h4>
-                            
-                            {order.pickup_window_start && order.pickup_window_end && (
-                              <div className="mb-3">
-                                <h6 className="text-muted mb-2 fw-semibold">
-                                  <i className="fas fa-clock me-2"></i>
-                                  Pickup Window
-                                </h6>
-                                <Countdown 
-                                  targetDate={order.pickup_window_end}
-                                  onExpire={() => fetchOrders(activeTab, false)}
-                                />
-                              </div>
-                            )}
+                            <h4 className="text-primary mb-3 fw-bold">
+                              {formatCurrency(order.total_amount)}
+                            </h4>
+
+                            {order.pickup_window_start &&
+                              order.pickup_window_end && (
+                                <div className="mb-3">
+                                  <h6 className="text-muted mb-2 fw-semibold">
+                                    <i className="fas fa-clock me-2"></i>
+                                    Pickup Window
+                                  </h6>
+                                  <Countdown
+                                    targetDate={order.pickup_window_end}
+                                    onExpire={() =>
+                                      fetchOrders(activeTab, false)
+                                    }
+                                  />
+                                </div>
+                              )}
 
                             <div className="d-grid gap-2">
-                              <Link 
+                              <Link
                                 to={`/orders/${order.id}`}
                                 className="btn btn-primary btn-sm"
                               >
                                 <i className="fas fa-eye me-1"></i>
                                 View Details
                               </Link>
-                              
+
                               {orderUtils.canCancel(order.status) && (
                                 <button
                                   className="btn btn-outline-danger btn-sm"
-                                  onClick={() => setCancelDialog({
-                                    isOpen: true,
-                                    order,
-                                    isLoading: false
-                                  })}
+                                  onClick={() =>
+                                    setCancelDialog({
+                                      isOpen: true,
+                                      order,
+                                      isLoading: false,
+                                    })
+                                  }
                                 >
                                   <i className="fas fa-times me-1"></i>
                                   Cancel Order
@@ -310,11 +352,13 @@ const MyOrders: React.FC = () => {
         isOpen={cancelDialog.isOpen}
         order={cancelDialog.order}
         isLoading={cancelDialog.isLoading}
-        onClose={() => setCancelDialog({
-          isOpen: false,
-          order: null,
-          isLoading: false
-        })}
+        onClose={() =>
+          setCancelDialog({
+            isOpen: false,
+            order: null,
+            isLoading: false,
+          })
+        }
         onConfirm={handleCancelOrder}
       />
     </div>

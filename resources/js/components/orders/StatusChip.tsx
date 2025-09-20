@@ -15,11 +15,13 @@ const StatusChip: React.FC<StatusChipProps> = ({ status, size = 'md' }) => {
   const sizeClasses = {
     sm: 'badge-sm',
     md: '',
-    lg: 'badge-lg'
+    lg: 'badge-lg',
   };
 
   return (
-    <span className={`badge bg-${color} ${sizeClasses[size]} d-flex align-items-center`}>
+    <span
+      className={`badge bg-${color} ${sizeClasses[size]} d-flex align-items-center`}
+    >
       <i className={`${icon} me-1`}></i>
       {text}
     </span>

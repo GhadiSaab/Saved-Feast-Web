@@ -35,7 +35,10 @@ const EnterCodeDialog: React.FC<EnterCodeDialogProps> = ({
   if (!isOpen || !order) return null;
 
   return (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div
+      className="modal show d-block"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+    >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content border-0 shadow-lg">
           <div className="modal-header bg-primary text-white border-0">
@@ -50,11 +53,14 @@ const EnterCodeDialog: React.FC<EnterCodeDialogProps> = ({
               disabled={isLoading}
             ></button>
           </div>
-          
+
           <div className="modal-body p-4">
             <div className="text-center mb-4">
               <h6 className="text-muted">Order #{order.id}</h6>
-              <p className="mb-0">Enter the claim code provided by the customer to complete this order.</p>
+              <p className="mb-0">
+                Enter the claim code provided by the customer to complete this
+                order.
+              </p>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -68,7 +74,7 @@ const EnterCodeDialog: React.FC<EnterCodeDialogProps> = ({
                   className={`form-control form-control-lg text-center font-monospace ${error ? 'is-invalid' : ''}`}
                   id="claimCode"
                   value={code}
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
+                  onChange={e => setCode(e.target.value.toUpperCase())}
                   placeholder="Enter 6-digit code"
                   maxLength={6}
                   disabled={isLoading}
@@ -96,7 +102,7 @@ const EnterCodeDialog: React.FC<EnterCodeDialogProps> = ({
               </div>
             </form>
           </div>
-          
+
           <div className="modal-footer border-0">
             <button
               type="button"
@@ -114,7 +120,11 @@ const EnterCodeDialog: React.FC<EnterCodeDialogProps> = ({
             >
               {isLoading ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   Completing...
                 </>
               ) : (

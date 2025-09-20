@@ -59,7 +59,7 @@ const mockFilters = {
 describe('FeedPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock successful API responses
     mockedAxios.get.mockImplementation((url: string) => {
       if (url === '/api/meals/filters') {
@@ -85,9 +85,11 @@ describe('FeedPage', () => {
 
   it('renders hero section with correct statistics', async () => {
     render(<FeedPage />);
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Save Food, Save Money, Save the Planet')).toBeInTheDocument();
+      expect(
+        screen.getByText('Save Food, Save Money, Save the Planet')
+      ).toBeInTheDocument();
       expect(screen.getByText('2.5M')).toBeInTheDocument();
       expect(screen.getByText('Meals Saved')).toBeInTheDocument();
       expect(screen.getByText('€15M')).toBeInTheDocument();
@@ -99,7 +101,7 @@ describe('FeedPage', () => {
 
   it('displays meals correctly', async () => {
     render(<FeedPage />);
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('meal-card-1')).toBeInTheDocument();
       expect(screen.getByTestId('meal-card-2')).toBeInTheDocument();
@@ -108,7 +110,7 @@ describe('FeedPage', () => {
 
   it('shows loading state initially', () => {
     render(<FeedPage />);
-    
+
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
@@ -123,9 +125,9 @@ describe('FeedPage', () => {
       }
       return Promise.reject(new Error('Unknown URL'));
     });
-    
+
     render(<FeedPage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText(/Failed to fetch meals/)).toBeInTheDocument();
     });
@@ -152,26 +154,30 @@ describe('FeedPage', () => {
       }
       return Promise.reject(new Error('Unknown URL'));
     });
-    
+
     render(<FeedPage />);
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Failed to fetch meals. Please try again later.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Failed to fetch meals. Please try again later.')
+      ).toBeInTheDocument();
     });
   });
 
   it('renders search and filter controls', async () => {
     render(<FeedPage />);
-    
+
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for delicious meals...')).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText('Search for delicious meals...')
+      ).toBeInTheDocument();
       expect(screen.getByText('All Categories')).toBeInTheDocument();
     });
   });
 
   it('fetches filters on component mount', async () => {
     render(<FeedPage />);
-    
+
     await waitFor(() => {
       expect(mockedAxios.get).toHaveBeenCalledWith('/api/meals/filters');
     });
@@ -179,10 +185,11 @@ describe('FeedPage', () => {
 
   it('fetches meals on component mount', async () => {
     render(<FeedPage />);
-    
+
     await waitFor(() => {
-      expect(mockedAxios.get).toHaveBeenCalledWith('/api/meals?page=1&per_page=12&sort_by=created_at&sort_order=desc&available=true');
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        '/api/meals?page=1&per_page=12&sort_by=created_at&sort_order=desc&available=true'
+      );
     });
   });
 });
-

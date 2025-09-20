@@ -73,7 +73,10 @@ const RestaurantApplicationPage: React.FC = () => {
                   <i className="fas fa-handshake me-3"></i>
                   Partner with SavedFeast
                 </h1>
-                <p className="mb-0 opacity-75">Join our mission to reduce food waste and help customers save money</p>
+                <p className="mb-0 opacity-75">
+                  Join our mission to reduce food waste and help customers save
+                  money
+                </p>
               </div>
               <div className="col-md-4 text-md-end">
                 <div className="d-flex justify-content-md-end gap-2">
@@ -95,23 +98,32 @@ const RestaurantApplicationPage: React.FC = () => {
                     Restaurant Application
                   </h5>
                   <p className="text-muted mt-2 mb-0">
-                    Interested in selling your surplus meals on SavedFeast? Fill out the form below to apply.
+                    Interested in selling your surplus meals on SavedFeast? Fill
+                    out the form below to apply.
                   </p>
                 </div>
                 <div className="card-body p-4">
                   {success && (
-                    <div className="alert alert-success border-0 shadow-sm" role="alert">
+                    <div
+                      className="alert alert-success border-0 shadow-sm"
+                      role="alert"
+                    >
                       <div className="d-flex align-items-center">
                         <i className="fas fa-check-circle fa-2x me-3"></i>
                         <div>
-                          <h6 className="alert-heading mb-1">Application Submitted!</h6>
+                          <h6 className="alert-heading mb-1">
+                            Application Submitted!
+                          </h6>
                           <p className="mb-0">{success}</p>
                         </div>
                       </div>
                     </div>
                   )}
                   {error && (
-                    <div className="alert alert-danger border-0 shadow-sm" role="alert">
+                    <div
+                      className="alert alert-danger border-0 shadow-sm"
+                      role="alert"
+                    >
                       <div className="d-flex align-items-center">
                         <i className="fas fa-exclamation-triangle fa-2x me-3"></i>
                         <div>
@@ -122,127 +134,127 @@ const RestaurantApplicationPage: React.FC = () => {
                     </div>
                   )}
 
-            {!success && ( // Hide form on success
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="restaurant_name" className="form-label">
-                    Restaurant Name
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="restaurant_name"
-                    value={restaurantName}
-                    onChange={e => setRestaurantName(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="address" className="form-label">
-                    Full Address
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="address"
-                    value={address}
-                    onChange={e => setAddress(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label htmlFor="contact_name" className="form-label">
-                      Contact Person Name
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="contact_name"
-                      value={contactName}
-                      onChange={e => setContactName(e.target.value)}
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <label htmlFor="contact_email" className="form-label">
-                      Contact Email
-                    </label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="contact_email"
-                      value={contactEmail}
-                      onChange={e => setContactEmail(e.target.value)}
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="contact_phone" className="form-label">
-                    Contact Phone
-                  </label>
-                  <input
-                    type="tel"
-                    className="form-control"
-                    id="contact_phone"
-                    value={contactPhone}
-                    onChange={e => setContactPhone(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="cuisine_type" className="form-label">
-                    Cuisine Type (e.g., Italian, Lebanese, Cafe)
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="cuisine_type"
-                    value={cuisineType}
-                    onChange={e => setCuisineType(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="description" className="form-label">
-                    Brief Description / Why you want to join
-                  </label>
-                  <textarea
-                    className="form-control"
-                    id="description"
-                    rows={3}
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    disabled={loading}
-                  ></textarea>
-                </div>
+                  {!success && ( // Hide form on success
+                    <form onSubmit={handleSubmit}>
+                      <div className="mb-3">
+                        <label htmlFor="restaurant_name" className="form-label">
+                          Restaurant Name
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="restaurant_name"
+                          value={restaurantName}
+                          onChange={e => setRestaurantName(e.target.value)}
+                          required
+                          disabled={loading}
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label htmlFor="address" className="form-label">
+                          Full Address
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="address"
+                          value={address}
+                          onChange={e => setAddress(e.target.value)}
+                          required
+                          disabled={loading}
+                        />
+                      </div>
+                      <div className="row">
+                        <div className="col-md-6 mb-3">
+                          <label htmlFor="contact_name" className="form-label">
+                            Contact Person Name
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="contact_name"
+                            value={contactName}
+                            onChange={e => setContactName(e.target.value)}
+                            required
+                            disabled={loading}
+                          />
+                        </div>
+                        <div className="col-md-6 mb-3">
+                          <label htmlFor="contact_email" className="form-label">
+                            Contact Email
+                          </label>
+                          <input
+                            type="email"
+                            className="form-control"
+                            id="contact_email"
+                            value={contactEmail}
+                            onChange={e => setContactEmail(e.target.value)}
+                            required
+                            disabled={loading}
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-3">
+                        <label htmlFor="contact_phone" className="form-label">
+                          Contact Phone
+                        </label>
+                        <input
+                          type="tel"
+                          className="form-control"
+                          id="contact_phone"
+                          value={contactPhone}
+                          onChange={e => setContactPhone(e.target.value)}
+                          required
+                          disabled={loading}
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label htmlFor="cuisine_type" className="form-label">
+                          Cuisine Type (e.g., Italian, Lebanese, Cafe)
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="cuisine_type"
+                          value={cuisineType}
+                          onChange={e => setCuisineType(e.target.value)}
+                          required
+                          disabled={loading}
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label htmlFor="description" className="form-label">
+                          Brief Description / Why you want to join
+                        </label>
+                        <textarea
+                          className="form-control"
+                          id="description"
+                          rows={3}
+                          value={description}
+                          onChange={e => setDescription(e.target.value)}
+                          disabled={loading}
+                        ></textarea>
+                      </div>
 
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <span
-                        className="spinner-border spinner-border-sm me-2"
-                        role="status"
-                        aria-hidden="true"
-                      ></span>
-                      Submitting Application...
-                    </>
-                  ) : (
-                    'Submit Application'
-                  )}
-                </button>
-              </form>
+                      <button
+                        type="submit"
+                        className="btn btn-primary w-100"
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <>
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              role="status"
+                              aria-hidden="true"
+                            ></span>
+                            Submitting Application...
+                          </>
+                        ) : (
+                          'Submit Application'
+                        )}
+                      </button>
+                    </form>
                   )}
                 </div>
               </div>

@@ -64,7 +64,7 @@ const renderWithAuthProvider = (component: React.ReactElement) => {
 describe('ProfilePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock successful API responses
     mockedAxios.get.mockImplementation((url: string) => {
       if (url === '/api/orders') {
@@ -88,16 +88,18 @@ describe('ProfilePage', () => {
 
   it('renders profile header with correct styling', async () => {
     renderWithAuthProvider(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('My Profile')).toBeInTheDocument();
-      expect(screen.getByText(/Manage your account settings/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Manage your account settings/)
+      ).toBeInTheDocument();
     });
   });
 
   it('displays user statistics cards', async () => {
     renderWithAuthProvider(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('1')).toBeInTheDocument(); // Orders completed
       expect(screen.getByText('Orders Completed')).toBeInTheDocument();
@@ -110,7 +112,7 @@ describe('ProfilePage', () => {
 
   it('shows profile information section', async () => {
     renderWithAuthProvider(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Profile Information')).toBeInTheDocument();
       expect(screen.getByText('John Doe')).toBeInTheDocument();
@@ -120,9 +122,11 @@ describe('ProfilePage', () => {
 
   it('shows change password section', async () => {
     renderWithAuthProvider(<ProfilePage />);
-    
+
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Change Password' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: 'Change Password' })
+      ).toBeInTheDocument();
       expect(screen.getByLabelText('Current Password')).toBeInTheDocument();
       expect(screen.getByLabelText('New Password')).toBeInTheDocument();
       expect(screen.getByLabelText('Confirm New Password')).toBeInTheDocument();
@@ -131,7 +135,7 @@ describe('ProfilePage', () => {
 
   it('shows impact visualization section', async () => {
     renderWithAuthProvider(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Your Impact')).toBeInTheDocument();
       expect(screen.getByTestId('bar-chart')).toBeInTheDocument();
@@ -140,36 +144,40 @@ describe('ProfilePage', () => {
 
   it('allows editing profile information', async () => {
     renderWithAuthProvider(<ProfilePage />);
-    
+
     await waitFor(() => {
       const editButton = screen.getByText('Edit Info');
       fireEvent.click(editButton);
-      
+
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('john.doe@example.com')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('john.doe@example.com')
+      ).toBeInTheDocument();
       expect(screen.getByText('Save Info')).toBeInTheDocument();
     });
   });
 
   it('shows loading state initially', () => {
     renderWithAuthProvider(<ProfilePage />);
-    
+
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   it('handles API errors gracefully', async () => {
     mockedAxios.get.mockRejectedValueOnce(new Error('API Error'));
-    
+
     renderWithAuthProvider(<ProfilePage />);
-    
+
     await waitFor(() => {
-      expect(screen.getByText(/An error occurred while fetching order history/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/An error occurred while fetching order history/)
+      ).toBeInTheDocument();
     });
   });
 
   it('calculates statistics correctly', async () => {
     renderWithAuthProvider(<ProfilePage />);
-    
+
     await waitFor(() => {
       // 2 items * (15.99 - 9.99) = 12.00 saved
       expect(screen.getByText('€12.00')).toBeInTheDocument();
@@ -180,7 +188,7 @@ describe('ProfilePage', () => {
 
   it('shows refresh button in header', async () => {
     renderWithAuthProvider(<ProfilePage />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Refresh')).toBeInTheDocument();
     });
@@ -188,13 +196,12 @@ describe('ProfilePage', () => {
 
   it('renders with proper card styling', async () => {
     renderWithAuthProvider(<ProfilePage />);
-    
+
     await waitFor(() => {
-      const cards = screen.getAllByRole('generic').filter(el => 
-        el.className.includes('card')
-      );
+      const cards = screen
+        .getAllByRole('generic')
+        .filter(el => el.className.includes('card'));
       expect(cards.length).toBeGreaterThan(0);
     });
   });
 });
-

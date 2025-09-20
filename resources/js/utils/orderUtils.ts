@@ -26,7 +26,11 @@ export const orderUtils = {
    * Check if an order is cancelled
    */
   isCancelled: (status: OrderStatus): boolean => {
-    return ['CANCELLED_BY_CUSTOMER', 'CANCELLED_BY_RESTAURANT', 'EXPIRED'].includes(status);
+    return [
+      'CANCELLED_BY_CUSTOMER',
+      'CANCELLED_BY_RESTAURANT',
+      'EXPIRED',
+    ].includes(status);
   },
 
   /**
@@ -138,12 +142,5 @@ export const orderUtils = {
       default:
         return 'fas fa-question-circle';
     }
-  }
+  },
 };
-
-
-
-
-
-
-

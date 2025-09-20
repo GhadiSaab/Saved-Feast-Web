@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import auth from '../auth';
-import { 
-  SettlementsSummary, 
-  RestaurantInvoice, 
-  PaginatedResponse
+import {
+  SettlementsSummary,
+  RestaurantInvoice,
+  PaginatedResponse,
 } from '../types/settlements';
 
 const ProviderSettlementsPage: React.FC = () => {
@@ -35,11 +35,14 @@ const ProviderSettlementsPage: React.FC = () => {
 
   const fetchInvoices = async (page = 1) => {
     try {
-      const response = await axios.get(`/api/provider/settlements/invoices?page=${page}`, {
-        headers: {
-          Authorization: `Bearer ${auth.getToken()}`,
-        },
-      });
+      const response = await axios.get(
+        `/api/provider/settlements/invoices?page=${page}`,
+        {
+          headers: {
+            Authorization: `Bearer ${auth.getToken()}`,
+          },
+        }
+      );
       const data = response.data.data as PaginatedResponse<RestaurantInvoice>;
       setInvoices(data.data);
       setCurrentPage(data.current_page);
@@ -131,7 +134,9 @@ const ProviderSettlementsPage: React.FC = () => {
                         <h6 className="card-title">Last Invoice</h6>
                         <h5 className="mb-0">
                           {summary.last_invoice_status ? (
-                            <span className={`badge ${getStatusBadge(summary.last_invoice_status)}`}>
+                            <span
+                              className={`badge ${getStatusBadge(summary.last_invoice_status)}`}
+                            >
                               {summary.last_invoice_status.toUpperCase()}
                             </span>
                           ) : (
@@ -155,7 +160,9 @@ const ProviderSettlementsPage: React.FC = () => {
                     <div className="d-flex justify-content-between">
                       <div>
                         <h6 className="card-title">Next Invoice</h6>
-                        <h5 className="mb-0">{formatDate(summary.next_invoice_date)}</h5>
+                        <h5 className="mb-0">
+                          {formatDate(summary.next_invoice_date)}
+                        </h5>
                         <small>Every Monday</small>
                       </div>
                       <div className="align-self-center">
@@ -182,7 +189,8 @@ const ProviderSettlementsPage: React.FC = () => {
                   <i className="fas fa-file-invoice fa-3x text-muted mb-3"></i>
                   <h5 className="text-muted">No invoices yet</h5>
                   <p className="text-muted">
-                    Invoices are generated weekly for completed cash-on-pickup orders.
+                    Invoices are generated weekly for completed cash-on-pickup
+                    orders.
                   </p>
                 </div>
               ) : (
@@ -201,13 +209,17 @@ const ProviderSettlementsPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {invoices.map((invoice) => (
+                        {invoices.map(invoice => (
                           <tr key={invoice.id}>
                             <td>
                               <div>
-                                <strong>{formatDate(invoice.period_start)}</strong>
+                                <strong>
+                                  {formatDate(invoice.period_start)}
+                                </strong>
                                 <br />
-                                <small className="text-muted">to {formatDate(invoice.period_end)}</small>
+                                <small className="text-muted">
+                                  to {formatDate(invoice.period_end)}
+                                </small>
                               </div>
                             </td>
                             <td>
@@ -226,7 +238,9 @@ const ProviderSettlementsPage: React.FC = () => {
                               </div>
                             </td>
                             <td>
-                              <span className={`badge ${getStatusBadge(invoice.status)}`}>
+                              <span
+                                className={`badge ${getStatusBadge(invoice.status)}`}
+                              >
                                 {invoice.status.toUpperCase()}
                               </span>
                             </td>
@@ -235,7 +249,12 @@ const ProviderSettlementsPage: React.FC = () => {
                               <div className="btn-group" role="group">
                                 <button
                                   className="btn btn-outline-primary btn-sm"
-                                  onClick={() => window.open(`/api/provider/settlements/invoices/${invoice.id}`, '_blank')}
+                                  onClick={() =>
+                                    window.open(
+                                      `/api/provider/settlements/invoices/${invoice.id}`,
+                                      '_blank'
+                                    )
+                                  }
                                   title="View Details"
                                 >
                                   <i className="fas fa-eye"></i>
@@ -243,7 +262,12 @@ const ProviderSettlementsPage: React.FC = () => {
                                 {invoice.pdf_path && (
                                   <button
                                     className="btn btn-outline-success btn-sm"
-                                    onClick={() => window.open(`/api/provider/settlements/invoices/${invoice.id}/download`, '_blank')}
+                                    onClick={() =>
+                                      window.open(
+                                        `/api/provider/settlements/invoices/${invoice.id}/download`,
+                                        '_blank'
+                                      )
+                                    }
                                     title="Download PDF"
                                   >
                                     <i className="fas fa-download"></i>
@@ -261,7 +285,9 @@ const ProviderSettlementsPage: React.FC = () => {
                   {totalPages > 1 && (
                     <nav aria-label="Invoice pagination">
                       <ul className="pagination justify-content-center">
-                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                        <li
+                          className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}
+                        >
                           <button
                             className="page-link"
                             onClick={() => handlePageChange(currentPage - 1)}
@@ -270,8 +296,14 @@ const ProviderSettlementsPage: React.FC = () => {
                             Previous
                           </button>
                         </li>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
+                        {Array.from(
+                          { length: totalPages },
+                          (_, i) => i + 1
+                        ).map(page => (
+                          <li
+                            key={page}
+                            className={`page-item ${currentPage === page ? 'active' : ''}`}
+                          >
                             <button
                               className="page-link"
                               onClick={() => handlePageChange(page)}
@@ -280,7 +312,9 @@ const ProviderSettlementsPage: React.FC = () => {
                             </button>
                           </li>
                         ))}
-                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                        <li
+                          className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}
+                        >
                           <button
                             className="page-link"
                             onClick={() => handlePageChange(currentPage + 1)}

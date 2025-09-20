@@ -17,7 +17,9 @@ const CheckoutPage: React.FC = () => {
   const navigate = useNavigate(); // Hook for navigation
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'CASH_ON_PICKUP' | 'ONLINE'>('CASH_ON_PICKUP');
+  const [paymentMethod, setPaymentMethod] = useState<
+    'CASH_ON_PICKUP' | 'ONLINE'
+  >('CASH_ON_PICKUP');
 
   // Function to handle placing the order
   const handlePlaceOrder = async () => {
@@ -191,15 +193,24 @@ const CheckoutPage: React.FC = () => {
                         id="cashOnPickup"
                         value="CASH_ON_PICKUP"
                         checked={paymentMethod === 'CASH_ON_PICKUP'}
-                        onChange={(e) => setPaymentMethod(e.target.value as 'CASH_ON_PICKUP' | 'ONLINE')}
+                        onChange={e =>
+                          setPaymentMethod(
+                            e.target.value as 'CASH_ON_PICKUP' | 'ONLINE'
+                          )
+                        }
                       />
-                      <label className="form-check-label" htmlFor="cashOnPickup">
+                      <label
+                        className="form-check-label"
+                        htmlFor="cashOnPickup"
+                      >
                         <div className="d-flex align-items-center">
                           <i className="fas fa-money-bill-wave text-success me-2"></i>
                           <div>
                             <strong>Cash on Pickup</strong>
                             <br />
-                            <small className="text-muted">Pay when you collect your order</small>
+                            <small className="text-muted">
+                              Pay when you collect your order
+                            </small>
                           </div>
                         </div>
                       </label>
@@ -214,10 +225,17 @@ const CheckoutPage: React.FC = () => {
                         id="onlinePayment"
                         value="ONLINE"
                         checked={paymentMethod === 'ONLINE'}
-                        onChange={(e) => setPaymentMethod(e.target.value as 'CASH_ON_PICKUP' | 'ONLINE')}
+                        onChange={e =>
+                          setPaymentMethod(
+                            e.target.value as 'CASH_ON_PICKUP' | 'ONLINE'
+                          )
+                        }
                         disabled
                       />
-                      <label className="form-check-label text-muted" htmlFor="onlinePayment">
+                      <label
+                        className="form-check-label text-muted"
+                        htmlFor="onlinePayment"
+                      >
                         <div className="d-flex align-items-center">
                           <i className="fas fa-credit-card text-muted me-2"></i>
                           <div>
@@ -234,8 +252,9 @@ const CheckoutPage: React.FC = () => {
                 {paymentMethod === 'CASH_ON_PICKUP' && (
                   <div className="alert alert-info mt-3">
                     <i className="fas fa-info-circle me-2"></i>
-                    <strong>Cash on Pickup:</strong> You'll pay for your order when you collect it from the restaurant. 
-                    This helps reduce food waste and saves you money!
+                    <strong>Cash on Pickup:</strong> You'll pay for your order
+                    when you collect it from the restaurant. This helps reduce
+                    food waste and saves you money!
                   </div>
                 )}
               </div>

@@ -1,5 +1,5 @@
 // resources/js/components/MealCard.tsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useCart } from '../context/CartContext'; // Import the useCart hook
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import auth from '../auth'; // Import the auth helper
@@ -35,17 +35,27 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [buttonScale, setButtonScale] = useState(1);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const timeoutRefs = useRef<number[]>([]);
+
+  // Cleanup function to clear all timeouts
+  useEffect(() => {
+    return () => {
+      timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
+    };
+  }, []);
 
   const animateButton = () => {
     setButtonScale(0.95);
-    setTimeout(() => setButtonScale(1), 150);
+    const timeout = setTimeout(() => setButtonScale(1), 150);
+    timeoutRefs.current.push(timeout);
   };
 
   const showSuccessFeedback = () => {
     setShowSuccess(true);
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       setShowSuccess(false);
     }, 1500);
+    timeoutRefs.current.push(timeout);
   };
 
   const handleAddToCart = () => {
@@ -100,9 +110,11 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
   };
 
   // Construct the full image URL if the path is relative
-  const imageUrl = meal.image ? 
-    (meal.image.startsWith('http') ? meal.image : `${window.location.origin}${meal.image}`) : 
-    null;
+  const imageUrl = meal.image
+    ? meal.image.startsWith('http')
+      ? meal.image
+      : `${window.location.origin}${meal.image}`
+    : null;
 
   const savingsPercentage = calculateSavings();
 
@@ -130,7 +142,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                 alt={meal.title}
                 className="card-img-top"
                 style={{ height: '150px', objectFit: 'cover' }}
-                onError={(e) => {
+                onError={e => {
                   // Fallback to placeholder if image fails to load
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
@@ -237,7 +249,8 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                       </span>
                     </div>
                     <small className="text-success fw-bold">
-                      Save €{(meal.original_price - meal.current_price).toFixed(2)}
+                      Save €
+                      {(meal.original_price - meal.current_price).toFixed(2)}
                     </small>
                   </div>
                 ) : (
@@ -314,15 +327,14 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
               <div className="modal-image-section">
                 <div className="meal-image-container">
                   {imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt={meal.title}
-                    />
+                    <img src={imageUrl} alt={meal.title} />
                   ) : (
                     <div className="image-placeholder">
                       <div className="placeholder-content">
                         <i className="fas fa-utensils placeholder-icon"></i>
-                        <div className="placeholder-text">No image available</div>
+                        <div className="placeholder-text">
+                          No image available
+                        </div>
                       </div>
                     </div>
                   )}
@@ -334,7 +346,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                 <div className="meal-header">
                   <h1 className="meal-title">{meal.title}</h1>
                   <p className="meal-description">{meal.description}</p>
-                  
+
                   <div className="meal-meta">
                     {meal.restaurant && (
                       <div className="meta-item">
@@ -345,7 +357,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="meta-item">
                       <i className="fas fa-clock meta-icon"></i>
                       <div className="meta-text">
@@ -370,7 +382,8 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                   <div className="price-section">
                     <div className="price-label">Price</div>
                     <div className="price-display">
-                      {meal.original_price && meal.original_price > meal.current_price ? (
+                      {meal.original_price &&
+                      meal.original_price > meal.current_price ? (
                         <>
                           <div className="current-price">
                             €{meal.current_price.toFixed(2)}
@@ -379,7 +392,11 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                             €{meal.original_price.toFixed(2)}
                           </div>
                           <div className="savings">
-                            Save €{(meal.original_price - meal.current_price).toFixed(2)} ({savingsPercentage}% OFF)
+                            Save €
+                            {(meal.original_price - meal.current_price).toFixed(
+                              2
+                            )}{' '}
+                            ({savingsPercentage}% OFF)
                           </div>
                         </>
                       ) : (

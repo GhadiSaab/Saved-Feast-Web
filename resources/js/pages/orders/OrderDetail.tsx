@@ -40,35 +40,43 @@ const OrderDetail: React.FC = () => {
     isLoading: false,
   });
 
-  const fetchOrder = useCallback(async (force: boolean = false) => {
-    if (!id) return;
+  const fetchOrder = useCallback(
+    async (force: boolean = false) => {
+      if (!id) return;
 
-    const now = Date.now();
-    
-    // Rate limiting: prevent calls if we're already fetching or within cooldown period
-    if (!force && (isFetching.current || (now - lastFetchTime.current < FETCH_COOLDOWN))) {
-      return;
-    }
+      const now = Date.now();
 
-    try {
-      isFetching.current = true;
-      lastFetchTime.current = now;
-      setLoading(true);
-      setError(null);
-      
-      const response = await orderApi.getOrder(id);
-      if (response.success) {
-        setOrder(response.data);
-      } else {
-        setError('Failed to fetch order details');
+      // Rate limiting: prevent calls if we're already fetching or within cooldown period
+      if (
+        !force &&
+        (isFetching.current || now - lastFetchTime.current < FETCH_COOLDOWN)
+      ) {
+        return;
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch order details');
-    } finally {
-      setLoading(false);
-      isFetching.current = false;
-    }
-  }, [id, FETCH_COOLDOWN]);
+
+      try {
+        isFetching.current = true;
+        lastFetchTime.current = now;
+        setLoading(true);
+        setError(null);
+
+        const response = await orderApi.getOrder(id);
+        if (response.success) {
+          setOrder(response.data);
+        } else {
+          setError('Failed to fetch order details');
+        }
+      } catch (err: any) {
+        setError(
+          err.response?.data?.message || 'Failed to fetch order details'
+        );
+      } finally {
+        setLoading(false);
+        isFetching.current = false;
+      }
+    },
+    [id, FETCH_COOLDOWN]
+  );
 
   useEffect(() => {
     fetchOrder(true); // Force initial load
@@ -104,13 +112,13 @@ const OrderDetail: React.FC = () => {
       if (response.success) {
         const expiresAt = new Date();
         expiresAt.setMinutes(expiresAt.getMinutes() + 5); // 5 minutes from now
-        
+
         setClaimDialog({
           isOpen: true,
           order,
           isLoading: false,
           code: response.data.code,
-          expiresAt
+          expiresAt,
         });
       } else {
         setError('Failed to generate claim code');
@@ -127,7 +135,7 @@ const OrderDetail: React.FC = () => {
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -141,7 +149,11 @@ const OrderDetail: React.FC = () => {
         <div className="row">
           <div className="col-12">
             <div className="text-center py-5">
-              <div className="spinner-border text-primary mb-3" style={{width: '3rem', height: '3rem'}} role="status">
+              <div
+                className="spinner-border text-primary mb-3"
+                style={{ width: '3rem', height: '3rem' }}
+                role="status"
+              >
                 <span className="visually-hidden">Loading...</span>
               </div>
               <h5 className="text-muted">Loading order details...</h5>
@@ -190,7 +202,9 @@ const OrderDetail: React.FC = () => {
                   <i className="fas fa-receipt me-3"></i>
                   Order #{order.id}
                 </h1>
-                <p className="mb-0 opacity-75">Order details and tracking information</p>
+                <p className="mb-0 opacity-75">
+                  Order details and tracking information
+                </p>
               </div>
               <div className="col-md-4 text-md-end">
                 <Link to="/orders" className="btn btn-light btn-lg">
@@ -203,7 +217,10 @@ const OrderDetail: React.FC = () => {
 
           {/* Error State */}
           {error && (
-            <div className="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+            <div
+              className="alert alert-danger border-0 shadow-sm mb-4"
+              role="alert"
+            >
               <div className="d-flex align-items-center">
                 <i className="fas fa-exclamation-triangle fa-2x me-3"></i>
                 <div>
@@ -240,7 +257,9 @@ const OrderDetail: React.FC = () => {
                       <h6 className="text-muted fw-semibold">Total Amount</h6>
                       <p className="mb-0">
                         <i className="fas fa-dollar-sign me-2"></i>
-                        <strong className="text-primary">{formatCurrency(order.total_amount)}</strong>
+                        <strong className="text-primary">
+                          {formatCurrency(order.total_amount)}
+                        </strong>
                       </p>
                     </div>
                   </div>
@@ -248,14 +267,18 @@ const OrderDetail: React.FC = () => {
                   {order.pickup_window_start && order.pickup_window_end && (
                     <div className="row">
                       <div className="col-md-6 mb-3">
-                        <h6 className="text-muted fw-semibold">Pickup Window Start</h6>
+                        <h6 className="text-muted fw-semibold">
+                          Pickup Window Start
+                        </h6>
                         <p className="mb-0">
                           <i className="fas fa-clock me-2"></i>
                           {formatDate(order.pickup_window_start)}
                         </p>
                       </div>
                       <div className="col-md-6 mb-3">
-                        <h6 className="text-muted fw-semibold">Pickup Window End</h6>
+                        <h6 className="text-muted fw-semibold">
+                          Pickup Window End
+                        </h6>
                         <p className="mb-0">
                           <i className="fas fa-clock me-2"></i>
                           {formatDate(order.pickup_window_end)}
@@ -270,10 +293,15 @@ const OrderDetail: React.FC = () => {
                       <i className="fas fa-list me-2"></i>
                       Order Items
                     </h6>
-                    {order.order_items.map((item) => (
-                      <div key={item.id} className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                    {order.order_items.map(item => (
+                      <div
+                        key={item.id}
+                        className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded"
+                      >
                         <div>
-                          <span className="fw-medium text-dark">{item.quantity}x {item.meal.title}</span>
+                          <span className="fw-medium text-dark">
+                            {item.quantity}x {item.meal.title}
+                          </span>
                           <br />
                           <small className="text-muted">
                             <i className="fas fa-store me-1"></i>
@@ -281,7 +309,12 @@ const OrderDetail: React.FC = () => {
                           </small>
                         </div>
                         <span className="text-end">
-                          <strong className="text-primary">${(item.quantity * parseFloat(item.price)).toFixed(2)}</strong>
+                          <strong className="text-primary">
+                            $
+                            {(item.quantity * parseFloat(item.price)).toFixed(
+                              2
+                            )}
+                          </strong>
                         </span>
                       </div>
                     ))}
@@ -306,7 +339,7 @@ const OrderDetail: React.FC = () => {
                         <i className="fas fa-clock me-2"></i>
                         Pickup Window
                       </h6>
-                      <Countdown 
+                      <Countdown
                         targetDate={order.pickup_window_end}
                         onExpire={() => fetchOrder(false)}
                       />
@@ -327,11 +360,13 @@ const OrderDetail: React.FC = () => {
                     {orderUtils.canCancel(order.status) && (
                       <button
                         className="btn btn-outline-danger"
-                        onClick={() => setCancelDialog({
-                          isOpen: true,
-                          order,
-                          isLoading: false
-                        })}
+                        onClick={() =>
+                          setCancelDialog({
+                            isOpen: true,
+                            order,
+                            isLoading: false,
+                          })
+                        }
                       >
                         <i className="fas fa-times me-2"></i>
                         Cancel Order
@@ -354,11 +389,13 @@ const OrderDetail: React.FC = () => {
         isOpen={cancelDialog.isOpen}
         order={cancelDialog.order}
         isLoading={cancelDialog.isLoading}
-        onClose={() => setCancelDialog({
-          isOpen: false,
-          order: null,
-          isLoading: false
-        })}
+        onClose={() =>
+          setCancelDialog({
+            isOpen: false,
+            order: null,
+            isLoading: false,
+          })
+        }
         onConfirm={handleCancelOrder}
       />
 
@@ -368,11 +405,13 @@ const OrderDetail: React.FC = () => {
         isLoading={claimDialog.isLoading}
         code={claimDialog.code}
         expiresAt={claimDialog.expiresAt}
-        onClose={() => setClaimDialog({
-          isOpen: false,
-          order: null,
-          isLoading: false
-        })}
+        onClose={() =>
+          setClaimDialog({
+            isOpen: false,
+            order: null,
+            isLoading: false,
+          })
+        }
       />
     </div>
   );

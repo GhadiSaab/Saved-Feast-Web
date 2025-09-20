@@ -1,5 +1,5 @@
 // Order status types
-export type OrderStatus = 
+export type OrderStatus =
   | 'PENDING'
   | 'ACCEPTED'
   | 'READY_FOR_PICKUP'
@@ -57,7 +57,7 @@ export interface Order {
   commission_amount?: string;
   completed_at?: string;
   invoiced_at?: string;
-  
+
   // New tracking fields
   pickup_window_start?: string;
   pickup_window_end?: string;
@@ -70,11 +70,11 @@ export interface Order {
   pickup_code_encrypted?: string;
   pickup_code_attempts: number;
   pickup_code_last_sent_at?: string;
-  
+
   // Computed fields
   pickup_code_masked?: string;
   can_show_code?: boolean;
-  
+
   // Relationships
   order_items: OrderItem[];
   events: OrderEvent[];
@@ -84,7 +84,7 @@ export interface Order {
     email: string;
     phone?: string;
   };
-  
+
   // Timestamps
   created_at: string;
   updated_at: string;
@@ -155,7 +155,12 @@ export interface CancelOrderByRestaurantRequest {
 
 // Filter interfaces
 export interface OrderFilters {
-  status?: OrderStatus | OrderStatus[] | 'in_progress' | 'completed' | 'cancelled';
+  status?:
+    | OrderStatus
+    | OrderStatus[]
+    | 'in_progress'
+    | 'completed'
+    | 'cancelled';
   date_from?: string;
   date_to?: string;
   per_page?: number;

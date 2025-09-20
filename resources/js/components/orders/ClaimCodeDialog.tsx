@@ -50,7 +50,10 @@ const ClaimCodeDialog: React.FC<ClaimCodeDialogProps> = ({
   if (!isOpen || !order) return null;
 
   return (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div
+      className="modal show d-block"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+    >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content border-0 shadow-lg">
           <div className="modal-header bg-success text-white border-0">
@@ -65,7 +68,7 @@ const ClaimCodeDialog: React.FC<ClaimCodeDialogProps> = ({
               disabled={isLoading}
             ></button>
           </div>
-          
+
           <div className="modal-body text-center p-4">
             {isLoading ? (
               <div className="py-4">
@@ -77,20 +80,22 @@ const ClaimCodeDialog: React.FC<ClaimCodeDialogProps> = ({
             ) : code ? (
               <div>
                 <div className="mb-4">
-                  <h6 className="text-muted mb-3">Show this code to the restaurant to claim your order:</h6>
+                  <h6 className="text-muted mb-3">
+                    Show this code to the restaurant to claim your order:
+                  </h6>
                   <div className="bg-light rounded-3 p-4 mb-3">
                     <h1 className="display-4 fw-bold text-success mb-0 font-monospace">
                       {code}
                     </h1>
                   </div>
-                  
+
                   {timeLeft > 0 && (
                     <div className="alert alert-warning border-0">
                       <i className="fas fa-clock me-2"></i>
                       <strong>Code expires in: {formatTime(timeLeft)}</strong>
                     </div>
                   )}
-                  
+
                   {timeLeft === 0 && (
                     <div className="alert alert-danger border-0">
                       <i className="fas fa-exclamation-triangle me-2"></i>
@@ -114,7 +119,7 @@ const ClaimCodeDialog: React.FC<ClaimCodeDialogProps> = ({
               </div>
             ) : null}
           </div>
-          
+
           <div className="modal-footer border-0">
             <button
               type="button"
@@ -132,10 +137,3 @@ const ClaimCodeDialog: React.FC<ClaimCodeDialogProps> = ({
 };
 
 export default ClaimCodeDialog;
-
-
-
-
-
-
-

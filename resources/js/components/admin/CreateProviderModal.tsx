@@ -16,7 +16,7 @@ interface ProviderFormData {
   address: string;
   password: string;
   password_confirmation: string;
-  
+
   // Restaurant data
   restaurant_name: string;
   restaurant_description: string;
@@ -55,14 +55,16 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string[]>>({});
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
-    
+
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({
@@ -79,7 +81,7 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
 
     try {
       const response = await axios.post('/api/admin/providers', formData);
-      
+
       if (response.data.status) {
         onSuccess();
         onClose();
@@ -106,7 +108,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
       } else {
-        setErrors({ general: [error.response?.data?.message || 'An error occurred'] });
+        setErrors({
+          general: [error.response?.data?.message || 'An error occurred'],
+        });
       }
     } finally {
       setLoading(false);
@@ -116,7 +120,10 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div
+      className="modal fade show d-block"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+    >
       <div className="modal-dialog modal-lg">
         <div className="modal-content">
           <div className="modal-header">
@@ -128,7 +135,7 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
               disabled={loading}
             ></button>
           </div>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="modal-body">
               {errors.general && (
@@ -143,9 +150,11 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 <div className="col-12">
                   <h6 className="text-primary mb-3">User Information</h6>
                 </div>
-                
+
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="first_name" className="form-label">First Name *</label>
+                  <label htmlFor="first_name" className="form-label">
+                    First Name *
+                  </label>
                   <input
                     type="text"
                     className={`form-control ${errors.first_name ? 'is-invalid' : ''}`}
@@ -165,7 +174,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="last_name" className="form-label">Last Name *</label>
+                  <label htmlFor="last_name" className="form-label">
+                    Last Name *
+                  </label>
                   <input
                     type="text"
                     className={`form-control ${errors.last_name ? 'is-invalid' : ''}`}
@@ -185,7 +196,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="email" className="form-label">Email *</label>
+                  <label htmlFor="email" className="form-label">
+                    Email *
+                  </label>
                   <input
                     type="email"
                     className={`form-control ${errors.email ? 'is-invalid' : ''}`}
@@ -205,7 +218,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="phone" className="form-label">Phone *</label>
+                  <label htmlFor="phone" className="form-label">
+                    Phone *
+                  </label>
                   <input
                     type="tel"
                     className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
@@ -225,7 +240,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-12 mb-3">
-                  <label htmlFor="address" className="form-label">Address *</label>
+                  <label htmlFor="address" className="form-label">
+                    Address *
+                  </label>
                   <textarea
                     className={`form-control ${errors.address ? 'is-invalid' : ''}`}
                     id="address"
@@ -245,7 +262,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="password" className="form-label">Password *</label>
+                  <label htmlFor="password" className="form-label">
+                    Password *
+                  </label>
                   <input
                     type="password"
                     className={`form-control ${errors.password ? 'is-invalid' : ''}`}
@@ -266,7 +285,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="password_confirmation" className="form-label">Confirm Password *</label>
+                  <label htmlFor="password_confirmation" className="form-label">
+                    Confirm Password *
+                  </label>
                   <input
                     type="password"
                     className={`form-control ${errors.password_confirmation ? 'is-invalid' : ''}`}
@@ -294,7 +315,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-12 mb-3">
-                  <label htmlFor="restaurant_name" className="form-label">Restaurant Name *</label>
+                  <label htmlFor="restaurant_name" className="form-label">
+                    Restaurant Name *
+                  </label>
                   <input
                     type="text"
                     className={`form-control ${errors.restaurant_name ? 'is-invalid' : ''}`}
@@ -314,7 +337,12 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-12 mb-3">
-                  <label htmlFor="restaurant_description" className="form-label">Description</label>
+                  <label
+                    htmlFor="restaurant_description"
+                    className="form-label"
+                  >
+                    Description
+                  </label>
                   <textarea
                     className={`form-control ${errors.restaurant_description ? 'is-invalid' : ''}`}
                     id="restaurant_description"
@@ -333,7 +361,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-12 mb-3">
-                  <label htmlFor="restaurant_address" className="form-label">Restaurant Address *</label>
+                  <label htmlFor="restaurant_address" className="form-label">
+                    Restaurant Address *
+                  </label>
                   <textarea
                     className={`form-control ${errors.restaurant_address ? 'is-invalid' : ''}`}
                     id="restaurant_address"
@@ -353,7 +383,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="restaurant_phone" className="form-label">Restaurant Phone</label>
+                  <label htmlFor="restaurant_phone" className="form-label">
+                    Restaurant Phone
+                  </label>
                   <input
                     type="tel"
                     className={`form-control ${errors.restaurant_phone ? 'is-invalid' : ''}`}
@@ -372,7 +404,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="restaurant_email" className="form-label">Restaurant Email *</label>
+                  <label htmlFor="restaurant_email" className="form-label">
+                    Restaurant Email *
+                  </label>
                   <input
                     type="email"
                     className={`form-control ${errors.restaurant_email ? 'is-invalid' : ''}`}
@@ -392,7 +426,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="restaurant_website" className="form-label">Website</label>
+                  <label htmlFor="restaurant_website" className="form-label">
+                    Website
+                  </label>
                   <input
                     type="url"
                     className={`form-control ${errors.restaurant_website ? 'is-invalid' : ''}`}
@@ -412,7 +448,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="cuisine_type" className="form-label">Cuisine Type</label>
+                  <label htmlFor="cuisine_type" className="form-label">
+                    Cuisine Type
+                  </label>
                   <input
                     type="text"
                     className={`form-control ${errors.cuisine_type ? 'is-invalid' : ''}`}
@@ -432,7 +470,9 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
                 </div>
 
                 <div className="col-md-6 mb-3">
-                  <label htmlFor="delivery_radius" className="form-label">Delivery Radius (km)</label>
+                  <label htmlFor="delivery_radius" className="form-label">
+                    Delivery Radius (km)
+                  </label>
                   <input
                     type="number"
                     className={`form-control ${errors.delivery_radius ? 'is-invalid' : ''}`}
@@ -471,7 +511,11 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
               >
                 {loading ? (
                   <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
                     Creating...
                   </>
                 ) : (
@@ -487,5 +531,3 @@ const CreateProviderModal: React.FC<CreateProviderModalProps> = ({
 };
 
 export default CreateProviderModal;
-
-

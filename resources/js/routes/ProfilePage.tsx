@@ -373,12 +373,14 @@ const ProfilePage: React.FC = () => {
                   <i className="fas fa-user me-3"></i>
                   My Profile
                 </h1>
-                <p className="mb-0 opacity-75">Manage your account settings and view your impact</p>
+                <p className="mb-0 opacity-75">
+                  Manage your account settings and view your impact
+                </p>
               </div>
               <div className="col-md-4 text-md-end">
                 <div className="d-flex justify-content-md-end gap-2">
-                  <button 
-                    className="btn btn-light btn-sm" 
+                  <button
+                    className="btn btn-light btn-sm"
                     onClick={() => window.location.reload()}
                   >
                     <i className="fas fa-sync-alt me-1"></i>
@@ -391,7 +393,10 @@ const ProfilePage: React.FC = () => {
 
           {/* Error State */}
           {error && (
-            <div className="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+            <div
+              className="alert alert-danger border-0 shadow-sm mb-4"
+              role="alert"
+            >
               <div className="d-flex align-items-center">
                 <i className="fas fa-exclamation-triangle fa-2x me-3"></i>
                 <div>
@@ -410,7 +415,9 @@ const ProfilePage: React.FC = () => {
                   <div className="text-primary mb-2">
                     <i className="fas fa-shopping-bag fa-2x"></i>
                   </div>
-                  <h4 className="fw-bold text-primary">{completedOrders.length}</h4>
+                  <h4 className="fw-bold text-primary">
+                    {completedOrders.length}
+                  </h4>
                   <p className="text-muted mb-0">Orders Completed</p>
                 </div>
               </div>
@@ -432,7 +439,9 @@ const ProfilePage: React.FC = () => {
                   <div className="text-warning mb-2">
                     <i className="fas fa-euro-sign fa-2x"></i>
                   </div>
-                  <h4 className="fw-bold text-warning">€{totalMoneySaved.toFixed(2)}</h4>
+                  <h4 className="fw-bold text-warning">
+                    €{totalMoneySaved.toFixed(2)}
+                  </h4>
                   <p className="text-muted mb-0">Money Saved</p>
                 </div>
               </div>
@@ -457,57 +466,57 @@ const ProfilePage: React.FC = () => {
                     {isEditingInfo ? 'Cancel' : 'Edit Info'}
                   </button>
                 </div>
-            <div className="card-body">
-              {isEditingInfo ? (
-                <form onSubmit={handleInfoSave}>
-                  <div className="mb-3">
-                    <label htmlFor="profileName" className="form-label">
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="profileName"
-                      value={name}
-                      onChange={e => setName(e.target.value)}
-                      required
-                      disabled={isSaving}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="profileEmail" className="form-label">
-                      Email address
-                    </label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="profileEmail"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      required
-                      disabled={isSaving} // Consider if email should be editable
-                    />
-                  </div>
-                  {/* Add other editable fields here if needed */}
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={isSaving}
-                  >
-                    {isSaving ? 'Saving...' : 'Save Info'}
-                  </button>
-                </form>
-              ) : (
-                <>
-                  <h5 className="card-title">{profile.name}</h5>
-                  <p className="card-text">
-                    <strong>Email:</strong> {profile.email}
-                  </p>
-                  {/* Display other non-editable profile fields here */}
-                </>
-              )}
-            </div>
-          </div>
+                <div className="card-body">
+                  {isEditingInfo ? (
+                    <form onSubmit={handleInfoSave}>
+                      <div className="mb-3">
+                        <label htmlFor="profileName" className="form-label">
+                          Name
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="profileName"
+                          value={name}
+                          onChange={e => setName(e.target.value)}
+                          required
+                          disabled={isSaving}
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label htmlFor="profileEmail" className="form-label">
+                          Email address
+                        </label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          id="profileEmail"
+                          value={email}
+                          onChange={e => setEmail(e.target.value)}
+                          required
+                          disabled={isSaving} // Consider if email should be editable
+                        />
+                      </div>
+                      {/* Add other editable fields here if needed */}
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={isSaving}
+                      >
+                        {isSaving ? 'Saving...' : 'Save Info'}
+                      </button>
+                    </form>
+                  ) : (
+                    <>
+                      <h5 className="card-title">{profile.name}</h5>
+                      <p className="card-text">
+                        <strong>Email:</strong> {profile.email}
+                      </p>
+                      {/* Display other non-editable profile fields here */}
+                    </>
+                  )}
+                </div>
+              </div>
 
               {/* Change Password Card */}
               <div className="card border-0 shadow-sm">
@@ -517,65 +526,67 @@ const ProfilePage: React.FC = () => {
                     Change Password
                   </h5>
                 </div>
-            <div className="card-body">
-              <form onSubmit={handlePasswordChange}>
-                <div className="mb-3">
-                  <label htmlFor="currentPassword">Current Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="currentPassword"
-                    value={currentPassword}
-                    onChange={e => setCurrentPassword(e.target.value)}
-                    required
-                    disabled={isChangingPassword}
-                  />
+                <div className="card-body">
+                  <form onSubmit={handlePasswordChange}>
+                    <div className="mb-3">
+                      <label htmlFor="currentPassword">Current Password</label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        id="currentPassword"
+                        value={currentPassword}
+                        onChange={e => setCurrentPassword(e.target.value)}
+                        required
+                        disabled={isChangingPassword}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="newPassword">New Password</label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        id="newPassword"
+                        value={newPassword}
+                        onChange={e => setNewPassword(e.target.value)}
+                        required
+                        disabled={isChangingPassword}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="confirmPassword">
+                        Confirm New Password
+                      </label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        id="confirmPassword"
+                        value={confirmPassword}
+                        onChange={e => setConfirmPassword(e.target.value)}
+                        required
+                        disabled={isChangingPassword}
+                      />
+                    </div>
+                    {passwordChangeError && (
+                      <div className="alert alert-danger">
+                        {passwordChangeError}
+                      </div>
+                    )}
+                    {passwordChangeSuccess && (
+                      <div className="alert alert-success">
+                        {passwordChangeSuccess}
+                      </div>
+                    )}
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={isChangingPassword}
+                    >
+                      {isChangingPassword ? 'Changing...' : 'Change Password'}
+                    </button>
+                  </form>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="newPassword">New Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="newPassword"
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                    required
-                    disabled={isChangingPassword}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="confirmPassword">Confirm New Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="confirmPassword"
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
-                    required
-                    disabled={isChangingPassword}
-                  />
-                </div>
-                {passwordChangeError && (
-                  <div className="alert alert-danger">
-                    {passwordChangeError}
-                  </div>
-                )}
-                {passwordChangeSuccess && (
-                  <div className="alert alert-success">
-                    {passwordChangeSuccess}
-                  </div>
-                )}
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={isChangingPassword}
-                >
-                  {isChangingPassword ? 'Changing...' : 'Change Password'}
-                </button>
-              </form>
+              </div>
             </div>
-          </div>
-        </div>
 
             {/* Column 2: Statistics & Graphs */}
             <div className="col-md-6">
@@ -588,41 +599,41 @@ const ProfilePage: React.FC = () => {
                 </div>
                 <div className="card-body">
                   <h6 className="text-muted mb-3">Visualizations</h6>
-              {/* Add Charts Here */}
-              {completedOrders.length > 0 ? (
-                <Bar
-                  options={{
-                    responsive: true,
-                    plugins: {
-                      legend: { display: false },
-                      title: { display: true, text: 'Savings Overview' },
-                    },
-                    scales: { y: { beginAtZero: true } },
-                  }}
-                  data={{
-                    labels: ['Food Items Saved', 'Money Saved (€)'],
-                    datasets: [
-                      {
-                        label: 'Value',
-                        data: [totalFoodSaved, totalMoneySaved],
-                        backgroundColor: [
-                          'rgba(75, 192, 192, 0.6)',
-                          'rgba(54, 162, 235, 0.6)',
+                  {/* Add Charts Here */}
+                  {completedOrders.length > 0 ? (
+                    <Bar
+                      options={{
+                        responsive: true,
+                        plugins: {
+                          legend: { display: false },
+                          title: { display: true, text: 'Savings Overview' },
+                        },
+                        scales: { y: { beginAtZero: true } },
+                      }}
+                      data={{
+                        labels: ['Food Items Saved', 'Money Saved (€)'],
+                        datasets: [
+                          {
+                            label: 'Value',
+                            data: [totalFoodSaved, totalMoneySaved],
+                            backgroundColor: [
+                              'rgba(75, 192, 192, 0.6)',
+                              'rgba(54, 162, 235, 0.6)',
+                            ],
+                            borderColor: [
+                              'rgba(75, 192, 192, 1)',
+                              'rgba(54, 162, 235, 1)',
+                            ],
+                            borderWidth: 1,
+                          },
                         ],
-                        borderColor: [
-                          'rgba(75, 192, 192, 1)',
-                          'rgba(54, 162, 235, 1)',
-                        ],
-                        borderWidth: 1,
-                      },
-                    ],
-                  }}
-                />
-              ) : (
-                <p className="text-center text-muted">
-                  No completed orders to display statistics.
-                </p>
-                )}
+                      }}
+                    />
+                  ) : (
+                    <p className="text-center text-muted">
+                      No completed orders to display statistics.
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

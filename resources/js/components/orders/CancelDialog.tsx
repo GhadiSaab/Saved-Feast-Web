@@ -33,7 +33,10 @@ const CancelDialog: React.FC<CancelDialogProps> = ({
   if (!isOpen || !order) return null;
 
   return (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div
+      className="modal show d-block"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+    >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content border-0 shadow-lg">
           <div className="modal-header bg-danger text-white border-0">
@@ -48,16 +51,21 @@ const CancelDialog: React.FC<CancelDialogProps> = ({
               disabled={isLoading}
             ></button>
           </div>
-          
+
           <div className="modal-body p-4">
             <div className="text-center mb-4">
               <h6 className="text-muted">Order #{order.id}</h6>
-              <p className="mb-0">Are you sure you want to cancel this order?</p>
+              <p className="mb-0">
+                Are you sure you want to cancel this order?
+              </p>
             </div>
 
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label htmlFor="cancelReason" className="form-label fw-semibold">
+                <label
+                  htmlFor="cancelReason"
+                  className="form-label fw-semibold"
+                >
                   <i className="fas fa-comment me-2"></i>
                   Reason for cancellation (optional)
                 </label>
@@ -66,7 +74,7 @@ const CancelDialog: React.FC<CancelDialogProps> = ({
                   id="cancelReason"
                   rows={3}
                   value={reason}
-                  onChange={(e) => setReason(e.target.value)}
+                  onChange={e => setReason(e.target.value)}
                   placeholder="Please let us know why you're cancelling this order..."
                   disabled={isLoading}
                 />
@@ -85,7 +93,7 @@ const CancelDialog: React.FC<CancelDialogProps> = ({
               </div>
             </form>
           </div>
-          
+
           <div className="modal-footer border-0">
             <button
               type="button"
@@ -103,7 +111,11 @@ const CancelDialog: React.FC<CancelDialogProps> = ({
             >
               {isLoading ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   Cancelling...
                 </>
               ) : (

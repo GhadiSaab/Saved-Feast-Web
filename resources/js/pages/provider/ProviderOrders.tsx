@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { providerOrderApi } from '../../api/orders';
 import { orderUtils } from '../../utils/orderUtils';
-import { Order, OrderFilters, OrderStatus, OrderStats } from '../../types/orders';
+import {
+  Order,
+  OrderFilters,
+  OrderStatus,
+  OrderStats,
+} from '../../types/orders';
 import StatusChip from '../../components/orders/StatusChip';
 import Countdown from '../../components/orders/Countdown';
 import CancelDialog from '../../components/orders/CancelDialog';
@@ -12,7 +17,9 @@ const ProviderOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'PENDING' | 'ACCEPTED' | 'READY_FOR_PICKUP' | 'COMPLETED' | 'CANCELLED'>('PENDING');
+  const [activeTab, setActiveTab] = useState<
+    'PENDING' | 'ACCEPTED' | 'READY_FOR_PICKUP' | 'COMPLETED' | 'CANCELLED'
+  >('PENDING');
   const [stats, setStats] = useState<OrderStats>({
     pending: 0,
     accepted: 0,
@@ -24,7 +31,7 @@ const ProviderOrders: React.FC = () => {
   const lastFetchTime = useRef<number>(0);
   const isFetching = useRef<boolean>(false);
   const FETCH_COOLDOWN = 2000; // 2 seconds cooldown between fetches
-  
+
   const [cancelDialog, setCancelDialog] = useState<{
     isOpen: boolean;
     order: Order | null;
@@ -56,65 +63,85 @@ const ProviderOrders: React.FC = () => {
     isLoading: false,
   });
 
-  const fetchOrders = useCallback(async (status?: OrderFilters['status'], force: boolean = false) => {
-    const now = Date.now();
-    
-    // Rate limiting: prevent calls if we're already fetching or within cooldown period
-    if (!force && (isFetching.current || (now - lastFetchTime.current < FETCH_COOLDOWN))) {
-      return;
-    }
+  const fetchOrders = useCallback(
+    async (status?: OrderFilters['status'], force: boolean = false) => {
+      const now = Date.now();
 
-    try {
-      isFetching.current = true;
-      lastFetchTime.current = now;
-      setLoading(true);
-      setError(null);
-      
-      // Normalize status filter types
-      const statusFilter: OrderFilters['status'] = status === 'cancelled'
-        ? (['CANCELLED_BY_CUSTOMER', 'CANCELLED_BY_RESTAURANT', 'EXPIRED'] as OrderStatus[])
-        : status;
-      
-      const response = await providerOrderApi.getOrders({ status: statusFilter });
-      if (response.success) {
-        setOrders(response.data.data);
-      } else {
-        setError('Failed to fetch orders');
+      // Rate limiting: prevent calls if we're already fetching or within cooldown period
+      if (
+        !force &&
+        (isFetching.current || now - lastFetchTime.current < FETCH_COOLDOWN)
+      ) {
+        return;
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch orders');
-    } finally {
-      setLoading(false);
-      isFetching.current = false;
-    }
-  }, [FETCH_COOLDOWN]);
 
-  const fetchStats = useCallback(async (force: boolean = false) => {
-    const now = Date.now();
-    
-    // Rate limiting: prevent calls if we're already fetching or within cooldown period
-    if (!force && (isFetching.current || (now - lastFetchTime.current < FETCH_COOLDOWN))) {
-      return;
-    }
+      try {
+        isFetching.current = true;
+        lastFetchTime.current = now;
+        setLoading(true);
+        setError(null);
 
-    try {
-      isFetching.current = true;
-      lastFetchTime.current = now;
-      
-      const response = await providerOrderApi.getStats();
-      if (response.success) {
-        setStats(response.data);
+        // Normalize status filter types
+        const statusFilter: OrderFilters['status'] =
+          status === 'cancelled'
+            ? ([
+                'CANCELLED_BY_CUSTOMER',
+                'CANCELLED_BY_RESTAURANT',
+                'EXPIRED',
+              ] as OrderStatus[])
+            : status;
+
+        const response = await providerOrderApi.getOrders({
+          status: statusFilter,
+        });
+        if (response.success) {
+          setOrders(response.data.data);
+        } else {
+          setError('Failed to fetch orders');
+        }
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Failed to fetch orders');
+      } finally {
+        setLoading(false);
+        isFetching.current = false;
       }
-    } catch (err) {
-      console.error('Failed to fetch stats:', err);
-    } finally {
-      isFetching.current = false;
-    }
-  }, [FETCH_COOLDOWN]);
+    },
+    [FETCH_COOLDOWN]
+  );
+
+  const fetchStats = useCallback(
+    async (force: boolean = false) => {
+      const now = Date.now();
+
+      // Rate limiting: prevent calls if we're already fetching or within cooldown period
+      if (
+        !force &&
+        (isFetching.current || now - lastFetchTime.current < FETCH_COOLDOWN)
+      ) {
+        return;
+      }
+
+      try {
+        isFetching.current = true;
+        lastFetchTime.current = now;
+
+        const response = await providerOrderApi.getStats();
+        if (response.success) {
+          setStats(response.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
+      } finally {
+        isFetching.current = false;
+      }
+    },
+    [FETCH_COOLDOWN]
+  );
 
   useEffect(() => {
     // Map tab to filter value acceptable by API types
-    const mappedStatus: OrderFilters['status'] = activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus);
+    const mappedStatus: OrderFilters['status'] =
+      activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus);
     fetchOrders(mappedStatus, true); // Force initial load
     fetchStats(true); // Force initial load
   }, [activeTab, fetchOrders, fetchStats]);
@@ -127,7 +154,11 @@ const ProviderOrders: React.FC = () => {
     });
   };
 
-  const handleConfirmAcceptOrder = async (order: Order, pickupWindowStart: string, pickupWindowEnd: string) => {
+  const handleConfirmAcceptOrder = async (
+    order: Order,
+    pickupWindowStart: string,
+    pickupWindowEnd: string
+  ) => {
     setAcceptDialog(prev => ({ ...prev, isLoading: true }));
 
     try {
@@ -138,7 +169,10 @@ const ProviderOrders: React.FC = () => {
 
       if (response.success) {
         setAcceptDialog({ isOpen: false, order: null, isLoading: false });
-        await fetchOrders(activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus), true);
+        await fetchOrders(
+          activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus),
+          true
+        );
         await fetchStats(true);
       } else {
         setError('Failed to accept order');
@@ -154,7 +188,10 @@ const ProviderOrders: React.FC = () => {
     try {
       const response = await providerOrderApi.markReady(order.id);
       if (response.success) {
-        await fetchOrders(activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus), true);
+        await fetchOrders(
+          activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus),
+          true
+        );
         await fetchStats(true);
       } else {
         setError('Failed to mark order as ready');
@@ -171,20 +208,23 @@ const ProviderOrders: React.FC = () => {
       const response = await providerOrderApi.completeOrder(order.id, { code });
       if (response.success) {
         setCodeDialog({ isOpen: false, order: null, isLoading: false });
-        await fetchOrders(activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus), true);
+        await fetchOrders(
+          activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus),
+          true
+        );
         await fetchStats(true);
       } else {
-        setCodeDialog(prev => ({ 
-          ...prev, 
-          isLoading: false, 
-          error: response.message || 'Invalid pickup code' 
+        setCodeDialog(prev => ({
+          ...prev,
+          isLoading: false,
+          error: response.message || 'Invalid pickup code',
         }));
       }
     } catch (err: any) {
-      setCodeDialog(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: err.response?.data?.message || 'Failed to complete order' 
+      setCodeDialog(prev => ({
+        ...prev,
+        isLoading: false,
+        error: err.response?.data?.message || 'Failed to complete order',
       }));
     }
   };
@@ -195,9 +235,14 @@ const ProviderOrders: React.FC = () => {
     setCancelDialog(prev => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await providerOrderApi.cancelOrder(order.id, { reason: reason ?? 'Cancelled by restaurant' });
+      const response = await providerOrderApi.cancelOrder(order.id, {
+        reason: reason ?? 'Cancelled by restaurant',
+      });
       if (response.success) {
-        await fetchOrders(activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus), true);
+        await fetchOrders(
+          activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus),
+          true
+        );
         await fetchStats(true);
         setCancelDialog({ isOpen: false, order: null, isLoading: false });
       } else {
@@ -216,7 +261,7 @@ const ProviderOrders: React.FC = () => {
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -250,11 +295,13 @@ const ProviderOrders: React.FC = () => {
         return (
           <button
             className="btn btn-primary btn-sm"
-            onClick={() => setCodeDialog({
-              isOpen: true,
-              order,
-              isLoading: false
-            })}
+            onClick={() =>
+              setCodeDialog({
+                isOpen: true,
+                order,
+                isLoading: false,
+              })
+            }
           >
             <i className="fas fa-key me-1"></i>
             Complete Order
@@ -275,7 +322,11 @@ const ProviderOrders: React.FC = () => {
         <div className="row">
           <div className="col-12">
             <div className="text-center py-5">
-              <div className="spinner-border text-primary mb-3" style={{width: '3rem', height: '3rem'}} role="status">
+              <div
+                className="spinner-border text-primary mb-3"
+                style={{ width: '3rem', height: '3rem' }}
+                role="status"
+              >
                 <span className="visually-hidden">Loading...</span>
               </div>
               <h5 className="text-muted">Loading orders...</h5>
@@ -298,11 +349,16 @@ const ProviderOrders: React.FC = () => {
                   <i className="fas fa-clipboard-list me-3"></i>
                   Order Management
                 </h1>
-                <p className="mb-0 opacity-75">Manage and track restaurant orders</p>
+                <p className="mb-0 opacity-75">
+                  Manage and track restaurant orders
+                </p>
               </div>
               <div className="col-md-4 text-md-end">
                 <div className="d-flex justify-content-md-end gap-2">
-                  <button className="btn btn-light btn-sm" onClick={() => fetchStats(true)}>
+                  <button
+                    className="btn btn-light btn-sm"
+                    onClick={() => fetchStats(true)}
+                  >
                     <i className="fas fa-sync-alt me-1"></i>
                     Refresh
                   </button>
@@ -353,7 +409,10 @@ const ProviderOrders: React.FC = () => {
 
           {/* Error State */}
           {error && (
-            <div className="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+            <div
+              className="alert alert-danger border-0 shadow-sm mb-4"
+              role="alert"
+            >
               <div className="d-flex align-items-center">
                 <i className="fas fa-exclamation-triangle fa-2x me-3"></i>
                 <div>
@@ -410,17 +469,19 @@ const ProviderOrders: React.FC = () => {
           {/* Empty State */}
           {orders.length === 0 && (
             <div className="text-center py-5">
-              <div className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style={{width: '120px', height: '120px'}}>
+              <div
+                className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
+                style={{ width: '120px', height: '120px' }}
+              >
                 <i className="fas fa-clipboard-list fa-3x text-muted"></i>
               </div>
               <h3 className="text-muted mb-3">No orders found</h3>
               <p className="text-muted mb-4">
-                {activeTab === 'PENDING' 
+                {activeTab === 'PENDING'
                   ? "You don't have any pending orders."
                   : activeTab === 'CANCELLED'
-                  ? "You don't have any cancelled or expired orders."
-                  : `You don't have any ${activeTab.toLowerCase().replace('_', ' ')} orders.`
-                }
+                    ? "You don't have any cancelled or expired orders."
+                    : `You don't have any ${activeTab.toLowerCase().replace('_', ' ')} orders.`}
               </p>
             </div>
           )}
@@ -428,7 +489,7 @@ const ProviderOrders: React.FC = () => {
           {/* Orders List */}
           {orders.length > 0 && (
             <div className="row">
-              {orders.map((order) => (
+              {orders.map(order => (
                 <div key={order.id} className="col-12 mb-4">
                   <div className="card border-0 shadow-sm h-100">
                     <div className="card-header bg-white border-0 pb-0">
@@ -453,10 +514,15 @@ const ProviderOrders: React.FC = () => {
                             <i className="fas fa-list me-2"></i>
                             Order Items
                           </h6>
-                          {order.order_items.map((item) => (
-                            <div key={item.id} className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                          {order.order_items.map(item => (
+                            <div
+                              key={item.id}
+                              className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded"
+                            >
                               <div>
-                                <span className="fw-medium text-dark">{item.quantity}x {item.meal.title}</span>
+                                <span className="fw-medium text-dark">
+                                  {item.quantity}x {item.meal.title}
+                                </span>
                                 <br />
                                 <small className="text-muted">
                                   <i className="fas fa-user me-1"></i>
@@ -464,7 +530,12 @@ const ProviderOrders: React.FC = () => {
                                 </small>
                               </div>
                               <span className="text-end">
-                                <strong className="text-primary">${(item.quantity * parseFloat(item.price)).toFixed(2)}</strong>
+                                <strong className="text-primary">
+                                  $
+                                  {(
+                                    item.quantity * parseFloat(item.price)
+                                  ).toFixed(2)}
+                                </strong>
                               </span>
                             </div>
                           ))}
@@ -475,32 +546,44 @@ const ProviderOrders: React.FC = () => {
                               <i className="fas fa-receipt me-2"></i>
                               Order Summary
                             </h6>
-                            <h4 className="text-primary mb-3 fw-bold">{formatCurrency(order.total_amount)}</h4>
-                            
-                            {order.pickup_window_start && order.pickup_window_end && (
-                              <div className="mb-3">
-                                <h6 className="text-muted mb-2 fw-semibold">
-                                  <i className="fas fa-clock me-2"></i>
-                                  Pickup Window
-                                </h6>
-                                <Countdown 
-                                  targetDate={order.pickup_window_end}
-                                  onExpire={() => fetchOrders(activeTab === 'CANCELLED' ? 'cancelled' : (activeTab as OrderStatus), false)}
-                                />
-                              </div>
-                            )}
+                            <h4 className="text-primary mb-3 fw-bold">
+                              {formatCurrency(order.total_amount)}
+                            </h4>
+
+                            {order.pickup_window_start &&
+                              order.pickup_window_end && (
+                                <div className="mb-3">
+                                  <h6 className="text-muted mb-2 fw-semibold">
+                                    <i className="fas fa-clock me-2"></i>
+                                    Pickup Window
+                                  </h6>
+                                  <Countdown
+                                    targetDate={order.pickup_window_end}
+                                    onExpire={() =>
+                                      fetchOrders(
+                                        activeTab === 'CANCELLED'
+                                          ? 'cancelled'
+                                          : (activeTab as OrderStatus),
+                                        false
+                                      )
+                                    }
+                                  />
+                                </div>
+                              )}
 
                             <div className="d-grid gap-2">
                               {getActionButton(order)}
-                              
+
                               {orderUtils.canCancel(order.status) && (
                                 <button
                                   className="btn btn-outline-danger btn-sm"
-                                  onClick={() => setCancelDialog({
-                                    isOpen: true,
-                                    order,
-                                    isLoading: false
-                                  })}
+                                  onClick={() =>
+                                    setCancelDialog({
+                                      isOpen: true,
+                                      order,
+                                      isLoading: false,
+                                    })
+                                  }
                                 >
                                   <i className="fas fa-times me-1"></i>
                                   Cancel Order
@@ -523,11 +606,13 @@ const ProviderOrders: React.FC = () => {
         isOpen={cancelDialog.isOpen}
         order={cancelDialog.order}
         isLoading={cancelDialog.isLoading}
-        onClose={() => setCancelDialog({
-          isOpen: false,
-          order: null,
-          isLoading: false
-        })}
+        onClose={() =>
+          setCancelDialog({
+            isOpen: false,
+            order: null,
+            isLoading: false,
+          })
+        }
         onConfirm={handleCancelOrder}
       />
 
@@ -536,11 +621,13 @@ const ProviderOrders: React.FC = () => {
         order={codeDialog.order}
         isLoading={codeDialog.isLoading}
         error={codeDialog.error}
-        onClose={() => setCodeDialog({
-          isOpen: false,
-          order: null,
-          isLoading: false
-        })}
+        onClose={() =>
+          setCodeDialog({
+            isOpen: false,
+            order: null,
+            isLoading: false,
+          })
+        }
         onConfirm={handleCompleteOrder}
       />
 
@@ -548,11 +635,13 @@ const ProviderOrders: React.FC = () => {
         isOpen={acceptDialog.isOpen}
         order={acceptDialog.order}
         isLoading={acceptDialog.isLoading}
-        onClose={() => setAcceptDialog({
-          isOpen: false,
-          order: null,
-          isLoading: false
-        })}
+        onClose={() =>
+          setAcceptDialog({
+            isOpen: false,
+            order: null,
+            isLoading: false,
+          })
+        }
         onConfirm={handleConfirmAcceptOrder}
       />
     </div>
