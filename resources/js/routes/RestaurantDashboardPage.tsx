@@ -214,8 +214,14 @@ const RestaurantDashboardPage: React.FC = () => {
     }
     apiFormData.append('quantity', formData.quantity);
     apiFormData.append('category_id', formData.category_id);
-    apiFormData.append('available_from', formData.available_from); // Add available_from
-    apiFormData.append('available_until', formData.available_until); // Add available_until
+
+    if (formData.available_from.trim() !== '') {
+      apiFormData.append('available_from', formData.available_from);
+    }
+
+    if (formData.available_until.trim() !== '') {
+      apiFormData.append('available_until', formData.available_until);
+    }
 
     if (imageFile) {
       apiFormData.append('image', imageFile); // 'image' is the key the backend will expect

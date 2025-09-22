@@ -74,7 +74,7 @@ class OrderStateService
             // Lock the order row for update to prevent race conditions
             $lockedOrder = Order::where('id', $order->id)->lockForUpdate()->first();
 
-            if (! $lockedOrder || $lockedOrder->status !== Order::STATUS_ACCEPTED) {
+            if (!$lockedOrder || $lockedOrder->status !== Order::STATUS_ACCEPTED) {
                 throw new \InvalidArgumentException('Order must be in ACCEPTED status to be marked ready');
             }
 
@@ -100,7 +100,7 @@ class OrderStateService
     /**
      * Complete order with pickup code or claim code verification
      */
-public function completeWithCode(Order $order, string $code, User $provider): bool
+    public function completeWithCode(Order $order, string $code, User $provider): bool
     {
         if ($order->status !== Order::STATUS_READY_FOR_PICKUP) {
             throw new \InvalidArgumentException('Order must be in READY_FOR_PICKUP status to be completed');
@@ -108,7 +108,7 @@ public function completeWithCode(Order $order, string $code, User $provider): bo
 
         // Check if this is a claim code (new system) or pickup code (old system)
         $isClaimCode = $this->isClaimCode($order, $code);
-        
+
         if ($isClaimCode) {
             // For claim codes, the validation was already done in the controller
             // Just complete the order without additional verification
@@ -136,7 +136,7 @@ public function completeWithCode(Order $order, string $code, User $provider): bo
         }
 
         // Legacy pickup code system
-        if (! $order->pickup_code_encrypted) {
+        if (!$order->pickup_code_encrypted) {
             throw new \InvalidArgumentException('Order does not have a pickup code');
         }
 
@@ -156,7 +156,7 @@ public function completeWithCode(Order $order, string $code, User $provider): bo
             ]);
 
             // Verify code
-            if (! $this->pickupCodeService->verify($order->pickup_code_encrypted, $code)) {
+            if (!$this->pickupCodeService->verify($order->pickup_code_encrypted, $code)) {
                 return false;
             }
 
@@ -195,7 +195,7 @@ public function completeWithCode(Order $order, string $code, User $provider): bo
             ->latest()
             ->first();
 
-        if (! $claimEvent) {
+        if (!$claimEvent) {
             return false;
         }
 
@@ -221,7 +221,7 @@ public function completeWithCode(Order $order, string $code, User $provider): bo
      */
     public function cancelByCustomer(Order $order, User $customer, ?string $reason = null): bool
     {
-        if (! $order->canBeCancelledByCustomer()) {
+        if (!$order->canBeCancelledByCustomer()) {
             throw new \InvalidArgumentException('Order cannot be cancelled by customer in current status');
         }
 
@@ -255,7 +255,7 @@ public function completeWithCode(Order $order, string $code, User $provider): bo
             // Lock the order row for update to prevent race conditions
             $lockedOrder = Order::where('id', $order->id)->lockForUpdate()->first();
 
-            if (! $lockedOrder || ! $lockedOrder->canBeCancelledByRestaurant()) {
+            if (!$lockedOrder || !$lockedOrder->canBeCancelledByRestaurant()) {
                 throw new \InvalidArgumentException('Order cannot be cancelled by restaurant in current status');
             }
 
@@ -284,7 +284,7 @@ public function completeWithCode(Order $order, string $code, User $provider): bo
      */
     public function expire(Order $order): bool
     {
-        if (! in_array($order->status, [Order::STATUS_ACCEPTED, Order::STATUS_READY_FOR_PICKUP])) {
+        if (!in_array($order->status, [Order::STATUS_ACCEPTED, Order::STATUS_READY_FOR_PICKUP])) {
             return false;
         }
 
