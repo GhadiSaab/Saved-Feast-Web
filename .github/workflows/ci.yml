@@ -66,8 +66,14 @@ jobs:
     - name: Install Node.js dependencies
       run: npm ci --legacy-peer-deps
 
-    - name: Copy environment file
-      run: cp .env.example .env
+    - name: Prepare environment file
+      run: |
+        cp .env.example .env
+        if grep -q '^APP_ENV=' .env; then
+          sed -i 's/^APP_ENV=.*/APP_ENV=testing/' .env
+        else
+          echo 'APP_ENV=testing' >> .env
+        fi
 
     - name: Generate application key
       run: php artisan key:generate
@@ -225,3 +231,4 @@ jobs:
       run: |
         echo "❌ Some tests failed!"
         echo "Please check the logs for details."
+

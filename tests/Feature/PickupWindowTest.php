@@ -23,9 +23,13 @@ class PickupWindowTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     protected User $customer;
+
     protected User $provider;
+
     protected Restaurant $restaurant;
+
     protected Meal $meal;
+
     protected Category $category;
 
     protected function setUp(): void

@@ -21,9 +21,13 @@ class AcceptOrderDialogTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     protected User $customer;
+
     protected User $provider;
+
     protected Restaurant $restaurant;
+
     protected Meal $meal;
+
     protected Category $category;
 
     protected function setUp(): void
@@ -421,3 +425,4 @@ class AcceptOrderDialogTest extends TestCase
         }
     }
 }
+

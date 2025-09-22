@@ -24,12 +24,19 @@ class RobustOrderFlowTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     protected User $customer;
+
     protected User $provider;
+
     protected User $anotherProvider;
+
     protected Restaurant $restaurant;
+
     protected Restaurant $anotherRestaurant;
+
     protected Meal $meal;
+
     protected Meal $expiringMeal;
+
     protected Category $category;
 
     protected function setUp(): void

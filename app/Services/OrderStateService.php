@@ -74,7 +74,7 @@ class OrderStateService
             // Lock the order row for update to prevent race conditions
             $lockedOrder = Order::where('id', $order->id)->lockForUpdate()->first();
 
-            if (!$lockedOrder || $lockedOrder->status !== Order::STATUS_ACCEPTED) {
+            if (! $lockedOrder || $lockedOrder->status !== Order::STATUS_ACCEPTED) {
                 throw new \InvalidArgumentException('Order must be in ACCEPTED status to be marked ready');
             }
 
@@ -136,7 +136,7 @@ class OrderStateService
         }
 
         // Legacy pickup code system
-        if (!$order->pickup_code_encrypted) {
+        if (! $order->pickup_code_encrypted) {
             throw new \InvalidArgumentException('Order does not have a pickup code');
         }
 
@@ -156,7 +156,7 @@ class OrderStateService
             ]);
 
             // Verify code
-            if (!$this->pickupCodeService->verify($order->pickup_code_encrypted, $code)) {
+            if (! $this->pickupCodeService->verify($order->pickup_code_encrypted, $code)) {
                 return false;
             }
 
@@ -195,7 +195,7 @@ class OrderStateService
             ->latest()
             ->first();
 
-        if (!$claimEvent) {
+        if (! $claimEvent) {
             return false;
         }
 
@@ -221,7 +221,7 @@ class OrderStateService
      */
     public function cancelByCustomer(Order $order, User $customer, ?string $reason = null): bool
     {
-        if (!$order->canBeCancelledByCustomer()) {
+        if (! $order->canBeCancelledByCustomer()) {
             throw new \InvalidArgumentException('Order cannot be cancelled by customer in current status');
         }
 
@@ -255,7 +255,7 @@ class OrderStateService
             // Lock the order row for update to prevent race conditions
             $lockedOrder = Order::where('id', $order->id)->lockForUpdate()->first();
 
-            if (!$lockedOrder || !$lockedOrder->canBeCancelledByRestaurant()) {
+            if (! $lockedOrder || ! $lockedOrder->canBeCancelledByRestaurant()) {
                 throw new \InvalidArgumentException('Order cannot be cancelled by restaurant in current status');
             }
 
@@ -328,3 +328,4 @@ class OrderStateService
         }
     }
 }
+

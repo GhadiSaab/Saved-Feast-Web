@@ -67,4 +67,3 @@ return [
     'supports_credentials' => true, // Enable for mobile apps and SPAs
 
 ];
-

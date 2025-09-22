@@ -23,10 +23,15 @@ class OrderExpirationTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     protected User $customer;
+
     protected User $provider;
+
     protected Restaurant $restaurant;
+
     protected Meal $meal;
+
     protected Category $category;
+
     protected OrderExpiryService $orderExpiryService;
 
     protected function setUp(): void
