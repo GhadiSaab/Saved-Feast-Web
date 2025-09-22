@@ -1434,3 +1434,152 @@ main {
 .opacity-75 {
   opacity: 0.75 !important;
 }
+
+@media (max-width: 576px) {
+  body {
+    font-size: 0.95rem;
+  }
+
+  .navbar {
+    padding: 0.75rem 1rem;
+
+    .navbar-brand {
+      font-size: 1.3rem;
+    }
+
+    .navbar-nav {
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .nav-link {
+      width: 100%;
+      text-align: center;
+      margin: 0.25rem 0;
+      padding: 0.5rem 0.75rem !important;
+    }
+
+    .btn-outline-primary {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+  }
+
+  .hero-section {
+    padding: 3rem 1.5rem;
+    border-radius: 1.5rem;
+    margin-bottom: 2rem;
+
+    .hero-content {
+      h1 {
+        font-size: 2.25rem;
+        line-height: 1.2;
+      }
+
+      p {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+      }
+    }
+
+    .hero-stats {
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+  }
+
+  .feed-page-container {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+  }
+
+  .feed-page .page-title,
+  .section-title,
+  .section-heading {
+    font-size: 1.75rem;
+    text-align: center;
+  }
+
+  .filters-section {
+    margin-bottom: 1.5rem;
+
+    .input-group-text {
+      border-radius: 0.9rem 0 0 0.9rem;
+    }
+  }
+
+  .card.meal-card {
+    border-radius: 1.25rem;
+    box-shadow:
+      0 18px 45px rgba(15, 23, 42, 0.12),
+      0 0 0 1px rgba(148, 163, 184, 0.08);
+    overflow: hidden;
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+    }
+  }
+
+  .card-image-placeholder {
+    max-height: 220px;
+
+    .card-img-top {
+      height: 220px !important;
+    }
+  }
+
+  .btn,
+  .form-control,
+  .form-select {
+    min-height: 48px;
+    border-radius: 0.9rem;
+  }
+
+  .btn {
+    font-weight: 600;
+    letter-spacing: 0.015em;
+  }
+
+  .meal-detail-modal-body {
+    flex-direction: column;
+
+    .modal-image-section,
+    .modal-content-section {
+      padding: 2rem 1.5rem;
+    }
+
+    .modal-image-section {
+      min-height: 260px;
+    }
+
+    .meal-header .meal-title {
+      font-size: 1.75rem;
+    }
+
+    .meal-header .meal-description {
+      font-size: 1rem;
+    }
+  }
+
+  .table-responsive {
+    border-radius: 1rem;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  }
+
+  .pagination {
+    justify-content: center;
+  }
+
+  .toast-container {
+    left: 1rem;
+    right: 1rem;
+    width: auto !important;
+  }
+}
+

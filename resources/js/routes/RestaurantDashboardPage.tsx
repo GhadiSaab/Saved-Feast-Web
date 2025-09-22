@@ -282,9 +282,46 @@ const RestaurantDashboardPage: React.FC = () => {
       if (err.response) {
         if (err.response.status === 422) {
           // Handle validation errors
-          const errors = err.response.data.errors;
-          const errorMessages = Object.values(errors).flat().join(' '); // Combine validation messages
-          setFormError(`Validation failed: ${errorMessages}`);
+          const responseData = err.response.data;
+          let errorMessages = '';
+
+          if (responseData) {
+            const maybeErrors =
+              responseData.errors && typeof responseData.errors === 'object'
+                ? responseData.errors
+                : null;
+
+            const source =
+              maybeErrors ??
+              (typeof responseData === 'object' ? responseData : null);
+
+            if (source) {
+              const messages = Object.values(
+                source as Record<string, unknown>
+              ).reduce<string[]>((acc, value) => {
+                if (Array.isArray(value)) {
+                  return acc.concat(value.map(item => String(item)));
+                }
+                if (value != null) {
+                  acc.push(String(value));
+                }
+                return acc;
+              }, []);
+              errorMessages = messages.join(' ');
+            } else if (typeof responseData === 'string') {
+              errorMessages = responseData;
+            }
+          }
+
+          if (!errorMessages && responseData?.message) {
+            errorMessages = String(responseData.message);
+          }
+
+          setFormError(
+            `Validation failed: ${
+              errorMessages || 'Please review the form fields.'
+            }`
+          );
         } else if (err.response.status === 401 || err.response.status === 403) {
           setFormError('Authorization error. You might not have permission.');
         } else {

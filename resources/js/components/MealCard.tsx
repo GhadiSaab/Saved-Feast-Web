@@ -35,7 +35,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [buttonScale, setButtonScale] = useState(1);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const timeoutRefs = useRef<number[]>([]);
+  const timeoutRefs = useRef<Array<ReturnType<typeof setTimeout>>>([]);
 
   // Cleanup function to clear all timeouts
   useEffect(() => {
