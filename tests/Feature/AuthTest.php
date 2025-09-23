@@ -47,6 +47,52 @@ class AuthTest extends TestCase
         ]);
     }
 
+    public function test_user_can_register_without_phone()
+    {
+        $userData = [
+            'first_name' => 'Jane',
+            'last_name' => 'Smith',
+            'email' => 'jane@example.com',
+            'password' => 'SecurePass123!',
+            'password_confirmation' => 'SecurePass123!',
+            'phone' => '',
+            'address' => '',
+        ];
+
+        $response = $this->postJson('/api/register', $userData);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'jane@example.com',
+            'phone' => null,
+        ]);
+    }
+
+    public function test_user_cannot_register_with_duplicate_phone()
+    {
+        $existingPhone = '+15550000001';
+
+        User::factory()->create([
+            'phone' => $existingPhone,
+        ]);
+
+        $userData = [
+            'first_name' => 'Alice',
+            'last_name' => 'Johnson',
+            'email' => 'alice@example.com',
+            'password' => 'SecurePass123!',
+            'password_confirmation' => 'SecurePass123!',
+            'phone' => $existingPhone,
+            'address' => '456 Elm St',
+        ];
+
+        $response = $this->postJson('/api/register', $userData);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['phone']);
+    }
+
     public function test_user_can_login()
     {
         $user = User::factory()->create([

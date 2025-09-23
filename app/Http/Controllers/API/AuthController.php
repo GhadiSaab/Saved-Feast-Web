@@ -16,23 +16,27 @@ class AuthController extends Controller
     public function register(Request $request): \Illuminate\Http\JsonResponse
     {
 
-        $request->validate([
+        if (! is_string($request->phone) || trim($request->phone) === '') {
+            $request->merge(['phone' => null]);
+        }
+
+        $validated = $request->validate([
             'first_name' => 'required|string|max:255', // Added max length
             'last_name' => 'required|string|max:255', // Added max length
             'email' => 'required|string|email|max:255|unique:users,email', // Added max length and string type
             // Use a more user-friendly password rule
             'password' => ['required', 'confirmed', Password::min(8)],
-            'phone' => 'nullable|string|max:25', // Added max length
+            'phone' => 'nullable|string|max:25|unique:users,phone', // Added unique constraint and normalization
             'address' => 'nullable|string|max:255', // Added max length
         ]);
 
         $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'phone' => $request->phone,
-            'address' => $request->address,
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'phone' => $validated['phone'],
+            'address' => $validated['address'] ?? null,
         ]);
 
         // Assign default 'customer' role to new users
