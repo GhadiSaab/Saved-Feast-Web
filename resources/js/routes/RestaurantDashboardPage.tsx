@@ -39,6 +39,37 @@ interface MealFormData {
   available_until: string; // Add available_until (string for datetime-local input)
 }
 
+
+const toIsoUtcString = (value: string): string => {
+  const trimmed = value.trim();
+  if (trimmed === '') {
+    return trimmed;
+  }
+
+  const parsed = new Date(trimmed);
+  if (Number.isNaN(parsed.getTime())) {
+    return trimmed;
+  }
+
+  return parsed.toISOString();
+};
+
+const toDatetimeLocalValue = (value?: string | null): string => {
+  if (!value) {
+    return '';
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return value.length >= 16 ? value.slice(0, 16) : value;
+  }
+
+  const offset = parsed.getTimezoneOffset() * 60000;
+  const local = new Date(parsed.getTime() - offset);
+
+  return local.toISOString().slice(0, 16);
+};
+
 const RestaurantDashboardPage: React.FC = () => {
   const [dashboardMessage, setDashboardMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true); // Overall loading for initial dashboard message
@@ -138,13 +169,9 @@ const RestaurantDashboardPage: React.FC = () => {
       original_price: meal.original_price ? String(meal.original_price) : '', // Handle null/undefined
       quantity: String(meal.quantity),
       category_id: String(meal.category_id),
-      // Format ISO string from backend (e.g., 2023-10-27T10:00:00.000000Z) to datetime-local format (YYYY-MM-DDTHH:mm)
-      available_from: meal.available_from
-        ? meal.available_from.slice(0, 16)
-        : '',
-      available_until: meal.available_until
-        ? meal.available_until.slice(0, 16)
-        : '',
+      // Normalize backend datetimes into datetime-local input format
+      available_from: toDatetimeLocalValue(meal.available_from),
+      available_until: toDatetimeLocalValue(meal.available_until),
     });
     setImageFile(null); // Clear previous file selection on edit
     setFormError(null);
@@ -216,11 +243,17 @@ const RestaurantDashboardPage: React.FC = () => {
     apiFormData.append('category_id', formData.category_id);
 
     if (formData.available_from.trim() !== '') {
-      apiFormData.append('available_from', formData.available_from);
+      apiFormData.append(
+        'available_from',
+        toIsoUtcString(formData.available_from)
+      );
     }
 
     if (formData.available_until.trim() !== '') {
-      apiFormData.append('available_until', formData.available_until);
+      apiFormData.append(
+        'available_until',
+        toIsoUtcString(formData.available_until)
+      );
     }
 
     if (imageFile) {
