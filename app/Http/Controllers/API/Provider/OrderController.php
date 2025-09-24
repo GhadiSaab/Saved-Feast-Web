@@ -112,7 +112,7 @@ class OrderController extends Controller
                 // Check if meal availability is actually constraining the pickup window
                 $order->loadMissing('orderItems.meal');
                 $availableUntilTimes = $order->orderItems
-                    ->filter(fn ($item) => !is_null($item->meal?->available_until))
+                    ->filter(fn ($item) => ! is_null($item->meal?->available_until))
                     ->map(fn ($item) => Carbon::parse($item->meal->available_until));
 
                 $allowShortWindow = false;
@@ -126,7 +126,7 @@ class OrderController extends Controller
                     }
                 }
 
-                if (!$allowShortWindow) {
+                if (! $allowShortWindow) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Pickup window must be at least 30 minutes',
@@ -208,7 +208,7 @@ class OrderController extends Controller
             // Complete order with code (handles both claim codes and pickup codes)
             $success = $this->orderStateService->completeWithCode($order, $request->code, auth()->user());
 
-            if (!$success) {
+            if (! $success) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid claim code or pickup code',
@@ -336,7 +336,7 @@ class OrderController extends Controller
             $q->whereIn('restaurant_id', $restaurantIds);
         })->exists();
 
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             abort(403, 'You do not have access to this order');
         }
     }

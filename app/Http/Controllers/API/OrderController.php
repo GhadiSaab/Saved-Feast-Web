@@ -9,6 +9,7 @@ use App\Services\CommissionService;
 use App\Services\OrderStateService;
 use App\Services\PickupCodeService;
 use Illuminate\Http\Request; // Import Meal model
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log; // Import Log facade
 
 class OrderController extends Controller
@@ -359,23 +360,41 @@ class OrderController extends Controller
 
         // Filter by status
         if ($request->has('status')) {
-            $status = $request->get('status');
-            if ($status === 'in_progress') {
-                $query->whereIn('status', [
-                    Order::STATUS_PENDING,
-                    Order::STATUS_ACCEPTED,
-                    Order::STATUS_READY_FOR_PICKUP,
-                ]);
-            } elseif ($status === 'completed') {
-                $query->where('status', Order::STATUS_COMPLETED);
-            } elseif ($status === 'cancelled') {
-                $query->whereIn('status', [
-                    Order::STATUS_CANCELLED_BY_CUSTOMER,
-                    Order::STATUS_CANCELLED_BY_RESTAURANT,
-                    Order::STATUS_EXPIRED,
-                ]);
-            } else {
-                $query->where('status', $status);
+            $statusFilter = $request->input('status');
+
+            $normalizedStatuses = collect(Arr::wrap($statusFilter))
+                ->flatMap(function ($status) {
+                    if (! is_string($status)) {
+                        return [];
+                    }
+
+                    $status = strtoupper($status);
+
+                    return match ($status) {
+                        'IN_PROGRESS' => [
+                            Order::STATUS_PENDING,
+                            Order::STATUS_ACCEPTED,
+                            Order::STATUS_READY_FOR_PICKUP,
+                        ],
+                        'COMPLETED' => [Order::STATUS_COMPLETED],
+                        'CANCELLED' => [
+                            Order::STATUS_CANCELLED_BY_CUSTOMER,
+                            Order::STATUS_CANCELLED_BY_RESTAURANT,
+                            Order::STATUS_EXPIRED,
+                        ],
+                        default => [$status],
+                    };
+                })
+                ->unique()
+                ->values()
+                ->all();
+
+            if (! empty($normalizedStatuses)) {
+                if (count($normalizedStatuses) === 1) {
+                    $query->where('status', $normalizedStatuses[0]);
+                } else {
+                    $query->whereIn('status', $normalizedStatuses);
+                }
             }
         }
 

@@ -29,12 +29,12 @@
     "dev": "vite",
     "build": "vite build",
     "ci:php": "bash check-php-ci.sh",
-    "ci:frontend": "bash check-frontend-ci.sh", 
+    "ci:frontend": "bash check-frontend-ci.sh",
     "ci:all": "bash check-all-ci.sh",
     "fix:deps": "bash fix-dependencies.sh",
     "fix:format": "bash fix-formatting.sh",
     "fix:all": "bash fix-all-ci-issues.sh",
-    "format": "prettier --write resources/js/",
+    "format": "prettier --write \"resources/**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
     "lint": "eslint resources/js/",
     "lint:fix": "eslint resources/js/ --fix",
     "preview": "vite preview",
@@ -48,8 +48,8 @@
     "serve:frontend": "npm run dev",
     "setup": "npm install && composer install && npm run build",
     "clean": "rm -rf node_modules vendor dist",
-    "format": "prettier --write \"resources/**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
-    "format:check": "prettier --check \"resources/**/*.{ts,tsx,js,jsx,json,css,scss,md}\""
+    "format:check": "prettier --check \"resources/**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
@@ -79,6 +79,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.0",
     "globals": "^13.24.0",
+    "husky": "^9.1.7",
     "jsdom": "^22.1.0",
     "prettier": "^3.0.0",
     "sass": "^1.69.0",

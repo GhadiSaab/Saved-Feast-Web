@@ -10,13 +10,12 @@
 require_once 'vendor/autoload.php';
 
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 
 // Bootstrap Laravel
 $app = require_once 'bootstrap/app.php';
 $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
 
-echo 'Setting up test database...' . PHP_EOL;
+echo 'Setting up test database...'.PHP_EOL;
 
 try {
     // Set testing environment
@@ -34,7 +33,7 @@ try {
     $pdo = new PDO("mysql:host=$host", $username, $password);
     $pdo->exec("CREATE DATABASE IF NOT EXISTS `$database`");
 
-    echo "Test database '$database' created/verified." . PHP_EOL;
+    echo "Test database '$database' created/verified.".PHP_EOL;
 
     // Run migrations
     Artisan::call('migrate:fresh', [
@@ -42,7 +41,7 @@ try {
         '--force' => true,
     ]);
 
-    echo 'Migrations completed.' . PHP_EOL;
+    echo 'Migrations completed.'.PHP_EOL;
 
     // Run seeders
     Artisan::call('db:seed', [
@@ -50,9 +49,9 @@ try {
         '--force' => true,
     ]);
 
-    echo 'Test seeders completed.' . PHP_EOL;
-    echo 'Test database setup complete!' . PHP_EOL;
+    echo 'Test seeders completed.'.PHP_EOL;
+    echo 'Test database setup complete!'.PHP_EOL;
 } catch (Exception $e) {
-    echo 'Error setting up test database: ' . $e->getMessage() . PHP_EOL;
+    echo 'Error setting up test database: '.$e->getMessage().PHP_EOL;
     exit(1);
 }

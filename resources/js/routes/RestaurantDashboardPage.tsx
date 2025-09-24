@@ -39,7 +39,6 @@ interface MealFormData {
   available_until: string; // Add available_until (string for datetime-local input)
 }
 
-
 const toIsoUtcString = (value: string): string => {
   const trimmed = value.trim();
   if (trimmed === '') {

@@ -284,7 +284,7 @@ class OrderStateService
      */
     public function expire(Order $order): bool
     {
-        if (!in_array($order->status, [Order::STATUS_ACCEPTED, Order::STATUS_READY_FOR_PICKUP])) {
+        if (! in_array($order->status, [Order::STATUS_ACCEPTED, Order::STATUS_READY_FOR_PICKUP])) {
             return false;
         }
 
