@@ -25,6 +25,7 @@ class OrderTest extends TestCase
         $this->meal = Meal::factory()->create([
             'restaurant_id' => $this->restaurant->id,
             'category_id' => $this->category->id,
+            'quantity' => 10,
         ]);
         $this->user = User::factory()->create();
     }
