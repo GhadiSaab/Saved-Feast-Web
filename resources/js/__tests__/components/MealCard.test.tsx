@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 import MealCard from '../../components/MealCard';
@@ -21,6 +21,9 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+const normalizeCurrency = (value: string) => value.replace(/[\s\u00A0\u202F]/g, '');
+const NAIRA_CODEPOINT = 8358;
+
 const mockMeal = {
   id: 1,
   title: 'Test Meal',
@@ -28,6 +31,7 @@ const mockMeal = {
   current_price: 9.99,
   original_price: 15.99,
   image: '/storage/meals/test-image.jpg',
+  image_url: '/storage/meals/test-image.jpg',
   available_from: '2024-01-01T10:00:00Z',
   available_until: '2024-01-01T18:00:00Z',
   restaurant: {
@@ -47,6 +51,7 @@ const mockMealWithoutDiscount = {
 const mockMealWithoutImage = {
   ...mockMeal,
   image: null,
+  image_url: null,
 };
 
 const renderWithCartProvider = (component: React.ReactElement) => {
@@ -64,31 +69,54 @@ describe('MealCard', () => {
 
     expect(screen.getByText('Test Meal')).toBeInTheDocument();
     expect(screen.getByText('A delicious test meal')).toBeInTheDocument();
-    expect(screen.getAllByText('Test Restaurant')).toHaveLength(2); // Badge and subtitle
-    expect(screen.getByText('€9.99')).toBeInTheDocument();
+    expect(screen.getAllByText('Test Restaurant')).toHaveLength(2);
+
+    const card = screen.getByText('Test Meal').closest('.card') as HTMLElement;
+    const currentPrice = card.querySelector('.current-price');
+    expect(currentPrice).not.toBeNull();
+    const normalized = normalizeCurrency(currentPrice?.textContent ?? '');
+    expect(normalized.endsWith('9.99')).toBe(true);
+    expect(normalized.codePointAt(0)).toBe(NAIRA_CODEPOINT);
   });
 
   it('displays discounted price correctly without overlap', () => {
     renderWithCartProvider(<MealCard meal={mockMeal} />);
 
-    const currentPrice = screen.getByText('€9.99');
-    const originalPrice = screen.getByText('€15.99');
-    const savings = screen.getByText('Save €6.00');
+    const card = screen.getByText('Test Meal').closest('.card') as HTMLElement;
+    const currentPrice = card.querySelector('.current-price');
+    const originalPrice = card.querySelector('.original-price');
+    const savings = card.querySelector('.price-display small.text-success.fw-bold');
 
-    expect(currentPrice).toBeInTheDocument();
-    expect(originalPrice).toBeInTheDocument();
-    expect(savings).toBeInTheDocument();
+    expect(currentPrice).not.toBeNull();
+    expect(originalPrice).not.toBeNull();
+    expect(savings).not.toBeNull();
 
-    // Check that prices are in a flex-column container to prevent overlap
-    const priceContainer = currentPrice.closest('.d-flex.flex-column');
+    const normalizedCurrent = normalizeCurrency(currentPrice?.textContent ?? '');
+    const normalizedOriginal = normalizeCurrency(originalPrice?.textContent ?? '');
+
+    expect(normalizedCurrent.endsWith('9.99')).toBe(true);
+    expect(normalizedOriginal.endsWith('15.99')).toBe(true);
+    expect(normalizedCurrent.codePointAt(0)).toBe(NAIRA_CODEPOINT);
+    expect(normalizedOriginal.codePointAt(0)).toBe(NAIRA_CODEPOINT);
+    expect(savings?.textContent || '').toContain('6.00');
+
+    const priceContainer = currentPrice?.closest('.d-flex.flex-column');
     expect(priceContainer).toBeInTheDocument();
   });
 
   it('displays regular price when no discount', () => {
     renderWithCartProvider(<MealCard meal={mockMealWithoutDiscount} />);
 
-    expect(screen.getByText('€9.99')).toBeInTheDocument();
-    expect(screen.queryByText('€15.99')).not.toBeInTheDocument();
+    const card = screen.getByText('Test Meal').closest('.card') as HTMLElement;
+    const currentPrice = card.querySelector('.current-price');
+    const originalPrice = card.querySelector('.original-price');
+
+    expect(currentPrice).not.toBeNull();
+    expect(originalPrice).toBeNull();
+
+    const normalizedCurrent = normalizeCurrency(currentPrice?.textContent ?? '');
+    expect(normalizedCurrent.endsWith('9.99')).toBe(true);
+    expect(normalizedCurrent.codePointAt(0)).toBe(NAIRA_CODEPOINT);
   });
 
   it('shows image when available', () => {
@@ -115,13 +143,28 @@ describe('MealCard', () => {
     const card = screen.getByText('Test Meal').closest('.card');
     fireEvent.click(card!);
 
-    // Check for modal-specific elements that are unique to the modal
-    expect(screen.getByLabelText('Close')).toBeInTheDocument(); // Modal close button
-    expect(screen.getByText('Price')).toBeInTheDocument(); // Modal price section (unique to modal)
-    expect(screen.getByText('Save €6.00 (38% OFF)')).toBeInTheDocument(); // Modal savings info
-    expect(screen.getByText('Test Category')).toBeInTheDocument(); // Category info only in modal
+    expect(screen.getByLabelText('Close')).toBeInTheDocument();
+    expect(screen.getByText('Price')).toBeInTheDocument();
 
-    // Verify the modal is visible
+    const modalContent = screen.getByLabelText('Close').closest('.meal-detail-modal-content');
+    const modalQueries = within(modalContent as HTMLElement);
+
+    const modalCurrentPrice = modalQueries.getByText((text, element) => {
+      const normalized = normalizeCurrency(element?.textContent ?? '');
+      return normalized.endsWith('9.99') && normalized.codePointAt(0) === NAIRA_CODEPOINT;
+    });
+    const modalOriginalPrice = modalQueries.getByText((text, element) => {
+      const normalized = normalizeCurrency(element?.textContent ?? '');
+      return normalized.endsWith('15.99') && normalized.codePointAt(0) === NAIRA_CODEPOINT;
+    });
+    const modalSavings = modalQueries.getByText(/Save/);
+
+    expect(modalCurrentPrice).toBeInTheDocument();
+    expect(modalOriginalPrice).toBeInTheDocument();
+    expect(modalSavings.textContent || '').toContain('6.00');
+    expect(modalSavings.textContent).toContain('38% OFF');
+    expect(modalQueries.getByText('Test Category')).toBeInTheDocument();
+
     const modalOverlay = document.querySelector('.meal-detail-modal-overlay');
     expect(modalOverlay).toBeInTheDocument();
   });
@@ -132,7 +175,6 @@ describe('MealCard', () => {
     const addButton = screen.getByText('Add to Cart');
     fireEvent.click(addButton);
 
-    // Check for success state
     await waitFor(() => {
       expect(screen.getByText('Added!')).toBeInTheDocument();
     });
@@ -152,14 +194,12 @@ describe('MealCard', () => {
   it('calculates savings percentage correctly', () => {
     renderWithCartProvider(<MealCard meal={mockMeal} />);
 
-    // 15.99 - 9.99 = 6.00, 6.00 / 15.99 * 100 = 37.5% ≈ 38%
     expect(screen.getByText('38% OFF')).toBeInTheDocument();
   });
 
   it('formats pickup time correctly', () => {
     renderWithCartProvider(<MealCard meal={mockMeal} />);
 
-    // Should show time range based on available_from and available_until
     expect(screen.getByText(/Pickup:/)).toBeInTheDocument();
   });
 
@@ -169,7 +209,6 @@ describe('MealCard', () => {
     const image = screen.getByAltText('Test Meal');
     fireEvent.error(image);
 
-    // Should fallback to placeholder
     expect(screen.getByText('Click to view')).toBeInTheDocument();
   });
 
@@ -177,12 +216,12 @@ describe('MealCard', () => {
     renderWithCartProvider(<MealCard meal={mockMeal} />);
 
     const addButton = screen.getByText('Add to Cart');
-
-    // Mock stopPropagation
     const stopPropagation = vi.fn();
     fireEvent.click(addButton, { stopPropagation });
 
-    // Should not open modal when clicking add to cart button
-    expect(screen.queryByText('Price')).not.toBeInTheDocument(); // Modal should not be open
+    expect(screen.queryByText('Price')).not.toBeInTheDocument();
   });
 });
+
+
+

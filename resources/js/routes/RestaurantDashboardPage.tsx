@@ -17,7 +17,8 @@ interface Meal {
   original_price?: number | null; // Added original_price
   quantity: number;
   category_id: number;
-  image?: string | null; // Changed from image_url, matches MealCard
+  image?: string | null;
+  image_url?: string | null;
   available_from: string; // Add available_from (ISO string from backend)
   available_until: string; // Add available_until (ISO string from backend)
   restaurant_id: number;
@@ -869,3 +870,4 @@ const RestaurantDashboardPage: React.FC = () => {
 };
 
 export default RestaurantDashboardPage;
+

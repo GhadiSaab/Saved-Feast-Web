@@ -10,7 +10,8 @@ interface Meal {
   description: string;
   current_price: number; // Changed from price
   original_price?: number | null; // Added original_price
-  image?: string | null; // Changed from image_url to image, matching backend
+  image?: string | null;
+  image_url?: string | null;
   available_from: string; // Add available_from (ISO string)
   available_until: string; // Add available_until (ISO string)
   restaurant?: {
@@ -398,3 +399,4 @@ const FeedPage: React.FC = () => {
 };
 
 export default FeedPage;
+

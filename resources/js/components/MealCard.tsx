@@ -1,43 +1,114 @@
 // resources/js/components/MealCard.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { useCart } from '../context/CartContext'; // Import the useCart hook
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import auth from '../auth'; // Import the auth helper
+import { useCart } from '../context/CartContext';
+import { useNavigate } from 'react-router-dom';
+import auth from '../auth';
 
-// Re-define or import the Meal type (ensure consistency with backend)
 interface Meal {
   id: number;
-  title: string; // Changed from name
+  title: string;
   description: string;
-  current_price: number; // Changed from price (Discounted price)
-  original_price?: number | null; // Original price (optional)
-  image?: string | null; // Changed from image_url to image
-  available_from: string; // Add available_from (ISO string)
-  available_until: string; // Add available_until (ISO string)
+  current_price: number;
+  original_price?: number | null;
+  image?: string | null;
+  image_url?: string | null;
+  available_from: string;
+  available_until: string;
   restaurant?: {
     name: string;
   };
   category?: {
     name: string;
   };
-  // Add other relevant fields as needed
 }
 
 interface MealCardProps {
   meal: Meal;
-  // Removed onAddToCart prop - using context instead
 }
 
+const currencyFormatter = new Intl.NumberFormat('en-NG', {
+  style: 'currency',
+  currency: 'NGN',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+const parseToNumber = (
+  value: number | string | null | undefined
+): number | null => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+};
+
+const getAssetBaseUrl = (): string => {
+  const env = import.meta.env as Record<string, string | undefined>;
+  const configured = env['VITE_ASSET_URL'] || env['VITE_API_URL'] || '';
+
+  if (configured) {
+    return configured.replace(/\/$/, '');
+  }
+
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  return '';
+};
+
+const resolveImageUrl = (
+  image?: string | null,
+  imageUrl?: string | null
+): string | null => {
+  const candidate = imageUrl || image;
+
+  if (!candidate || candidate.trim() === '') {
+    return null;
+  }
+
+  if (/^https?:\/\//i.test(candidate)) {
+    return candidate;
+  }
+
+  if (candidate.startsWith('//')) {
+    const protocol =
+      typeof window !== 'undefined' && window.location?.protocol
+        ? window.location.protocol
+        : 'https:';
+    return `${protocol}${candidate}`;
+  }
+
+  const baseUrl = getAssetBaseUrl();
+  const normalizedPath = candidate.startsWith('/')
+    ? candidate
+    : `/${candidate}`;
+
+  return baseUrl ? `${baseUrl}${normalizedPath}` : normalizedPath;
+};
+
+const formatCurrency = (value: number | null): string | null => {
+  if (value == null) {
+    return null;
+  }
+
+  return currencyFormatter.format(value);
+};
+
 const MealCard: React.FC<MealCardProps> = ({ meal }) => {
-  const { addToCart } = useCart(); // Get addToCart function from context
-  const navigate = useNavigate(); // Get navigate function
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [showImageModal, setShowImageModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [buttonScale, setButtonScale] = useState(1);
-  const buttonRef = useRef<HTMLButtonElement>(null);
   const timeoutRefs = useRef<Array<ReturnType<typeof setTimeout>>>([]);
 
-  // Cleanup function to clear all timeouts
   useEffect(() => {
     return () => {
       timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
@@ -58,42 +129,40 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
     timeoutRefs.current.push(timeout);
   };
 
+  const currentPriceValue = parseToNumber(meal.current_price);
+  const originalPriceValue = parseToNumber(meal.original_price ?? null);
+  const hasDiscount =
+    originalPriceValue != null &&
+    currentPriceValue != null &&
+    originalPriceValue > currentPriceValue;
+  const savingsAmount = hasDiscount
+    ? originalPriceValue - currentPriceValue
+    : null;
+  const savingsPercentage =
+    hasDiscount && originalPriceValue
+      ? Math.round((savingsAmount! / originalPriceValue) * 100)
+      : 0;
+
+  const formattedCurrentPrice = formatCurrency(currentPriceValue);
+  const formattedOriginalPrice = formatCurrency(originalPriceValue);
+  const formattedSavings = formatCurrency(savingsAmount);
+
   const handleAddToCart = () => {
     animateButton();
 
     if (auth.isAuthenticated()) {
-      // Ensure current_price is a valid number before adding
-      const currentPrice =
-        typeof meal.current_price === 'number'
-          ? meal.current_price
-          : parseFloat(String(meal.current_price));
-      if (!isNaN(currentPrice)) {
-        // Pass title and current_price to addToCart
-        addToCart({ id: meal.id, name: meal.title, price: currentPrice });
+      if (currentPriceValue != null) {
+        addToCart({ id: meal.id, name: meal.title, price: currentPriceValue });
         console.log(`Added ${meal.title} to cart (ID: ${meal.id})`);
         showSuccessFeedback();
       } else {
         console.error(`Invalid price for meal: ${meal.title}`);
-        // Optionally: Show an error to the user
       }
     } else {
-      // Redirect to login page if not authenticated
       navigate('/login');
     }
   };
 
-  // Calculate savings percentage
-  const calculateSavings = () => {
-    if (meal.original_price && meal.original_price > meal.current_price) {
-      const savings =
-        ((meal.original_price - meal.current_price) / meal.original_price) *
-        100;
-      return Math.round(savings);
-    }
-    return 0;
-  };
-
-  // Format pickup time
   const formatPickupTime = () => {
     if (meal.available_from && meal.available_until) {
       const fromTime = new Date(meal.available_from).toLocaleTimeString([], {
@@ -109,14 +178,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
     return 'Time TBD';
   };
 
-  // Construct the full image URL if the path is relative
-  const imageUrl = meal.image
-    ? meal.image.startsWith('http')
-      ? meal.image
-      : `${window.location.origin}${meal.image}`
-    : null;
-
-  const savingsPercentage = calculateSavings();
+  const imageUrl = resolveImageUrl(meal.image, meal.image_url);
 
   const handleCardClick = () => {
     setShowImageModal(true);
@@ -133,7 +195,6 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
         onClick={handleCardClick}
         style={{ cursor: 'pointer' }}
       >
-        {/* Image Section */}
         <div className="card-image-placeholder position-relative">
           {imageUrl ? (
             <div className="meal-image-container">
@@ -143,7 +204,6 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                 className="card-img-top"
                 style={{ height: '150px', objectFit: 'cover' }}
                 onError={e => {
-                  // Fallback to placeholder if image fails to load
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   target.nextElementSibling?.classList.remove('d-none');
@@ -171,7 +231,6 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
             </div>
           )}
 
-          {/* Savings Badge */}
           {savingsPercentage > 0 && (
             <div className="savings-badge position-absolute top-0 start-0 m-2">
               <span className="badge bg-success fs-6 fw-bold">
@@ -181,7 +240,6 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
             </div>
           )}
 
-          {/* Restaurant Badge */}
           {meal.restaurant && (
             <div className="restaurant-badge position-absolute top-0 end-0 m-2">
               <span className="badge bg-primary fs-6 fw-bold">
@@ -192,9 +250,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
           )}
         </div>
 
-        {/* Card Body */}
         <div className="card-body d-flex flex-column">
-          {/* Title and Restaurant */}
           <div className="mb-3">
             <h5 className="card-title fw-bold mb-1 text-primary">
               {meal.title}
@@ -207,7 +263,6 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
             )}
           </div>
 
-          {/* Description */}
           <div className="flex-grow-1 mb-3">
             <p className="card-text small text-muted">
               {meal.description ? (
@@ -225,7 +280,6 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
             </p>
           </div>
 
-          {/* Pickup Time */}
           <div className="mb-3">
             <div className="pickup-time d-inline-block">
               <i className="fas fa-clock me-2"></i>
@@ -233,39 +287,36 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
             </div>
           </div>
 
-          {/* Price and Action Section */}
           <div className="mt-auto">
             <div className="d-flex justify-content-between align-items-center">
               <div className="price-display flex-grow-1 me-3">
-                {meal.original_price &&
-                meal.original_price > meal.current_price ? (
+                {hasDiscount ? (
                   <div className="d-flex flex-column">
                     <div className="d-flex align-items-baseline">
                       <span className="current-price fw-bold text-success me-2">
-                        €{meal.current_price.toFixed(2)}
+                        {formattedCurrentPrice ?? 'Price N/A'}
                       </span>
-                      <span className="original-price text-muted small">
-                        <del>€{meal.original_price.toFixed(2)}</del>
-                      </span>
+                      {formattedOriginalPrice && (
+                        <span className="original-price text-muted small">
+                          <del>{formattedOriginalPrice}</del>
+                        </span>
+                      )}
                     </div>
-                    <small className="text-success fw-bold">
-                      Save €
-                      {(meal.original_price - meal.current_price).toFixed(2)}
-                    </small>
+                    {formattedSavings && (
+                      <small className="text-success fw-bold">
+                        {`Save ${formattedSavings}`}
+                      </small>
+                    )}
                   </div>
                 ) : (
                   <span className="current-price fw-bold text-primary">
-                    {typeof meal.current_price === 'number' ||
-                    !isNaN(parseFloat(String(meal.current_price)))
-                      ? `€${parseFloat(String(meal.current_price)).toFixed(2)}`
-                      : 'Price N/A'}
+                    {formattedCurrentPrice ?? 'Price N/A'}
                   </span>
                 )}
               </div>
 
               <div className="d-flex align-items-center">
                 <button
-                  ref={buttonRef}
                   className="btn btn-primary btn-sm fw-bold position-relative"
                   onClick={e => {
                     e.stopPropagation();
@@ -291,7 +342,6 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
           </div>
         </div>
 
-        {/* Card Footer with Additional Info */}
         <div className="card-footer bg-transparent border-top-0 pt-0">
           <div className="d-flex justify-content-between align-items-center">
             <small className="text-muted">
@@ -306,14 +356,12 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
         </div>
       </div>
 
-      {/* Professional Meal Detail Modal */}
       {showImageModal && (
         <div className="meal-detail-modal-overlay" onClick={handleModalClose}>
           <div
             className="meal-detail-modal-content"
             onClick={e => e.stopPropagation()}
           >
-            {/* Close Button */}
             <button
               className="modal-close-btn"
               onClick={handleModalClose}
@@ -323,7 +371,6 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
             </button>
 
             <div className="meal-detail-modal-body">
-              {/* Left Side - Image */}
               <div className="modal-image-section">
                 <div className="meal-image-container">
                   {imageUrl ? (
@@ -332,16 +379,13 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                     <div className="image-placeholder">
                       <div className="placeholder-content">
                         <i className="fas fa-utensils placeholder-icon"></i>
-                        <div className="placeholder-text">
-                          No image available
-                        </div>
+                        <div className="placeholder-text">No image available</div>
                       </div>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Right Side - Content */}
               <div className="modal-content-section">
                 <div className="meal-header">
                   <h1 className="meal-title">{meal.title}</h1>
@@ -382,26 +426,28 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                   <div className="price-section">
                     <div className="price-label">Price</div>
                     <div className="price-display">
-                      {meal.original_price &&
-                      meal.original_price > meal.current_price ? (
+                      {hasDiscount ? (
                         <>
                           <div className="current-price">
-                            €{meal.current_price.toFixed(2)}
+                            {formattedCurrentPrice ?? 'Price N/A'}
                           </div>
-                          <div className="original-price">
-                            €{meal.original_price.toFixed(2)}
-                          </div>
-                          <div className="savings">
-                            Save €
-                            {(meal.original_price - meal.current_price).toFixed(
-                              2
-                            )}{' '}
-                            ({savingsPercentage}% OFF)
-                          </div>
+                          {formattedOriginalPrice && (
+                            <div className="original-price">
+                              {formattedOriginalPrice}
+                            </div>
+                          )}
+                          {formattedSavings && (
+                            <div className="savings">
+                              {`Save ${formattedSavings}`}
+                              {savingsPercentage > 0
+                                ? ` (${savingsPercentage}% OFF)`
+                                : ''}
+                            </div>
+                          )}
                         </>
                       ) : (
                         <div className="current-price">
-                          €{meal.current_price.toFixed(2)}
+                          {formattedCurrentPrice ?? 'Price N/A'}
                         </div>
                       )}
                     </div>

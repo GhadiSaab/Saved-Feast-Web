@@ -554,42 +554,44 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(
+    135deg,
+    color.change(vars.$warm-beige, $alpha: 0.92),
+    color.change(vars.$sage-green, $alpha: 0.88)
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
   padding: 2rem;
   animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  // Ensure it stays centered on viewport regardless of scroll
   transform: translateZ(0);
   will-change: transform;
 
   .meal-detail-modal-content {
-    background: #ffffff;
+    background: color.change(#ffffff, $alpha: 0.98);
     border-radius: 20px;
     max-width: 900px;
     width: 100%;
     max-height: 90vh;
     overflow: hidden;
     box-shadow:
-      0 25px 50px -12px rgba(0, 0, 0, 0.25),
-      0 0 0 1px rgba(226, 232, 240, 0.5);
-    border: 1px solid rgba(226, 232, 240, 0.3);
+      0 25px 50px -12px color.change(#000000, $alpha: 0.28),
+      0 0 0 1px color.change(vars.$primary, $alpha: 0.12);
+    border: 1px solid color.change(vars.$primary, $alpha: 0.08);
     animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     margin: 0;
     transform: translate(0, 0);
 
-    // Close button positioned absolutely
     .modal-close-btn {
       position: absolute;
       top: 20px;
       right: 20px;
-      background: rgba(248, 250, 252, 0.8);
-      border: 1px solid rgba(226, 232, 240, 0.5);
+      background: color.change(vars.$soft-cream, $alpha: 0.85);
+      border: 1px solid color.change(vars.$sage-green, $alpha: 0.4);
       width: 36px;
       height: 36px;
       border-radius: 50%;
@@ -600,19 +602,19 @@ main {
       z-index: 10;
       transition: all 0.3s ease;
       backdrop-filter: blur(8px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 8px color.change(#000000, $alpha: 0.08);
 
       &:hover {
-        background: rgba(248, 250, 252, 1);
-        border-color: rgba(203, 213, 225, 0.8);
+        background: color.change(vars.$soft-cream, $alpha: 0.95);
+        border-color: color.change(vars.$sage-green, $alpha: 0.55);
         transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 4px 12px color.change(#000000, $alpha: 0.12);
       }
 
       .close-icon {
         width: 16px;
         height: 16px;
-        color: #64748b;
+        color: color.mix(vars.$primary, vars.$sage-green, $weight: 55%);
         font-weight: 500;
       }
     }
@@ -622,10 +624,13 @@ main {
       display: flex;
       min-height: 500px;
 
-      // Left side - Image
       .modal-image-section {
         flex: 1;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        background: linear-gradient(
+          135deg,
+          color.mix(vars.$soft-cream, vars.$sage-green, $weight: 65%),
+          color.mix(vars.$warm-beige, vars.$sage-green, $weight: 45%)
+        );
         display: flex;
         align-items: center;
         justify-content: center;
@@ -640,8 +645,8 @@ main {
           left: 0;
           right: 0;
           bottom: 0;
-          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-          opacity: 0.2;
+          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.06"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+          opacity: 0.25;
         }
 
         .meal-image-container {
@@ -653,10 +658,10 @@ main {
             max-width: 100%;
             max-height: 400px;
             object-fit: cover;
-            border-radius: 12px;
+            border-radius: 16px;
             box-shadow:
-              0 8px 25px rgba(0, 0, 0, 0.08),
-              0 0 0 1px rgba(226, 232, 240, 0.3);
+              0 12px 30px color.change(#000000, $alpha: 0.12),
+              0 0 0 1px color.change(vars.$primary, $alpha: 0.08);
             transition: transform 0.3s ease;
 
             &:hover {
@@ -667,40 +672,43 @@ main {
           .image-placeholder {
             width: 300px;
             height: 300px;
-            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-            border-radius: 16px;
+            background: linear-gradient(
+              135deg,
+              color.mix(vars.$sage-green, vars.$soft-cream, $weight: 40%),
+              color.mix(vars.$primary, vars.$sage-green, $weight: 25%)
+            );
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px color.change(#000000, $alpha: 0.12);
 
             .placeholder-content {
               text-align: center;
-              color: #64748b;
+              color: color.change(#ffffff, $alpha: 0.85);
 
               .placeholder-icon {
                 font-size: 4rem;
                 margin-bottom: 1rem;
-                opacity: 0.5;
+                opacity: 0.8;
               }
 
               .placeholder-text {
                 font-size: 1.1rem;
-                font-weight: 500;
+                font-weight: 600;
               }
             }
           }
         }
       }
 
-      // Right side - Content
       .modal-content-section {
         flex: 1;
         padding: 3rem 2.5rem;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        background: #ffffff;
+        background: color.change(#ffffff, $alpha: 0.96);
 
         .meal-header {
           margin-bottom: 2rem;
@@ -708,14 +716,14 @@ main {
           .meal-title {
             font-size: 2rem;
             font-weight: 700;
-            color: #1e293b;
-            margin: 0 0 0.5rem 0;
+            color: vars.$earth-brown;
+            margin: 0 0 0.75rem 0;
             line-height: 1.2;
           }
 
           .meal-description {
             font-size: 1.1rem;
-            color: #64748b;
+            color: color.mix(vars.$earth-brown, #ffffff, $weight: 35%);
             line-height: 1.6;
             margin: 0 0 1.5rem 0;
           }
@@ -729,25 +737,25 @@ main {
             .meta-item {
               display: flex;
               align-items: center;
-              background: #f8fafc;
+              background: color.change(vars.$soft-cream, $alpha: 0.85);
               padding: 0.75rem 1rem;
               border-radius: 12px;
-              border: 1px solid #e2e8f0;
+              border: 1px solid color.change(vars.$sage-green, $alpha: 0.35);
 
               .meta-icon {
                 width: 20px;
                 height: 20px;
                 margin-right: 0.5rem;
-                color: #3b82f6;
+                color: color.mix(vars.$primary, vars.$sage-green, $weight: 70%);
               }
 
               .meta-text {
                 font-size: 0.9rem;
                 font-weight: 500;
-                color: #374151;
+                color: vars.$dark;
 
                 .meta-label {
-                  color: #6b7280;
+                  color: color.mix(vars.$dark, #ffffff, $weight: 45%);
                   margin-right: 0.25rem;
                 }
               }
@@ -757,17 +765,21 @@ main {
 
         .meal-footer {
           .price-section {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            background: linear-gradient(
+              135deg,
+              color.change(vars.$soft-cream, $alpha: 0.95),
+              color.mix(vars.$warm-beige, vars.$sage-green, $weight: 40%)
+            );
             padding: 2rem;
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid color.change(vars.$sage-green, $alpha: 0.35);
             margin-bottom: 2rem;
             text-align: center;
 
             .price-label {
               font-size: 0.9rem;
               font-weight: 600;
-              color: #64748b;
+              color: color.mix(vars.$primary, vars.$sage-green, $weight: 55%);
               text-transform: uppercase;
               letter-spacing: 0.5px;
               margin-bottom: 0.5rem;
@@ -777,27 +789,28 @@ main {
               .current-price {
                 font-size: 2.5rem;
                 font-weight: 800;
-                color: #1e293b;
+                color: vars.$primary;
                 margin: 0;
                 line-height: 1;
               }
 
               .original-price {
                 font-size: 1.2rem;
-                color: #94a3b8;
+                color: color.change(vars.$earth-brown, $alpha: 0.55);
                 text-decoration: line-through;
                 margin-left: 0.5rem;
               }
 
               .savings {
                 display: inline-block;
-                background: #10b981;
-                color: white;
-                padding: 0.25rem 0.75rem;
+                background: color.mix(vars.$primary, vars.$sage-green, $weight: 65%);
+                color: #ffffff;
+                padding: 0.35rem 0.85rem;
                 border-radius: 20px;
-                font-size: 0.8rem;
+                font-size: 0.85rem;
                 font-weight: 600;
-                margin-top: 0.5rem;
+                margin-top: 0.75rem;
+                box-shadow: 0 6px 15px color.change(vars.$primary, $alpha: 0.28);
               }
             }
           }
@@ -805,7 +818,11 @@ main {
           .action-section {
             .add-to-cart-btn {
               width: 100%;
-              background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+              background: linear-gradient(
+                135deg,
+                vars.$primary 0%,
+                color.mix(vars.$primary, vars.$sage-green, $weight: 40%) 100%
+              );
               border: none;
               color: white;
               padding: 1rem 2rem;
@@ -814,16 +831,20 @@ main {
               font-weight: 600;
               cursor: pointer;
               transition: all 0.3s ease;
-              box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+              box-shadow: 0 8px 20px color.change(vars.$primary, $alpha: 0.28);
               display: flex;
               align-items: center;
               justify-content: center;
               gap: 0.5rem;
 
               &:hover {
-                background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+                background: linear-gradient(
+                  135deg,
+                  color.mix(vars.$primary, vars.$sage-green, $weight: 60%) 0%,
+                  vars.$secondary 100%
+                );
                 transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+                box-shadow: 0 12px 24px color.change(vars.$primary, $alpha: 0.32);
               }
 
               &:active {
@@ -841,28 +862,6 @@ main {
   }
 }
 
-// Animations
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-// Responsive design
 @media (max-width: 768px) {
   .meal-detail-modal-overlay {
     padding: 1rem;
@@ -1582,3 +1581,4 @@ main {
     width: auto !important;
   }
 }
+
